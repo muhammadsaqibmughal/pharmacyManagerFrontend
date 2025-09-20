@@ -9,11 +9,13 @@ import Pos from "./components/Pos";
 
 import PosPage from "./Pages/PosPage";
 import Dashboard from "./Pages/Dashboard";
-import Product from "./Pages/AllProduct";
 import AllProduct from "./Pages/AllProduct";
 import AllPackages from "./Pages/AllPackages"
 import ExpiryProducts from "./Pages/ExpiryProducts";
 import Inventry from "./Pages/Inventry";
+import Supplier from "./Pages/Supplier";
+import Purchase from "./Pages/Purchase";
+import PurchaseReturen from "./Pages/PurchaseReturen";
 import Customer from "./pages/Customer";
 import Reports from "./Pages/Reports";
 import Settings from "./Pages/Settings";
@@ -102,6 +104,9 @@ const App = () => {
         <Route path="/pos/products/package" element={<AllPackages />} />
         <Route path="/pos/products/expiryProduct" element={<ExpiryProducts />} />
         <Route path="/pos/products/inventry" element={<Inventry />} />
+        <Route path="/pos/purchase/supplier" element={<Supplier />} />
+        <Route path="/pos/purchase/purchase" element={<Purchase />} />
+        <Route path="/pos/purchase/purchaseReturn" element={<PurchaseReturen />} />
         <Route path="/pos/pos" element={<PosPage />} />
         <Route path="/pos/customers" element={<Customer />} />
         <Route path="/pos/reports" element={<Reports />} />

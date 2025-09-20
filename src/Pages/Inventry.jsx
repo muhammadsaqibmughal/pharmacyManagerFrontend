@@ -113,13 +113,13 @@ const Inventry = () => {
               <tbody className="text-left">
                 {paginatedProducts.map((product, idx) => (
                   <tr key={idx} className="border-b">
-{Object.values(product).map((value, i) => (
-  <td key={i} className="px-4 py-2 text-xs font-medium">
-    {value instanceof Date
-      ? value.toLocaleDateString() // Or value.toISOString()
-      : value?.toString()}
-  </td>
-))}
+                    {Object.values(product).map((value, i) => (
+                    <td key={i} className="px-4 py-2 text-xs font-medium">
+                        {value instanceof Date
+                        ? value.toLocaleDateString() // Or value.toISOString()
+                        : value?.toString()}
+                    </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>

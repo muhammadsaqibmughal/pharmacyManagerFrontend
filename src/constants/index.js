@@ -226,9 +226,13 @@ export const pos = [
   },
     {
     name: 'Purchase',
-    href: '/pos/products',
+    // href: '/pos/products',
     icon: FiBox ,
-    subitems: [{ name: "Purchase Return", href: "/pos/purchase/return" }],
+    subitems: [
+      { name: "Supplier", href: "/pos/purchase/supplier" },
+      { name: "Purchase", href: "/pos/purchase/purchase" },
+      { name: "Purchase Return", href: "/pos/purchase/purchaseReturn" }
+    ],
 
   },
   {

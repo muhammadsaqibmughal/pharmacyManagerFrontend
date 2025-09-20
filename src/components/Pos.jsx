@@ -41,10 +41,11 @@ const Pos = () => {
       >
         {/* Toggle Button */}
         <div className="flex items-center justify-between p-2">
-  {/* Logo / Placeholder Circle */}
-  {isOpen && (
-    <div className="bg-db-50 w-10 h-10 rounded-full" />
-  )}
+          
+        {/* Logo / Placeholder Circle */}
+        {isOpen && (
+          <div className="bg-db-50 w-10 h-10 rounded-full" />
+        )}
 
   <button
     onClick={() => setIsOpen(!isOpen)}
@@ -70,7 +71,7 @@ const Pos = () => {
 
 
         {isOpen && (
-          <h1 className="text-xl px-2 text-center font-semibold text-white">PharmaConnect+</h1>
+          <h1 className="text-md px-2 text-center tracking-widest font-bold text-bg-50">PharmaConnect+</h1>
         )}
 
         {/* Navigation Links */}
@@ -101,7 +102,7 @@ const Pos = () => {
                         to={subItem.href}
                         className="block text-sm hover:bg-[#4CBB17] w-full   rounded-lg p-2 cursor-pointer text-white"
                       >
-                        <span className="ml-13 text-xs">{subItem.name}</span>
+                        <span className="ml-15  text-[11px]">{subItem.name}</span>
                       </Link>
                     </li>
                   ))}
