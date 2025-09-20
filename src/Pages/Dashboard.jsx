@@ -98,7 +98,7 @@ const Dashboard = () => {
         {/* Monthly Line Chart */}
         <Card className="mb-8 w-full flex-1   color-white rounded-2xl shadow-md">
         <CardContent>
-          <h2 className="text-lg font-semibold mb-4 text-primary-50">📈 Monthly Sales Overview</h2>
+          <h2 className="text-lg font-semibold mb-4 text-primary-50"> Monthly Sales Overview</h2>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart
               data={monthlySales}
