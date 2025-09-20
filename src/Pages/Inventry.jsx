@@ -62,18 +62,18 @@ const Inventry = () => {
   return (
     <div className="mt-8 p-10">
       {/* Top Bar */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl text-primary-50 font-bold">Inventory Management</h2>
-        <div className="space-x-2">
+      <div className="flex justify-between max-md:flex-col max-md:gap-2 max-md:justify-center items-center mb-4">
+        <h2 className="text-2xl text-primary-50 max-md:text-xl font-bold">Inventory Management</h2>
+        <div className="space-x-2  max-md:flex">
           <button
             onClick={() => openModal("inventory")}
-            className="bg-[#4F7942] text-white px-4 py-1 h-10 rounded-full hover:bg-hf-100"
+            className="bg-[#4F7942] text-white max-md:text-sm px-4 py-1 h-10 rounded-full hover:bg-hf-100"
           >
             Add Inventory
           </button>
           <button
             onClick={() => openModal("stock")}
-            className="bg-[#4F7942] text-white px-4 py-1 h-10 rounded-full hover:bg-hf-100"
+            className="bg-[#4F7942] text-white max-md:text-sm px-4 py-1 h-10 rounded-full hover:bg-hf-100"
           >
             Add Stock
           </button>
@@ -129,17 +129,17 @@ const Inventry = () => {
           {/* Pagination */}
           <div className="flex justify-between mt-4">
             <button
-              className="px-4 py-1 bg-[#4F7942] text-white rounded disabled:opacity-50"
+              className="px-4 py-1 max-md:px-2 bg-[#4F7942] max-md:text-sm text-white rounded-full disabled:opacity-50"
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
             >
               Previous
             </button>
-            <span className="text-sm text-gray-400">
+            <span className="text-sm max-md:text-xs text-primary-50">
               Page {currentPage} of {totalPages}
             </span>
             <button
-              className="px-4 py-1 bg-[#4F7942] text-white rounded disabled:opacity-50"
+              className="px-4 py-1 max-md:px-2 bg-[#4F7942] max-md:text-sm text-white rounded-full disabled:opacity-50"
               onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
             >

@@ -643,3 +643,172 @@ export const pharmacyStockData = [
     reorderLevel: 10,
   },
 ];
+
+
+// index.js
+export const users = [
+  {
+    name: "Ahmad Raza",
+    email: "ahmad.raza@example.com",
+    phone: "+92 300 1234567",
+    address: "Street 12, G-10, Islamabad, Pakistan",
+    supplier: "MedLife Pharmaceuticals"
+  },
+  {
+    name: "Sara Khan",
+    email: "sara.khan@example.com",
+    phone: "+92 301 7654321",
+    address: "House 5, DHA Phase 5, Lahore, Pakistan",
+    supplier: "PharmaZone Ltd."
+  },
+  {
+    name: "Ali Haider",
+    email: "ali.haider@example.com",
+    phone: "+92 302 1112233",
+    address: "Block B, North Nazimabad, Karachi, Pakistan",
+    supplier: "WellCare Distributors"
+  },
+  {
+    name: "Hina Malik",
+    email: "hina.malik@example.com",
+    phone: "+92 303 4445566",
+    address: "Faisal Town, Multan, Pakistan",
+    supplier: "NovaMed Suppliers"
+  },
+  {
+    name: "Zain Ul Abideen",
+    email: "zain.abideen@example.com",
+    phone: "+92 304 9876543",
+    address: "Satellite Town, Rawalpindi, Pakistan",
+    supplier: "Sunrise Pharma"
+  },
+  {
+    name: "Mehwish Tariq",
+    email: "mehwish.tariq@example.com",
+    phone: "+92 305 6789123",
+    address: "Model Town, Gujranwala, Pakistan",
+    supplier: "LifeLine Distributors"
+  },
+  {
+    name: "Usman Bashir",
+    email: "usman.bashir@example.com",
+    phone: "+92 306 3456789",
+    address: "University Road, Peshawar, Pakistan",
+    supplier: "Medico Pvt Ltd"
+  },
+  {
+    name: "Sana Javed",
+    email: "sana.javed@example.com",
+    phone: "+92 307 2345678",
+    address: "Gulberg, Lahore, Pakistan",
+    supplier: "HealWell Corporation"
+  },
+  {
+    name: "Hamza Qureshi",
+    email: "hamza.qureshi@example.com",
+    phone: "+92 308 1122334",
+    address: "Johar Town, Lahore, Pakistan",
+    supplier: "CureLine Supplies"
+  },
+  {
+    name: "Marium Akbar",
+    email: "marium.akbar@example.com",
+    phone: "+92 309 5566778",
+    address: "Blue Area, Islamabad, Pakistan",
+    supplier: "Global Health Traders"
+  }
+];
+
+
+export const purchaseDataa = [
+  {
+    purchaseID: "P-001",
+    supplier: "MedLife Pharmaceuticals",
+    invoiceNo: "INV-1001",
+    purchaseDate: new Date("2025-09-01"),
+    totalAmount: 1250.50,
+    discount: 50.0,
+    tax: 100.0,
+  },
+  {
+    purchaseID: "P-002",
+    supplier: "PharmaZone Ltd.",
+    invoiceNo: "INV-1002",
+    purchaseDate: new Date("2025-09-03"),
+    totalAmount: 980.00,
+    discount: 20.0,
+    tax: 70.0,
+  },
+  {
+    purchaseID: "P-003",
+    supplier: "WellCare Distributors",
+    invoiceNo: "INV-1003",
+    purchaseDate: new Date("2025-09-05"),
+    totalAmount: 1575.25,
+    discount: 0.0,
+    tax: 125.25,
+  },
+  {
+    purchaseID: "P-004",
+    supplier: "NovaMed Suppliers",
+    invoiceNo: "INV-1004",
+    purchaseDate: new Date("2025-09-06"),
+    totalAmount: 1340.10,
+    discount: 40.0,
+    tax: 90.0,
+  },
+  {
+    purchaseID: "P-005",
+    supplier: "Sunrise Pharma",
+    invoiceNo: "INV-1005",
+    purchaseDate: new Date("2025-09-08"),
+    totalAmount: 1120.00,
+    discount: 0.0,
+    tax: 80.0,
+  },
+  {
+    purchaseID: "P-006",
+    supplier: "LifeLine Distributors",
+    invoiceNo: "INV-1006",
+    purchaseDate: new Date("2025-09-09"),
+    totalAmount: 2100.75,
+    discount: 100.0,
+    tax: 160.75,
+  },
+  {
+    purchaseID: "P-007",
+    supplier: "Medico Pvt Ltd",
+    invoiceNo: "INV-1007",
+    purchaseDate: new Date("2025-09-10"),
+    totalAmount: 1435.00,
+    discount: 25.0,
+    tax: 110.0,
+  },
+  {
+    purchaseID: "P-008",
+    supplier: "HealWell Corporation",
+    invoiceNo: "INV-1008",
+    purchaseDate: new Date("2025-09-12"),
+    totalAmount: 890.00,
+    discount: 10.0,
+    tax: 60.0,
+  },
+  {
+    purchaseID: "P-009",
+    supplier: "CureLine Supplies",
+    invoiceNo: "INV-1009",
+    purchaseDate: new Date("2025-09-14"),
+    totalAmount: 1650.90,
+    discount: 30.0,
+    tax: 120.90,
+  },
+  {
+    purchaseID: "P-010",
+    supplier: "Global Health Traders",
+    invoiceNo: "INV-1010",
+    purchaseDate: new Date("2025-09-16"),
+    totalAmount: 1980.00,
+    discount: 50.0,
+    tax: 150.0,
+  },
+];

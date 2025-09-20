@@ -14,6 +14,7 @@ import AllPackages from "./Pages/AllPackages"
 import ExpiryProducts from "./Pages/ExpiryProducts";
 import Inventry from "./Pages/Inventry";
 import Supplier from "./Pages/Supplier";
+import SupplierDetail from "./Pages/SupplierDetail";
 import Purchase from "./Pages/Purchase";
 import PurchaseReturen from "./Pages/PurchaseReturen";
 import Customer from "./pages/Customer";
@@ -96,21 +97,24 @@ const App = () => {
 
           <>
     <Routes>
-      {/* This is your layout route */}
+      {/* Main Layout */}
       <Route path="/" element={<Pos />}>
-        {/* These will render inside <Outlet /> */}
-        <Route path="/pos/dashboard" element={<Dashboard />} />
-        <Route path="/pos/products/add" element={<AllProduct />} />
-        <Route path="/pos/products/package" element={<AllPackages />} />
-        <Route path="/pos/products/expiryProduct" element={<ExpiryProducts />} />
-        <Route path="/pos/products/inventry" element={<Inventry />} />
-        <Route path="/pos/purchase/supplier" element={<Supplier />} />
-        <Route path="/pos/purchase/purchase" element={<Purchase />} />
-        <Route path="/pos/purchase/purchaseReturn" element={<PurchaseReturen />} />
-        <Route path="/pos/pos" element={<PosPage />} />
-        <Route path="/pos/customers" element={<Customer />} />
-        <Route path="/pos/reports" element={<Reports />} />
-        <Route path="/pos/settings" element={<Settings />} />
+        {/* Sidebar Pages */}
+        <Route path="pos/dashboard" element={<Dashboard />} />
+        <Route path="pos/products/add" element={<AllProduct />} />
+        <Route path="pos/products/package" element={<AllPackages />} />
+        <Route path="pos/products/expiryProduct" element={<ExpiryProducts />} />
+        <Route path="pos/products/inventry" element={<Inventry />} />
+        <Route path="pos/purchase/supplier" element={<Supplier />} />
+        <Route path="pos/purchase/purchase" element={<Purchase />} />
+        <Route path="pos/purchase/purchaseReturn" element={<PurchaseReturen />} />
+        <Route path="pos/customers" element={<Customer />} />
+        <Route path="pos/reports" element={<Reports />} />
+        <Route path="pos/settings" element={<Settings />} />
+        <Route path="pos/pos" element={<PosPage />} />
+
+        {/* 🔥 Dynamic route under POS layout 🔥 */}
+        <Route path="/pos/purchase/supplier/:supplierName" element={<SupplierDetail />} />
       </Route>
     </Routes>
            
