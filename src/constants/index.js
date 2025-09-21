@@ -812,3 +812,117 @@ export const purchaseDataa = [
     tax: 150.0,
   },
 ];
+
+
+export const purchases = [
+  {
+    productName: "Paracetamol 500mg",
+    productType: "Tablet",
+    quantity: "100",
+    costPrice: "2.5",
+    batchNo: "B001",
+    expiryDate: "2026-01-15",
+    discount: "5",
+    discountPayment: "12.5",
+    lineTotal: "237.5"
+  },
+  {
+    productName: "Ibuprofen 200mg",
+    productType: "Tablet",
+    quantity: "200",
+    costPrice: "3.0",
+    batchNo: "B002",
+    expiryDate: "2026-03-20",
+    discount: "10",
+    discountPayment: "60",
+    lineTotal: "540"
+  },
+  {
+    productName: "Cough Syrup 100ml",
+    productType: "Syrup",
+    quantity: "50",
+    costPrice: "20",
+    batchNo: "B003",
+    expiryDate: "2025-12-01",
+    discount: "8",
+    discountPayment: "80",
+    lineTotal: "920"
+  },
+  {
+    productName: "Vitamin C 1000mg",
+    productType: "Tablet",
+    quantity: "150",
+    costPrice: "5",
+    batchNo: "B004",
+    expiryDate: "2026-05-10",
+    discount: "7",
+    discountPayment: "52.5",
+    lineTotal: "697.5"
+  },
+  {
+    productName: "Azithromycin 250mg",
+    productType: "Tablet",
+    quantity: "80",
+    costPrice: "10",
+    batchNo: "B005",
+    expiryDate: "2025-10-10",
+    discount: "6",
+    discountPayment: "48",
+    lineTotal: "752"
+  },
+  {
+    productName: "Amoxicillin 500mg",
+    productType: "Capsule",
+    quantity: "120",
+    costPrice: "4",
+    batchNo: "B006",
+    expiryDate: "2026-08-15",
+    discount: "5",
+    discountPayment: "24",
+    lineTotal: "456"
+  },
+  {
+    productName: "Multivitamin Syrup",
+    productType: "Syrup",
+    quantity: "60",
+    costPrice: "18",
+    batchNo: "B007",
+    expiryDate: "2025-11-25",
+    discount: "9",
+    discountPayment: "97.2",
+    lineTotal: "982.8"
+  },
+  {
+    productName: "Loratadine 10mg",
+    productType: "Tablet",
+    quantity: "90",
+    costPrice: "3.5",
+    batchNo: "B008",
+    expiryDate: "2026-06-30",
+    discount: "4",
+    discountPayment: "12.6",
+    lineTotal: "295.4"
+  },
+  {
+    productName: "Calcium + D3",
+    productType: "Tablet",
+    quantity: "70",
+    costPrice: "6",
+    batchNo: "B009",
+    expiryDate: "2026-02-10",
+    discount: "5",
+    discountPayment: "21",
+    lineTotal: "399"
+  },
+  {
+    productName: "ORS Sachets",
+    productType: "Sachet",
+    quantity: "100",
+    costPrice: "2",
+    batchNo: "B010",
+    expiryDate: "2025-12-20",
+    discount: "10",
+    discountPayment: "20",
+    lineTotal: "180"
+  }
+];
