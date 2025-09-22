@@ -159,7 +159,7 @@ const SupplierDetail = () => {
               {new Date(supplierPurchases[0].purchaseDate).toLocaleDateString()}
             </p>
             <p className="text-primary-50 text-xs font-medium">
-              <span className="font-semibold">SalesMan:</span> __________
+              <span className="font-semibold">SalesMan:</span>  {supplierInfo.name} 
             </p>
           </div>
         )}
