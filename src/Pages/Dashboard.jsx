@@ -279,7 +279,7 @@ const Dashboard = () => {
           <h2 className="text-lg font-semibold mb-4">Products Near Expiry</h2>
           <div className="overflow-y-auto max-h-[400px]">
             <table className="w-full overflow-x-auto text-sm text-left text-white-700">
-              <thead className="text-xs uppercase text-white bg-[#4F7942]">
+              <thead className="text-xs uppercase text-white bg-bg-50">
                 <tr>
                   <th className="py-2 px-4">Product Name</th>
                   <th className="py-2 px-4">Category</th>
@@ -303,7 +303,7 @@ const Dashboard = () => {
           {/* Pagination Buttons */}
           <div className="flex justify-between mt-4">
             <button
-              className="px-4 py-1 bg-[#4F7942] text-white rounded disabled:opacity-50"
+              className="px-4 py-1 bg-bg-50 text-white rounded disabled:opacity-50"
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
             >
@@ -315,7 +315,7 @@ const Dashboard = () => {
             </span>
 
             <button
-              className="px-4 py-1 bg-[#4F7942] text-white rounded disabled:opacity-50"
+              className="px-4 py-1 bg-bg-50 text-white rounded disabled:opacity-50"
               onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
             >
@@ -333,7 +333,7 @@ const Dashboard = () => {
           <h2 className="text-lg font-semibold mb-4">Products Near Expiry</h2>
           <div className="overflow-y-auto max-h-[400px]">
             <table className="w-full overflow-x-auto text-sm text-left text-white-700">
-              <thead className="text-xs uppercase text-white bg-[#4F7942]">
+              <thead className="text-xs uppercase text-white bg-bg-50">
                 <tr>
                   <th className="py-2 px-4">Product Name</th>
                   <th className="py-2 px-4">Category</th>
@@ -357,7 +357,7 @@ const Dashboard = () => {
           {/* Pagination Buttons */}
           <div className="flex justify-between mt-4">
             <button
-              className="px-4 py-1 bg-[#4F7942] text-white rounded disabled:opacity-50"
+              className="px-4 py-1 bg-bg-50 text-white rounded disabled:opacity-50"
               onClick={() => setCurrentPage2((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage2 === 1}
             >
@@ -369,7 +369,7 @@ const Dashboard = () => {
             </span>
 
             <button
-              className="px-4 py-1 bg-[#4F7942] text-white rounded disabled:opacity-50"
+              className="px-4 py-1 bg-bg-50 text-white rounded disabled:opacity-50"
               onClick={() => setCurrentPage2((prev) => Math.min(prev + 1, totalPages2))}
               disabled={currentPage2 === totalPages2}
             >

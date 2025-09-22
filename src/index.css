@@ -21,10 +21,11 @@ html, body {
     --color-Secondary-50: #757575;
     --color-sucess-50: #4CAF50;
     --color-warning-50: #D32F2F;
+
     --color-hf-50: #0D47A1;
-    --color-bg-50: #ffa04c;
+    --color-bg-50: #4F7942;
     --color-db-50: #F5F5F5;
-    --color-selected-50: #e6761f;
+    --color-selected-50: #4CBB17;
     --color-black-50: #1c1c21;
     --color-black-100: #0e0e10;
     --color-black-200: #282732;
@@ -133,7 +134,7 @@ html, body {
     }
 
     .timeline-logo {
-        @apply md:size-15 max-sm:size-12 size-10 flex-none mt-2 rounded-full flex justify-center items-center md:-translate-y-7 border-2 border-bg-50 bg-db-50;
+        @apply md:size-15 max-sm:size-12 size-10 flex-none mt-2 rounded-full flex justify-center items-center md:-translate-y-7 border-2 border-[#4F7942] bg-db-50;
     }
 
 

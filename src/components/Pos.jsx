@@ -36,7 +36,7 @@ const Pos = () => {
       {/* Sidebar */}
       <nav
         ref={sidebarRef}
-        className={`flex flex-col z-10 gap-2 h-screen sticky top-0 bg-[#4F7942] overflow-hidden transition-all`}
+        className={`flex flex-col z-10 gap-2 h-screen sticky top-0 bg-bg-50 overflow-hidden transition-all`}
         style={{ width: "3rem" }} // initial width
       >
         {/* Toggle Button */}
@@ -71,7 +71,7 @@ const Pos = () => {
 
 
         {isOpen && (
-          <h1 className="text-md px-2 text-center tracking-widest font-bold text-bg-50">PharmaConnect+</h1>
+          <h1 className="text-lg px-2 text-center tracking-widest font-bold text-primary-50">PharmaConnect+</h1>
         )}
 
         {/* Navigation Links */}
@@ -94,13 +94,13 @@ const Pos = () => {
                     openSubMenuIndex === index
                       ? "opacity-100 max-h-40"
                       : "opacity-0 max-h-0 overflow-hidden"
-                  } ${isOpen ? "w-full  " : "absolute left-[13rem] bg-[#4F7942] rounded-md p-2 z-20"} flex justify-center  items-center  flex-col gap-1`}
+                  } ${isOpen ? "w-full  " : "absolute left-[13rem] bg-bg-50 rounded-md p-2 z-20"} flex justify-center  items-center  flex-col gap-1`}
                 >
                   {link.subitems.map((subItem, subIndex) => (
                     <li key={subIndex} className="w-full px-1 ">
                       <Link
                         to={subItem.href}
-                        className="block text-sm hover:bg-[#4CBB17] w-full   rounded-lg p-2 cursor-pointer text-white"
+                        className="block text-sm hover:bg-selected-50 w-full   rounded-lg p-2 cursor-pointer text-white"
                       >
                         <span className="ml-15  text-[11px]">{subItem.name}</span>
                       </Link>

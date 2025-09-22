@@ -25,13 +25,13 @@ const Hero = () => {
             <div className='absolute top-0 left-0 inset-0 bg-primary-50  z-0 pointer-events-none w-full h-full'>
                 <img src='../images/pham.png' alt='background' className='h-full w-full  opacity-40'/>
             </div>
-            <h1 className='lg:text-7xl md:text-4xl text-3xl text-bg-50 font-extrabold  tracking-[20px] '>PHARMACY</h1>
+            <h1 className='lg:text-7xl md:text-4xl text-3xl text-selected-50 font-extrabold  tracking-[20px] '>PHARMACY</h1>
             <h1 className='md:text-4xl md:font-semibold text-2xl '>Deleviring</h1>
             <span className=' inline-block   overflow-hidden h-12  '>
                <span className='flex  flex-col gap-5 w-100 animation-wordSlider '>
                  {words.map((item , index) => (
                     <span key={index} className='h-10  flex justify-center gap-3 md:gap-2 items-center'>
-                        <span className='bg-bg-50 rounded-full p-2 text-black'> <item.icon className=''/> </span>
+                        <span className='bg-selected-50 rounded-full p-2 text-black'> <item.icon className=''/> </span>
                         <span className='text-white-50 md:text-4xl text-2xl  font-semibold'>{item.text}</span>
                     </span>
                 ))}
