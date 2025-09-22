@@ -141,18 +141,21 @@ export const footerImages = [
 export const fields = [
   // personal info
   {
-    label: 'Phone',
-    placeholder: 'Enter your phone number',
+    name: 'phoneNumber',
+    label: 'Phone Number',
+    placeholder: 'Enter your phone number (e.g., 03089156503)',
     type: 'tel',
     section: 'personal',
   },
   {
+    name: 'frontId',
     label: 'Front ID',
     placeholder: 'Add your Front ID card Picture',
     type: 'file',
     section: 'personal',
   },
   {
+    name: 'backId',
     label: 'Back ID',
     placeholder: 'Add your Back ID card Picture',
     type: 'file',
@@ -161,12 +164,18 @@ export const fields = [
 
   // pharmacy info
   {
+    name: 'pharmacyName',
     label: 'Pharmacy Name',
     placeholder: 'Enter your pharmacy name',
     type: 'text',
     section: 'pharmacy',
   },
   {
+<<<<<<< HEAD
+    name: 'state',
+    label: 'State',
+    placeholder: 'Enter your state',
+=======
     label: 'Country',
     placeholder: 'Enter your Country',
     type: 'text',
@@ -175,35 +184,43 @@ export const fields = [
   {
     label: 'State',
     placeholder: 'Enter your State',
+>>>>>>> 1d31167888792819c3d51e2afb340366653e97b0
     type: 'text',
     section: 'pharmacy',
   },
   {
+<<<<<<< HEAD
+    name: 'city',
+=======
+>>>>>>> 1d31167888792819c3d51e2afb340366653e97b0
     label: 'City',
     placeholder: 'Enter your city',
     type: 'text',
     section: 'pharmacy',
   },
   {
+    name: 'address',
     label: 'Address',
     placeholder: 'Enter your address',
     type: 'text',
     section: 'pharmacy',
   },
   {
-    label: 'License No',
-    placeholder: 'Enter your License Number',
+    name: 'licenseNumber',
+    label: 'License Number',
+    placeholder: 'Enter your license number',
     type: 'text',
     section: 'pharmacy',
   },
   {
+    name: 'licensePicture',
     label: 'License Picture',
     placeholder: 'Add your License Picture',
     type: 'file',
     section: 'pharmacy',
   },
-  
 ];
+
 
 
 
