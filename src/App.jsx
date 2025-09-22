@@ -95,36 +95,36 @@ const App = () => {
     
   // </>
 
-          <>
-    <Routes>
-      {/* Main Layout */}
-      <Route path="/" element={<Pos />}>
-        {/* Sidebar Pages */}
-        <Route path="pos/dashboard" element={<Dashboard />} />
-        <Route path="pos/products/add" element={<AllProduct />} />
-        <Route path="pos/products/package" element={<AllPackages />} />
-        <Route path="pos/products/expiryProduct" element={<ExpiryProducts />} />
-        <Route path="pos/products/inventry" element={<Inventry />} />
-        <Route path="pos/purchase/supplier" element={<Supplier />} />
-        <Route path="pos/purchase/purchase" element={<Purchase />} />
-        <Route path="pos/purchase/purchaseReturn" element={<PurchaseReturen />} />
-        <Route path="pos/customers" element={<Customer />} />
-        <Route path="pos/reports" element={<Reports />} />
-        <Route path="pos/settings" element={<Settings />} />
-        <Route path="pos/pos" element={<PosPage />} />
+    //       <>
+    // <Routes>
+    //   {/* Main Layout */}
+    //   <Route path="/" element={<Pos />}>
+    //     {/* Sidebar Pages */}
+    //     <Route path="pos/dashboard" element={<Dashboard />} />
+    //     <Route path="pos/products/add" element={<AllProduct />} />
+    //     <Route path="pos/products/package" element={<AllPackages />} />
+    //     <Route path="pos/products/expiryProduct" element={<ExpiryProducts />} />
+    //     <Route path="pos/products/inventry" element={<Inventry />} />
+    //     <Route path="pos/purchase/supplier" element={<Supplier />} />
+    //     <Route path="pos/purchase/purchase" element={<Purchase />} />
+    //     <Route path="pos/purchase/purchaseReturn" element={<PurchaseReturen />} />
+    //     <Route path="pos/customers" element={<Customer />} />
+    //     <Route path="pos/reports" element={<Reports />} />
+    //     <Route path="pos/settings" element={<Settings />} />
+    //     <Route path="pos/pos" element={<PosPage />} />
 
-        {/* 🔥 Dynamic route under POS layout 🔥 */}
-        <Route path="/pos/purchase/supplier/:supplierName" element={<SupplierDetail />} />
-      </Route>
-    </Routes>
-           
-            {/* <Hero />
+    //     {/* 🔥 Dynamic route under POS layout 🔥 */}
+    //     <Route path="/pos/purchase/supplier/:supplierName" element={<SupplierDetail />} />
+    //   </Route>
+    // </Routes>
+           <>
+            <Hero />
             <Modules />
             <SignUp />
             <FormPage/>
             <OtpVerification/>
             <PendingApproval/>
-            <Footer /> */}
+            <Footer />
           </>
   );
 };

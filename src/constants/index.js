@@ -167,6 +167,18 @@ export const fields = [
     section: 'pharmacy',
   },
   {
+    label: 'Country',
+    placeholder: 'Enter your Country',
+    type: 'text',
+    section: 'pharmacy',
+  },
+  {
+    label: 'State',
+    placeholder: 'Enter your State',
+    type: 'text',
+    section: 'pharmacy',
+  },
+  {
     label: 'City',
     placeholder: 'Enter your city',
     type: 'text',
