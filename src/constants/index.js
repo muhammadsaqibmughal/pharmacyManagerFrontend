@@ -175,20 +175,15 @@ export const fields = [
     name: 'state',
     label: 'State',
     placeholder: 'Enter your state',
-
+    section: 'pharmacy',
+  },
+  {
+    name:"Country",
     label: 'Country',
     placeholder: 'Enter your Country',
     type: 'text',
     section: 'pharmacy',
   },
-  {
-    label: 'State',
-    placeholder: 'Enter your State',
-
-    type: 'text',
-    section: 'pharmacy',
-  },
-  
 
 {
     label: 'City',
