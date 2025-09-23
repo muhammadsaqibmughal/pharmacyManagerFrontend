@@ -1,4 +1,3 @@
-// OtpVerification.jsx
 import React, { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -41,28 +40,27 @@ const OtpVerification = () => {
     }
   };
 
- const handleResend = async () => {
-  try {
-    const response = await axios.post(
-      "http://localhost:5000/api/auth/resend-otp",
-      { email }
-    );
+  const handleResend = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/resend-otp",
+        { email }
+      );
 
-    if (response.data.status === "success") {
-      // Clear OTP input fields
-      const clearedOtp = ["", "", "", "", "", ""];
-      setOtpFields(clearedOtp);
-      formik.setFieldValue("otp", "");
-      inputRefs.current[0]?.focus(); // Optional: focus first field
-      setResendVisible(false);
-      setServerMessage("OTP resent to your email");
-    } else {
-      setServerMessage(response.data.message || "Failed to resend OTP");
+      if (response.data.status === "success") {
+        const clearedOtp = ["", "", "", "", "", ""];
+        setOtpFields(clearedOtp);
+        formik.setFieldValue("otp", "");
+        inputRefs.current[0]?.focus();
+        setResendVisible(false);
+        setServerMessage("OTP resent to your email");
+      } else {
+        setServerMessage(response.data.message || "Failed to resend OTP");
+      }
+    } catch (err) {
+      setServerMessage(err.response?.data?.message || "Resend failed");
     }
-  } catch (err) {
-    setServerMessage(err.response?.data?.message || "Resend failed");
-  }
-};
+  };
 
   useEffect(() => {
     if (!email) {
@@ -71,10 +69,10 @@ const OtpVerification = () => {
   }, [email, navigate]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f8f8ee] p-5">
-      <div className="flex flex-col  bg-db-50 rounded-3xl p-10 shadow-xl w-[400px] max-w-full text-white items-center">
-        <h2 className="text-3xl font-semibold mb-4 text-bg-50">Verify OTP</h2>
-        <p className="text-primary-50 text-sm text-center mb-6">
+    <div className="flex min-h-screen items-center justify-center bg-black-50 p-5">
+          <div className="rounded-xl p-10 border border-white/20 bg-white/10 backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
+        <h2 className="text-3xl text-center font-semibold mb-4 text-white">Verify OTP</h2>
+        <p className="text-gray-300 text-sm text-center mb-6">
           Enter the 6-digit OTP sent to <br />
           <span className="text-purple-400 font-semibold">{email}</span>
         </p>
@@ -93,31 +91,31 @@ const OtpVerification = () => {
                 value={digit}
                 onChange={(e) => handleChange(e.target.value, index)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
-                className="w-12 h-12 bg-[#e0e0e0] text-center text-primary-50 text-xl rounded-md focus:outline-none focus:border-bg-50"
+                className="w-12 h-12 text-center text-white text-xl rounded-md border border-white/20 bg-white/10 backdrop-blur-sm focus:outline-none focus:border-purple-400"
               />
             ))}
           </div>
 
           {serverMessage && (
-            <p className="text-warning-50 text-sm text-center">{serverMessage}</p>
+            <p className="text-yellow-400 text-sm text-center">{serverMessage}</p>
           )}
           {formik.errors.otp && formik.touched.otp && (
-            <p className="text-warning-50 text-sm text-center">
+            <p className="text-red-400 text-sm text-center">
               {formik.errors.otp}
             </p>
           )}
 
           <button
             type="submit"
-            className="bg-bg-50 text-primary-50 font-semibold rounded-xl px-6 py-2 hover:bg-selected-50 hover:text-white transition-all"
+            className="bg-bg-50 text-white font-semibold rounded-xl px-6 py-2 hover:bg-selected-50 transition-all"
             disabled={formik.isSubmitting}
           >
-            Verify OTP
+            {formik.isSubmitting ? "Verifying..." : "Verify OTP"}
           </button>
         </form>
 
         {resendVisible && (
-          <p className="mt-4 text-sm text-gray-400">
+          <p className="mt-4 text-sm text-gray-300">
             Didn’t receive or OTP expired?{" "}
             <button
               onClick={handleResend}

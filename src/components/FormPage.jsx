@@ -7,6 +7,7 @@ import * as Yup from 'yup';
 import { supabase } from "../utils/supabaseClient";
 import { pharmacyRegistration } from '../api/pharmacyApi';
 import { useNavigate } from 'react-router-dom';
+import { div } from 'motion/react-client';
 
 // File upload helper function for Supabase
 const uploadFileToSupabase = async (file, pathPrefix) => {
@@ -176,13 +177,19 @@ const FormPage = () => {
   });
 
   return (
-    <div className='w-full min-h-screen bg-db-50 flex flex-col px-20 max-md:px-10 py-10'>
+  <div className="w-full min-h-screen bg-black-50 px-20 max-md:px-10 py-10 ">
+
+      {/* ✅ FORM STARTS HERE */}
+      <form
+        className="flex flex-col w-full items-center rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] px-10 py-10"
+        onSubmit={formik.handleSubmit}
+      >
       <div className='title-Header text-center'>
         <TitleHeader title='Registration Form' />
       </div>
 
       {/* Section Toggle Buttons */}
-      <div className='flex justify-center mb-10 gap-4'>
+      <div className='flex justify-center mb-8 gap-4'>
         <button
           onClick={() => setCurrentSection('personal')}
           className={`p-2 rounded-xl border-2 border-bg-50 ${
@@ -200,20 +207,19 @@ const FormPage = () => {
           Pharmacy Info
         </button>
       </div>
-
-      {/* ✅ FORM STARTS HERE */}
-      <form className='flex flex-col w-full items-center' onSubmit={formik.handleSubmit}>
+      <div className='w-full h-[1px] bg-db-50'/>
+      <div className=' w-full mt-2'>
         {fields
           .filter((field) => field.section === currentSection)
           .filter((field) => !['Country', 'State', 'City'].includes(field.label))
           .map((field, index) => (
-            <div key={index} className='flex flex-col w-full justify-center items-center'>
+            <div key={index} className='flex  flex-col w-full justify-center items-center'>
               <div className='flex flex-col gap-1 w-1/3 max-xl:w-1/2 max-lg:w-90 max-md:w-full p-2 max-sm:w-4/5'>
                 <label className='labels text-Secondary-50 font-semibold fields'>{field.label}</label>
                 <input
                   type={field.type}
                   placeholder={field.placeholder}
-                  className='fields text-Secondary-50 text-xs bg-white border border-gray-300 p-2 rounded-xl'
+                  className="text-xs text-white bg-white/10 backdrop-blur-sm border border-white/20 p-2 rounded-xl outline-none"
                   name={field.name}
                   onChange={(event) => {
                     if (field.type === "file") {
@@ -231,15 +237,16 @@ const FormPage = () => {
               </div>
             </div>
           ))}
+      </div>
 
         {/* Country / State / City Dropdowns */}
         {currentSection === "pharmacy" && (
           <div className="flex flex-col w-full items-center">
             {/* Country */}
-            <div className="w-1/3 max-xl:w-1/2 max-lg:w-90 max-md:w-full p-2 max-sm:w-4/5">
+            <div className="flex flex-col gap-1 w-1/3 max-xl:w-1/2 max-lg:w-90 max-md:w-full p-2 max-sm:w-4/5">
               <label className="labels text-Secondary-50 font-semibold">Country</label>
               <select
-                className="fields bg-white text-xs text-Secondary-50 p-2 rounded-xl border border-gray-300 w-full"
+                className="text-xs text-white bg-white/10 backdrop-blur-sm border border-white/20 p-2 rounded-xl outline-none"
                 value={selectedCountry}
                 onChange={(e) => {
                   setSelectedCountry(e.target.value);
@@ -257,10 +264,10 @@ const FormPage = () => {
             </div>
 
             {/* State */}
-            <div className="w-1/3 max-xl:w-1/2 max-lg:w-90 max-md:w-full p-2 max-sm:w-4/5">
+            <div className="flex flex-col gap-1 w-1/3 max-xl:w-1/2 max-lg:w-90 max-md:w-full p-2 max-sm:w-4/5">
               <label className="labels text-Secondary-50 font-semibold">State</label>
               <select
-                className="fields bg-white text-xs text-Secondary-50 p-2 rounded-xl border border-gray-300 w-full"
+                className="text-xs text-white bg-white/10 backdrop-blur-sm border border-white/20 p-2 rounded-xl outline-none"
                 value={selectedState}
                 onChange={(e) => setSelectedState(e.target.value)}
                 disabled={!selectedCountry}
@@ -275,10 +282,10 @@ const FormPage = () => {
             </div>
 
             {/* City */}
-            <div className="w-1/3 max-xl:w-1/2 max-lg:w-90 max-md:w-full p-2 max-sm:w-4/5">
+            <div className="flex flex-col gap-1 w-1/3 max-xl:w-1/2 max-lg:w-90 max-md:w-full p-2 max-sm:w-4/5">
               <label className="labels text-Secondary-50 font-semibold">City</label>
-              <select
-                className="fields bg-white text-xs text-Secondary-50 p-2 rounded-xl border border-gray-300 w-full"
+             <select
+                className="text-xs text-white bg-white/10 backdrop-blur-sm border border-white/20 p-2 rounded-xl outline-none"
                 value={selectedCity}
                 onChange={(e) => {
                   setSelectedCity(e.target.value);
@@ -300,12 +307,12 @@ const FormPage = () => {
         {currentSection === "pharmacy" && (
           <div className='flex w-full justify-center items-center -mt-5 p-5'>
             <div className='flex flex-col gap-2 w-66 max-xl:w-1/2 max-lg:w-90 max-md:w-4/5'>
-              <label className='labels text-Secondary-50 font-semibold'>Location</label>
+              <label className='labels ml-4 text-Secondary-50 font-semibold'>Location</label>
               <input
                 type='text'
                 value={location}
                 placeholder='Get Location'
-                className='fields text-Secondary-50 text-xs bg-white p-2 outline-none rounded-xl'
+                className="text-xs text-white bg-white/10 ml-4 backdrop-blur-sm border border-white/20 p-2 rounded-xl outline-none"
                 {...formik.getFieldProps('location')}
               />
             </div>

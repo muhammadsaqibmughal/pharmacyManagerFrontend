@@ -13,17 +13,12 @@ const SignUp = () => {
   const [showPasswordLogin, setShowPasswordLogin] = useState(false);
   const [showPasswordRegister, setShowPasswordRegister] = useState(false);
 
-  const loginFormik = useLoginFormik(
-    setFormErrorLogin,
-    setLoading // Pass setLoading here
-  );
-
+  const loginFormik = useLoginFormik(setFormErrorLogin, setLoading);
   const registerFormik = useRegisterFormik(
     (email) => navigate(`/verify-email?email=${encodeURIComponent(email)}`),
     setFormErrorRegister
   );
 
-  // ❗ keep hook calls above return
   if (loading) {
     return (
       <div className="w-full h-screen flex items-center justify-center bg-db-50">
@@ -31,7 +26,6 @@ const SignUp = () => {
       </div>
     );
   }
-
 
   const handleSwitchToSignUp = () => {
     setIsLogin(false);
@@ -46,28 +40,28 @@ const SignUp = () => {
   };
 
   return (
-    <div className="w-full min-h-screen overflow-hidden bg-[#f8f8ee] flex">
+    <div className="w-full min-h-screen overflow-hidden bg-black-50 flex">
       {/* Left Side */}
       <div className="flex max-md:hidden p-20 justify-center items-center w-1/2">
         <img src="/images/animated-banner.gif" alt="Banner" />
       </div>
 
       {/* Right Side */}
-      <div className="flex bg-db-50 w-1/2 max-md:w-full justify-center items-center transition-all duration-500">
-        <div className="flex flex-col justify-center mb-80 items-center w-full gap-3 p-10">
-          <h1 className="text-center text-bg-50 text-3xl font-bold">PharmaConnect +</h1>
-          <p className="text-Secondary-50 text-xs text-center">
+      <div className="flex w-1/2 max-md:w-full justify-center items-center">
+        <div className="backdrop-blur-xl  bg-white/10 border border-white/20  shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] rounded-2xl flex flex-col justify-center mb-70 items-center w-4/5 max-md:w-11/12 gap-3 p-10 transition-all duration-500">
+          <h1 className="text-center text-white text-3xl font-bold">PharmaConnect +</h1>
+          <p className="text-gray-200 text-xs text-center">
             {isLogin
               ? "Please login to continue your session!"
               : "Create your account to get started!"}
           </p>
 
           <div className="flex w-full mt-4 items-center justify-center relative">
-            <div className="w-2/3 relative">
+            <div className="w-full max-w-md relative">
               {/* LOGIN FORM */}
               <form
                 onSubmit={loginFormik.handleSubmit}
-                className={`absolute top-5 left-0 w-full transition-all duration-500 ${
+                className={`absolute top-15 left-0 w-full transition-all duration-500 ${
                   isLogin
                     ? "opacity-100 scale-100 pointer-events-auto"
                     : "opacity-0 scale-90 pointer-events-none"
@@ -79,7 +73,7 @@ const SignUp = () => {
                     name="email"
                     aria-label="Email"
                     placeholder="Enter your email address"
-                    className="text-Secondary-50 text-xs p-3 h-10 bg-white rounded-xl outline-none"
+                    className="bg-white/10 text-white placeholder-white text-xs p-3 h-10 rounded-xl border border-white/20 outline-none backdrop-blur-sm"
                     value={loginFormik.values.email}
                     onChange={loginFormik.handleChange}
                   />
@@ -93,23 +87,23 @@ const SignUp = () => {
                       name="password"
                       aria-label="Password"
                       placeholder="Enter your password"
-                      className="p-3 h-10 w-full text-xs bg-white text-Secondary-50 rounded-xl outline-none"
+                      className="p-3 h-10 w-full text-xs bg-white/10 text-white placeholder-white border border-white/20 rounded-xl outline-none backdrop-blur-sm"
                       value={loginFormik.values.password}
                       onChange={loginFormik.handleChange}
                     />
                     <span
-                      className="absolute top-3 right-3 text-gray-500 cursor-pointer"
+                      className="absolute top-3 right-3 text-gray-300 cursor-pointer"
                       onClick={() => setShowPasswordLogin((prev) => !prev)}
                     >
                       {showPasswordLogin ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
                     </span>
                   </div>
                   {loginFormik.touched.password && loginFormik.errors.password && (
-                    <div className="text-warning-50 text-xs">{loginFormik.errors.password}</div>
+                    <div className="text-red-400 text-xs">{loginFormik.errors.password}</div>
                   )}
 
                   {formErrorLogin && (
-                    <div className="text-warning-50 text-sm text-center">{formErrorLogin}</div>
+                    <div className="text-red-400 text-sm text-center">{formErrorLogin}</div>
                   )}
                 </div>
 
@@ -126,18 +120,18 @@ const SignUp = () => {
                 <button
                   type="submit"
                   disabled={loginFormik.isSubmitting}
-                  className="w-full mt-7 py-2 bg-bg-50 font-semibold text-primary-50 rounded-xl hover:bg-selected-50 hover:text-white transition"
+                  className="w-full mt-7 py-2 bg-[#4F7942] text-white font-semibold rounded-xl hover:bg-green-700 transition"
                 >
                   {loginFormik.isSubmitting ? "Logging In..." : "Log In"}
                 </button>
 
                 <div className="text-center mt-4">
-                  <p className="text-sm text-Secondary-50">
+                  <p className="text-sm text-white">
                     Don't have an account?
                     <button
                       type="button"
                       onClick={handleSwitchToSignUp}
-                      className="ml-1 text-blue-500 hover:underline cursor-pointer"
+                      className="ml-1 text-blue-400 hover:underline cursor-pointer"
                     >
                       Sign Up
                     </button>
@@ -148,7 +142,7 @@ const SignUp = () => {
               {/* SIGNUP FORM */}
               <form
                 onSubmit={registerFormik.handleSubmit}
-                className={`absolute top-0 left-0 w-full transition-all duration-500 ${
+                className={`absolute top-15 left-0 w-full transition-all duration-500 ${
                   !isLogin
                     ? "opacity-100 scale-100 pointer-events-auto"
                     : "opacity-0 scale-90 pointer-events-none"
@@ -160,7 +154,7 @@ const SignUp = () => {
                     name="name"
                     aria-label="Full Name"
                     placeholder="Enter your name"
-                    className="p-3 h-10 text-xs bg-white text-Secondary-50 rounded-xl outline-none"
+                    className="p-3 h-10 text-xs bg-white/10 text-white placeholder-white border border-white/20 rounded-xl outline-none backdrop-blur-sm"
                     value={registerFormik.values.name}
                     onChange={registerFormik.handleChange}
                   />
@@ -173,7 +167,7 @@ const SignUp = () => {
                     name="email"
                     aria-label="Email"
                     placeholder="Enter your email address"
-                    className="p-3 h-10 text-xs bg-white text-Secondary-50 rounded-xl outline-none"
+                    className="p-3 h-10 text-xs bg-white/10 text-white placeholder-white border border-white/20 rounded-xl outline-none backdrop-blur-sm"
                     value={registerFormik.values.email}
                     onChange={registerFormik.handleChange}
                   />
@@ -187,12 +181,12 @@ const SignUp = () => {
                       name="password"
                       aria-label="Password"
                       placeholder="Enter your password"
-                      className="p-3 h-10 w-full text-xs bg-white text-Secondary-50 rounded-xl outline-none"
+                      className="p-3 h-10 w-full text-xs bg-white/10 text-white placeholder-white border border-white/20 rounded-xl outline-none backdrop-blur-sm"
                       value={registerFormik.values.password}
                       onChange={registerFormik.handleChange}
                     />
                     <span
-                      className="absolute top-3 right-3 text-gray-500 cursor-pointer"
+                      className="absolute top-3 right-3 text-gray-300 cursor-pointer"
                       onClick={() => setShowPasswordRegister((prev) => !prev)}
                     >
                       {showPasswordRegister ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
@@ -210,18 +204,18 @@ const SignUp = () => {
                 <button
                   type="submit"
                   disabled={registerFormik.isSubmitting}
-                  className="w-full mt-7 py-2 bg-bg-50 text-primary-50 rounded-xl hover:bg-selected-50 hover:text-white transition"
+                  className="w-full mt-7 py-2 bg-[#4F7942] text-white font-semibold rounded-xl hover:bg-green-700 transition"
                 >
                   {registerFormik.isSubmitting ? "Signing Up..." : "Sign Up"}
                 </button>
 
                 <div className="text-center mt-6">
-                  <p className="text-sm text-Secondary-50">
+                  <p className="text-sm text-white">
                     Already have an account?
                     <button
                       type="button"
                       onClick={handleSwitchToLogin}
-                      className="ml-1 text-blue-500 hover:underline cursor-pointer"
+                      className="ml-1 text-blue-400 hover:underline cursor-pointer"
                     >
                       Log In
                     </button>

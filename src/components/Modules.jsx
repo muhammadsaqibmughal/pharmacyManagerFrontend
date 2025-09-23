@@ -56,7 +56,7 @@ const Modules = () => {
   }, []);
 
   return (
-    <div id='services' className="mt-12 bg-db-50">
+    <div id='services' className="mt-12 ">
       <div>
         <TitleHeader title='Pharmacy POS System' sub='Modules and Responsibilities'/>
       </div>
