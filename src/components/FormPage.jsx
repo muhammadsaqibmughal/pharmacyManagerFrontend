@@ -4,42 +4,38 @@ import TitleHeader from './TitleHeader';
 import { Country, State, City } from 'country-state-city';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { supabase } from "../utils/supabaseClient"; // Your supabase client import
-import { pharmacyRegistration } from '../api/pharmacyApi'; // Adjust according to your API path
+import { supabase } from "../utils/supabaseClient";
+import { pharmacyRegistration } from '../api/pharmacyApi';
+import { useNavigate } from 'react-router-dom';
 
+// File upload helper function for Supabase
 const uploadFileToSupabase = async (file, pathPrefix) => {
   if (!file) throw new Error("No file provided for upload");
 
   const fileName = `${pathPrefix}/${Date.now()}-${file.name}`;
-  try {
-    console.log(" Uploading file:", file.name);
+  const { data, error } = await supabase.storage
+    .from("pharmacy-files")
+    .upload(fileName, file);
 
-    const { data, error } = await supabase.storage
-      .from("pharmacy-files")
-      .upload(fileName, file);
+  if (error) throw new Error(error.message);
 
-    if (error) throw new Error(error.message);
+  const { data: publicUrlData, error: urlError } = await supabase.storage
+    .from("pharmacy-files")
+    .getPublicUrl(fileName);
 
-    const { data: publicUrlData, error: urlError } = await supabase.storage
-      .from("pharmacy-files")
-      .getPublicUrl(fileName);
+  if (urlError) throw new Error(urlError.message);
 
-    if (urlError) throw new Error(urlError.message);
-
-    console.log(" File uploaded successfully:", publicUrlData.publicUrl);
-    return publicUrlData.publicUrl;
-  } catch (error) {
-    console.error(" File upload error:", error);
-    throw new Error("File upload failed: " + error.message);
-  }
+  return publicUrlData.publicUrl;
 };
 
 const FormPage = () => {
+  const navigate = useNavigate();
+
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
+  const [currentSection, setCurrentSection] = useState('personal');
   const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedState, setSelectedState] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
@@ -72,7 +68,9 @@ const FormPage = () => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-        setLocation(`Lat: ${latitude.toFixed(5)}, Long: ${longitude.toFixed(5)}`);
+        const loc = `Lat:${latitude.toFixed(5)},Long:${longitude.toFixed(5)}`;
+        setLocation(loc);
+        formik.setFieldValue('location', loc);
         setLoading(false);
       },
       () => {
@@ -82,7 +80,17 @@ const FormPage = () => {
     );
   };
 
-  // Formik hook
+  const handleNext = async () => {
+    const errors = await formik.validateForm();
+    if (errors.phoneNumber || errors.frontId || errors.backId) {
+      setError("Please fill required fields first.");
+      return;
+    }
+
+    setError('');
+    setCurrentSection('pharmacy');
+  };
+
   const formik = useFormik({
     initialValues: {
       phoneNumber: '',
@@ -94,7 +102,7 @@ const FormPage = () => {
       address: '',
       licenseNumber: '',
       licensePicture: null,
-      location: location,
+      location: '',
     },
     validationSchema: Yup.object({
       phoneNumber: Yup.string()
@@ -115,12 +123,12 @@ const FormPage = () => {
     onSubmit: async (values) => {
       try {
         const { frontId, backId, licensePicture } = values;
-        const filesToUpload = [frontId, backId, licensePicture];
-        if (filesToUpload.some((file) => !file)) {
-          throw new Error('Please provide all required files.');
+
+        if (!frontId || !backId || !licensePicture) {
+          setError('Please upload all required images');
+          return;
         }
 
-        // Upload files to Supabase
         const [frontIdUrl, backIdUrl, licenseUrl] = await Promise.all([
           uploadFileToSupabase(frontId, 'ids/front'),
           uploadFileToSupabase(backId, 'ids/back'),
@@ -130,18 +138,11 @@ const FormPage = () => {
         const locationRegex = /^Lat:(-?\d+(\.\d+)?),Long:(-?\d+(\.\d+)?)$/;
         const match = values.location.match(locationRegex);
 
-        if (!match) {
-          throw new Error("Invalid location format. Use Lat:<latitude>,Long:<longitude>");
-        }
+        if (!match) throw new Error("Invalid location format.");
 
         const latitude = parseFloat(match[1]);
         const longitude = parseFloat(match[3]);
 
-        if (isNaN(latitude) || isNaN(longitude)) {
-          throw new Error("Latitude and longitude must be valid numbers.");
-        }
-
-        // Prepare payload to send to the API
         const payload = {
           pharmacyName: values.pharmacyName,
           phoneNumber: values.phoneNumber,
@@ -158,16 +159,20 @@ const FormPage = () => {
         };
 
         const res = await pharmacyRegistration(payload);
+        console.log("API Response:", res);
+
         if (res.status === 'success') {
           formik.resetForm();
           alert('Registration successful!');
+          navigate('/pending-approval');
         } else {
           setError(res.message || 'Registration failed.');
         }
       } catch (err) {
+        console.error("Submit error:", err);
         setError(err.message || 'Something went wrong.');
       }
-    },
+    }
   });
 
   return (
@@ -179,39 +184,46 @@ const FormPage = () => {
       {/* Section Toggle Buttons */}
       <div className='flex justify-center mb-10 gap-4'>
         <button
-          onClick={() => formik.setFieldValue('currentSection', 'personal')}
+          onClick={() => setCurrentSection('personal')}
           className={`p-2 rounded-xl border-2 border-bg-50 ${
-            formik.values.currentSection === 'personal' ? 'bg-bg-50 text-white' : 'bg-white text-primary-50'
+            currentSection === 'personal' ? 'bg-bg-50 text-white' : 'bg-white text-primary-50'
           } transition`}
         >
           Personal Info
         </button>
         <button
-          onClick={() => formik.setFieldValue('currentSection', 'pharmacy')}
+          onClick={() => setCurrentSection('pharmacy')}
           className={`p-2 rounded-xl border-2 border-bg-50 ${
-            formik.values.currentSection === 'pharmacy' ? 'bg-bg-50 text-white' : 'bg-white text-primary-50'
+            currentSection === 'pharmacy' ? 'bg-bg-50 text-white' : 'bg-white text-primary-50'
           } transition`}
         >
           Pharmacy Info
         </button>
       </div>
 
-      {/* Form Fields */}
-      <div className='flex flex-col w-full items-center'>
+      {/* ✅ FORM STARTS HERE */}
+      <form className='flex flex-col w-full items-center' onSubmit={formik.handleSubmit}>
         {fields
-          .filter((field) => field.section === formik.values.currentSection)
-          .filter((field) => !['Country', 'State', 'City'].includes(field.label)) // REMOVE text inputs
+          .filter((field) => field.section === currentSection)
+          .filter((field) => !['Country', 'State', 'City'].includes(field.label))
           .map((field, index) => (
             <div key={index} className='flex flex-col w-full justify-center items-center'>
               <div className='flex flex-col gap-1 w-1/3 max-xl:w-1/2 max-lg:w-90 max-md:w-full p-2 max-sm:w-4/5'>
-                <label className='labels text-Secondary-50 font-semibold fields'>
-                  {field.label}
-                </label>
+                <label className='labels text-Secondary-50 font-semibold fields'>{field.label}</label>
                 <input
                   type={field.type}
                   placeholder={field.placeholder}
                   className='fields text-Secondary-50 text-xs bg-white border border-gray-300 p-2 rounded-xl'
-                  {...formik.getFieldProps(field.name)}
+                  name={field.name}
+                  onChange={(event) => {
+                    if (field.type === "file") {
+                      formik.setFieldValue(field.name, event.currentTarget.files[0]);
+                    } else {
+                      formik.handleChange(event);
+                    }
+                  }}
+                  onBlur={formik.handleBlur}
+                  value={field.type === "file" ? undefined : formik.values[field.name]}
                 />
                 {formik.touched[field.name] && formik.errors[field.name] && (
                   <div className="text-red-500 text-xs">{formik.errors[field.name]}</div>
@@ -220,93 +232,116 @@ const FormPage = () => {
             </div>
           ))}
 
-        {/* Country Dropdown */}
-        <div className='w-1/3 max-xl:w-1/2 max-lg:w-90 max-md:w-full p-2 max-sm:w-4/5'>
-          <label className='labels text-Secondary-50 font-semibold'>Country</label>
-          <select
-            className='fields bg-white text-xs text-Secondary-50 p-2 rounded-xl border border-gray-300 w-full'
-            value={selectedCountry}
-            onChange={(e) => setSelectedCountry(e.target.value)}
-          >
-            <option value="">Select Country</option>
-            {Country.getAllCountries().map((country) => (
-              <option key={country.isoCode} value={country.isoCode}>
-                {country.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Country / State / City Dropdowns */}
+        {currentSection === "pharmacy" && (
+          <div className="flex flex-col w-full items-center">
+            {/* Country */}
+            <div className="w-1/3 max-xl:w-1/2 max-lg:w-90 max-md:w-full p-2 max-sm:w-4/5">
+              <label className="labels text-Secondary-50 font-semibold">Country</label>
+              <select
+                className="fields bg-white text-xs text-Secondary-50 p-2 rounded-xl border border-gray-300 w-full"
+                value={selectedCountry}
+                onChange={(e) => {
+                  setSelectedCountry(e.target.value);
+                  setSelectedState('');
+                  setSelectedCity('');
+                }}
+              >
+                <option value="">Select Country</option>
+                {Country.getAllCountries().map((country) => (
+                  <option key={country.isoCode} value={country.isoCode}>
+                    {country.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        {/* State Dropdown */}
-        <div className='w-1/3 max-xl:w-1/2 max-lg:w-90 max-md:w-full p-2 max-sm:w-4/5'>
-          <label className='labels text-Secondary-50 font-semibold'>State</label>
-          <select
-            className='fields bg-white text-xs text-Secondary-50 p-2 rounded-xl border border-gray-300 w-full'
-            value={selectedState}
-            onChange={(e) => setSelectedState(e.target.value)}
-            disabled={!selectedCountry}
-          >
-            <option value="">Select State</option>
-            {states.map((state) => (
-              <option key={state.isoCode} value={state.isoCode}>
-                {state.name}
-              </option>
-            ))}
-          </select>
-        </div>
+            {/* State */}
+            <div className="w-1/3 max-xl:w-1/2 max-lg:w-90 max-md:w-full p-2 max-sm:w-4/5">
+              <label className="labels text-Secondary-50 font-semibold">State</label>
+              <select
+                className="fields bg-white text-xs text-Secondary-50 p-2 rounded-xl border border-gray-300 w-full"
+                value={selectedState}
+                onChange={(e) => setSelectedState(e.target.value)}
+                disabled={!selectedCountry}
+              >
+                <option value="">Select State</option>
+                {states.map((state) => (
+                  <option key={state.isoCode} value={state.isoCode}>
+                    {state.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        {/* City Dropdown */}
-        <div className='w-1/3 max-xl:w-1/2 max-lg:w-90 max-md:w-full p-2 max-sm:w-4/5'>
-          <label className='labels text-Secondary-50 font-semibold'>City</label>
-          <select
-            className='fields bg-white text-xs text-Secondary-50 p-2 rounded-xl border border-gray-300 w-full'
-            value={selectedCity}
-            onChange={(e) => setSelectedCity(e.target.value)}
-            disabled={!selectedState}
-          >
-            <option value="">Select City</option>
-            {cities.map((city, idx) => (
-              <option key={idx} value={city.name}>
-                {city.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Location Button */}
-        <div className='flex w-full justify-center items-center -mt-5 p-5'>
-          <div className='flex flex-col gap-2 w-66 max-xl:w-1/2 max-lg:w-90 max-md:w-4/5'>
-            <label className='labels text-Secondary-50 font-semibold'>Location</label>
-            <input
-              type='text'
-              value={location}
-              placeholder='Get Location'
-              className='fields text-Secondary-50 text-xs bg-white p-2 outline-none rounded-xl'
-              {...formik.getFieldProps('location')}
-            />
+            {/* City */}
+            <div className="w-1/3 max-xl:w-1/2 max-lg:w-90 max-md:w-full p-2 max-sm:w-4/5">
+              <label className="labels text-Secondary-50 font-semibold">City</label>
+              <select
+                className="fields bg-white text-xs text-Secondary-50 p-2 rounded-xl border border-gray-300 w-full"
+                value={selectedCity}
+                onChange={(e) => {
+                  setSelectedCity(e.target.value);
+                  formik.setFieldValue('city', e.target.value);
+                  formik.setFieldValue('state', selectedState);
+                }}
+                disabled={!selectedState}
+              >
+                <option value="">Select City</option>
+                {cities.map((city, idx) => (
+                  <option key={idx} value={city.name}>{city.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
-          <button
-            onClick={getLocation}
-            className='ml-3 w-20 h-10 mt-6 bg-hf-50 hover:bg-selected-50 text-white rounded-xl transition'
-          >
-            {loading ? 'Locating...' : 'Get'}
-          </button>
-        </div>
+        )}
 
-        {/* Error Message */}
+        {/* Location */}
+        {currentSection === "pharmacy" && (
+          <div className='flex w-full justify-center items-center -mt-5 p-5'>
+            <div className='flex flex-col gap-2 w-66 max-xl:w-1/2 max-lg:w-90 max-md:w-4/5'>
+              <label className='labels text-Secondary-50 font-semibold'>Location</label>
+              <input
+                type='text'
+                value={location}
+                placeholder='Get Location'
+                className='fields text-Secondary-50 text-xs bg-white p-2 outline-none rounded-xl'
+                {...formik.getFieldProps('location')}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={getLocation}
+              className='ml-3 w-20 h-10 mt-6 bg-hf-50 hover:bg-selected-50 text-white rounded-xl transition'
+            >
+              {loading ? 'Locating...' : 'Get'}
+            </button>
+          </div>
+        )}
+
+        {/* Error */}
         {error && <span className='text-sm text-warning-50 mt-2'>{error}</span>}
 
-        {/* Submit Button */}
+        {/* Final Button */}
         <div className='flex justify-center items-center mt-10'>
-          <button
-            type='submit'
-            onClick={formik.handleSubmit}
-            className='bg-bg-50 labels hover:bg-selected-50 rounded-xl px-6 py-2 transition'
-          >
-            <span className='text-white font-semibold hover:text-white'>{formik.isSubmitting ? 'Submitting...' : 'Register'}</span>
-          </button>
+          {currentSection === 'personal' ? (
+            <button
+              type="button"
+              onClick={handleNext}
+              className='bg-bg-50 labels hover:bg-selected-50 rounded-xl px-6 py-2 transition'
+            >
+              <span className='text-white font-semibold hover:text-white'>Next</span>
+            </button>
+          ) : (
+            <button
+              type="submit"
+              className='bg-bg-50 labels hover:bg-selected-50 rounded-xl px-6 py-2 transition'
+            >
+              <span className='text-white font-semibold hover:text-white'>Register</span>
+            </button>
+          )}
         </div>
-      </div>
+      </form>
     </div>
   );
 };
