@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Card, { CardContent } from "../components/Card";
-import { initialData } from "../constants";
+import { getProduct, addProduct } from "../api/productsApi";
 
 const ITEM_PER_PAGE = 10;
 
 const AllProduct = () => {
-  const [products, setProducts] = useState(initialData);
+  const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -15,22 +15,39 @@ const AllProduct = () => {
 
   const [newProduct, setNewProduct] = useState({
     brandName: "",
-    genericName: "",
-    strength: "",
-    dosageForm: "",
     manufacturer: "",
     barcode: "",
   });
 
+  // Fetch products on mount
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        const response = await getProduct();
+        // Assuming response.data holds the product array
+        setProducts(Array.isArray(response.data) ? response.data : []);
+      } catch (error) {
+        setErrorMsg("Failed to load products");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Filter products based on search term
   const filteredProducts = products.filter((product) => {
     const term = searchTerm.toLowerCase();
     return (
-      product.brandName.toLowerCase().includes(term) ||
-      product.genericName.toLowerCase().includes(term) ||
-      product.barcode.includes(term)
+      (product.brandName && product.brandName.toLowerCase().includes(term)) ||
+      (product.genericName && product.genericName.toLowerCase().includes(term)) ||
+      (product.barcode && product.barcode.includes(term))
     );
   });
 
+  // Pagination logic
   const totalPages = Math.ceil(filteredProducts.length / ITEM_PER_PAGE);
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * ITEM_PER_PAGE,
@@ -39,10 +56,10 @@ const AllProduct = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setNewProduct({ ...newProduct, [name]: value });
+    setNewProduct((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddProduct = () => {
+  const handleAddProduct = async () => {
     // Prevent adding if duplicate
     const exists = products.find(
       (p) => p.brandName.toLowerCase() === newProduct.brandName.toLowerCase()
@@ -52,17 +69,35 @@ const AllProduct = () => {
       return;
     }
 
-    setProducts([newProduct, ...products]);
-    setShowModal(false);
-    resetForm();
+    try {
+      setIsLoading(true);
+      const addedProduct = await addProduct(newProduct);
+
+      // Log the returned product to ensure structure
+      console.log("Added product response:", addedProduct);
+
+      // If your API wraps the product in data or something else adjust accordingly
+      const productToAdd = addedProduct.data || addedProduct;
+
+      if (!productToAdd || !productToAdd.brandName) {
+        setErrorMsg("Invalid product data returned from server");
+        return;
+      }
+
+      setProducts((prev) => [productToAdd, ...prev]);
+      setShowModal(false);
+      resetForm();
+    } catch (error) {
+      setErrorMsg("Failed to add product");
+      console.error("Add product error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const resetForm = () => {
+  const resetForm = (keepError = false) => {
     setNewProduct({
       brandName: "",
-      genericName: "",
-      strength: "",
-      dosageForm: "",
       manufacturer: "",
       barcode: "",
     });
@@ -74,30 +109,22 @@ const AllProduct = () => {
     }
   };
 
-  const handleBrandBlur = async () => {
+  const handleBrandBlur = () => {
     if (!newProduct.brandName.trim()) return;
 
     setIsLoading(true);
     setIsLocked(true);
     setErrorMsg("");
 
-    const response = await new Promise((resolve) =>
-      setTimeout(() => {
-        const found = products.find(
-          (p) =>
-            p.brandName.toLowerCase() ===
-            newProduct.brandName.trim().toLowerCase()
-        );
-        resolve(found);
-      }, 1500)
+    const found = products.find(
+      (p) =>
+        p.brandName.toLowerCase() === newProduct.brandName.trim().toLowerCase()
     );
 
-    if (response) {
-      // Product already exists
+    if (found) {
       setErrorMsg("Product already exists!");
       resetForm(true);
     } else {
-      // No duplicate found
       setIsLocked(false);
     }
 
@@ -120,7 +147,7 @@ const AllProduct = () => {
         </button>
       </div>
 
-      {/* 🔍 Search Bar */}
+      {/* Search Bar */}
       <div className="mb-4 bg-[#acc5b0ff]  rounded-full">
         <input
           type="text"
@@ -137,27 +164,28 @@ const AllProduct = () => {
           <div className="overflow-y-auto mt-2">
             <table className="w-full">
               <thead className="text-sm text-left uppercase text-white bg-[#4F7942]">
-                <tr className="row-span-3">
+                <tr>
                   <th className="px-4 py-2">Brand Name</th>
                   <th className="px-4 py-2">Generic Name</th>
-                  <th className="px-4 py-2">Strength</th>
-                  <th className="px-4 py-2">Dosage Form</th>
                   <th className="px-4 py-2">Manufacturer</th>
                   <th className="px-4 py-2">Barcode</th>
                 </tr>
-                <tr className=" col-span-6  h-3">
-
-                </tr>
               </thead>
               <tbody className="text-left">
-                {paginatedProducts.map((product, idx) => (
-                  <tr key={idx} className="border-b">
-                    <td className="px-4 py-2 text-xs font-medium">{product.brandName}</td>
-                    <td className="px-4 py-2 text-xs font-medium">{product.genericName}</td>
-                    <td className="px-4 py-2 text-xs font-medium">{product.strength}</td>
-                    <td className="px-4 py-2 text-xs font-medium">{product.dosageForm}</td>
-                    <td className="px-4 py-2 text-xs font-medium">{product.manufacturer}</td>
-                    <td className="px-4 py-2 text-xs font-medium">{product.barcode}</td>
+                {paginatedProducts.map((product) => (
+                  <tr key={product.id || product.barcode || product.brandName}>
+                    <td className="px-4 py-2 text-xs font-medium">
+                      {product.brandName}
+                    </td>
+                    <td className="px-4 py-2 text-xs font-medium">
+                      {product.genericName}
+                    </td>
+                    <td className="px-4 py-2 text-xs font-medium">
+                      {product.manufacturer}
+                    </td>
+                    <td className="px-4 py-2 text-xs font-medium">
+                      {product.barcode}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -178,7 +206,9 @@ const AllProduct = () => {
             </span>
             <button
               className="px-4 py-1 bg-[#4F7942] text-white rounded disabled:opacity-50"
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
               disabled={currentPage === totalPages}
             >
               Next
@@ -191,9 +221,11 @@ const AllProduct = () => {
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-10">
           <div className="bg-db-50 p-6 rounded-md w-full max-w-lg">
-            <h2 className="text-xl text-primary-50 font-semibold mb-4">Add New Product</h2>
-            
-            {/* ❗ Error Message */}
+            <h2 className="text-xl text-primary-50 font-semibold mb-4">
+              Add New Product
+            </h2>
+
+            {/* Error Message */}
             {errorMsg && (
               <p className="text-warning-50 text-sm mb-2">{errorMsg}</p>
             )}
@@ -212,10 +244,14 @@ const AllProduct = () => {
                     className="border text-xs border-gray-300 font-semibold text-primary-50 px-3 py-2 rounded w-full"
                   />
                   {isLocked && field !== "brandName" && (
-                    <span className="absolute right-2 top-1 text-sm text-gray-400">🔒</span>
+                    <span className="absolute right-2 top-1 text-sm text-gray-400">
+                      🔒
+                    </span>
                   )}
                   {isLoading && field === "brandName" && (
-                    <span className="absolute right-2 top-1 text-xs text-gray-400 animate-spin">⏳</span>
+                    <span className="absolute right-2 top-1 text-xs text-gray-400 animate-spin">
+                      ⏳
+                    </span>
                   )}
                 </div>
               ))}
@@ -232,6 +268,7 @@ const AllProduct = () => {
               </button>
               <button
                 onClick={handleAddProduct}
+                disabled={isLoading}
                 className="px-4 py-2 bg-[#4F7942] text-white rounded hover:bg-hf-100"
               >
                 Add Product
