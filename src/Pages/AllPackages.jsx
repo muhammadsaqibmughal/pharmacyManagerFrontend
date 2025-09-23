@@ -163,7 +163,7 @@ const AllPackages = () => {
   const renderDropdown = (field, options) => (
     <div className="relative col-span-1">
       <div
-        className="border text-xs border-gray-300 font-semibold text-primary-50 px-3 py-2 rounded w-full cursor-pointer"
+        className="border-1 text-xs border-gray-300 font-semibold text-white/90 px-3 py-2 rounded-full w-full"
         onClick={() => setDropdowns({ ...dropdowns, [field]: !dropdowns[field] })}
       >
         {newProduct[field] || `Select ${field}`}
@@ -203,7 +203,7 @@ const AllPackages = () => {
   const renderMedicineDropdown = () => (
     <div className="relative col-span-1">
       <div
-        className="border text-xs border-gray-300 font-semibold text-primary-50 px-3 py-2 rounded w-full cursor-pointer"
+        className="border-1 text-xs border-gray-300 font-semibold text-white/90 px-3 py-2 rounded-full w-full"
         onClick={() =>
           setDropdowns((prev) => ({ ...prev, medicineId: !prev.medicineId }))
         }
@@ -251,7 +251,7 @@ const AllPackages = () => {
   return (
     <div className="mt-8 p-10">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl text-primary-50 font-bold">All Packages</h2>
+        <h2 className="text-2xl text-white/90 font-bold">All Packages</h2>
         <button
           onClick={() => {
             setShowModal(true);
@@ -267,96 +267,93 @@ const AllPackages = () => {
         <input
           type="text"
           placeholder="Search by medicine or package type..."
-          className="px-4 py-2 w-full font-semibold text-primary-50 outline-none text-sm"
+          className="px-4 py-2 w-full outline-none font-semibold text-primary-50  text-sm"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      <Card>
-        <CardContent>
-          {isLoading ? (
-            <div className="text-center py-4">Loading packages...</div>
-          ) : (
-            <>
-              <div className="overflow-y-auto mt-2 max-h-[400px]">
-                <table className="w-full">
-                  <thead className="text-sm text-left uppercase text-white bg-[#4F7942]">
-                    <tr>
-                      <th className="px-4 py-2">Medicine</th>
-                      <th className="px-4 py-2">Package Type</th>
-                      <th className="px-4 py-2">Units Per Pack</th>
-                      <th className="px-4 py-2">Unit Type</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-left">
-                    {paginatedProducts.map((product) => (
-                      <tr
-                        key={`${product.medicineId}-${product.packageType}-${product.unitsPerPack}`}
-                        className="border-b"
-                      >
-                        <td className="px-4 py-2 text-xs font-medium">
-                          {getMedicineBrandName(product.medicineId)}
-                        </td>
-                        <td className="px-4 py-2 text-xs font-medium">
-                          {product.packageType}
-                        </td>
-                        <td className="px-4 py-2 text-xs font-medium">
-                          {product.unitsPerPack}
-                        </td>
-                        <td className="px-4 py-2 text-xs font-medium">
-                          {product.unitType}
-                        </td>
-                      </tr>
-                    ))}
-                    {paginatedProducts.length === 0 && (
-                      <tr>
-                        <td
-                          colSpan={4}
-                          className="text-center text-xs py-4 text-gray-400"
-                        >
-                          No packages found.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+      {isLoading ? (
+        <div className="text-center py-4">Loading packages...</div>
+      ) : (
+        <>
+      <div className="overflow-y-auto mt-2 rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
+        <table className="w-full table-auto text-white">
+          <thead className="text-sm text-left uppercase bg-bg-50 text-white/80">
+            <tr>
+              <th className="px-4 py-3  border-b border-white/10">Medicine</th>
+              <th className="px-4 py-2 border-b border-white/10">Package Type</th>
+              <th className="px-4 py-2 border-b border-white/10">Units Per Pack</th>
+              <th className="px-4 py-2 border-b border-white/10">Unit Type</th>
+            </tr>
+          </thead>
+            <tbody>
+              {paginatedProducts.map((product) => (
+                <tr
+                  key={`${product.medicineId}-${product.packageType}-${product.unitsPerPack}`}
+                >
+                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
+                    {getMedicineBrandName(product.medicineId)}
+                  </td>
+                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
+                    {product.packageType}
+                  </td>
+                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
+                    {product.unitsPerPack}
+                  </td>
+                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
+                    {product.unitType}
+                  </td>
+                </tr>
+              ))}
+              {paginatedProducts.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={4}
+                    className="text-center text-xs py-4 text-gray-400"
+                  >
+                    No packages found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+        </table>
+        {/* Pagination */}
+        <div className="flex justify-between items-center px-4 py-3 bg-white/10 border-t border-white/10">
+          <button
+            className="px-4 py-1 bg-[#4F7942] text-white rounded-full disabled:opacity-50"
+            onClick={() =>
+              setCurrentPage((prev) => Math.max(prev - 1, 1))
+            }
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+          <span className="text-sm text-gray-400">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className="px-4 py-1 bg-[#4F7942] text-white rounded-full disabled:opacity-50"
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      </div>
 
-              {/* Pagination */}
-              <div className="flex justify-between mt-4">
-                <button
-                  className="px-4 py-1 bg-[#4F7942] text-white rounded disabled:opacity-50"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
-                  disabled={currentPage === 1}
-                >
-                  Previous
-                </button>
-                <span className="text-sm text-gray-400">
-                  Page {currentPage} of {totalPages}
-                </span>
-                <button
-                  className="px-4 py-1 bg-[#4F7942] text-white rounded disabled:opacity-50"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                  }
-                  disabled={currentPage === totalPages}
-                >
-                  Next
-                </button>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+      </>
+      )}
+        {/* </CardContent>
+      </Card> */}
 
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-10">
-          <div className="bg-db-50 p-6 rounded-md w-full max-w-lg">
-            <h2 className="text-xl text-primary-50 font-semibold mb-4">
+          <div className="rounded-xl p-5 border border-white/20 bg-white/10 backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
+            <h2 className="text-xl text-white/90 font-semibold mb-4">
               Add New Package
             </h2>
 
@@ -375,7 +372,7 @@ const AllPackages = () => {
                 placeholder="Units Per Pack"
                 value={newProduct.unitsPerPack}
                 onChange={handleChange}
-                className="border text-xs border-gray-300 font-semibold text-primary-50 px-3 py-2 rounded w-full"
+                    className="border-1 text-xs border-gray-300 font-semibold text-white/90 px-3 py-2 rounded-full w-full"
               />
               {renderDropdown("packageType", packageTypeOptions)}
               {renderDropdown("unitType", unitTypeOptions)}
@@ -387,7 +384,7 @@ const AllPackages = () => {
                   setShowModal(false);
                   resetForm();
                 }}
-                className="px-4 py-1 border border-primary-50 text-primary-50 rounded hover:bg-gray-100"
+                className="px-4 py-2 rounded-full bg-gray-400 text-white hover:bg-white/80 hover:text-primary-50 "
               >
                 Cancel
               </button>
@@ -395,7 +392,7 @@ const AllPackages = () => {
               <button
                 onClick={handleAddProduct}
                 disabled={isLoading}
-                className="px-4 py-1 bg-primary-50 text-db-50 rounded hover:bg-primary-100 disabled:opacity-50"
+                className="px-4 py-2 bg-bg-50 hover:bg-selected-50 text-white rounded-full hover:bg-hf-100"
               >
                 {isLoading ? "Adding..." : "Add Package"}
               </button>

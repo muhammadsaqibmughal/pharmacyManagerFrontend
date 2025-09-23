@@ -62,7 +62,7 @@ const Supplier = () => {
     <div className="mt-8 p-10">
         {/* *********** TOP ************ */}
         <div className="flex justify-between max-md:flex-col max-md:gap-2 max-md:justify-center items-center mb-4">
-            <h2 className="text-2xl text-primary-50 max-md:text-xl font-bold">Suppliers Data</h2>
+            <h2 className="text-2xl text-white/90 max-md:text-xl font-bold">Suppliers Data</h2>
             <div className="space-x-2  max-md:flex">
             <button
                 onClick={()=> setShowModal(true)}
@@ -86,64 +86,60 @@ const Supplier = () => {
 
 
         {/* ************ Table ************** */}
-        <Card>
-        <CardContent>
-          <div className="overflow-y-auto mt-2">
-            <table className="w-full">
-              <thead className="text-sm text-left uppercase text-white bg-[#4F7942]">
+      <div className="overflow-y-auto mt-2 rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
+        <table className="w-full table-auto text-white">
+          <thead className="text-xs text-left uppercase bg-bg-50 text-white/80">
                 <tr className="row-span-3">
-                  <th className="px-4 py-2">Supplier</th>
-                  <th className="px-4 py-2">Name</th>
-                  <th className="px-4 py-2">Email</th>
-                  <th className="px-4 py-2">Phone No</th>
-                  <th className="px-4 py-2">Address</th>
+                  <th className="px-4 py-3 border-b border-white/10">Supplier</th>
+                  <th className="px-4 py-3 border-b border-white/10">Name</th>
+                  <th className="px-4 py-3 border-b border-white/10">Email</th>
+                  <th className="px-4 py-3 border-b border-white/10">Phone No</th>
+                  <th className="px-4 py-3 border-b border-white/10">Address</th>
                 </tr>
                 <tr className=" col-span-6  h-3">
 
                 </tr>
               </thead>
-              <tbody className="text-left">
+              <tbody >
                 {paginatedProducts.map((product, idx) => (
                   <tr key={idx} className="border-b">
-                    <td className="px-4 py-2 text-xs font-medium">{product.supplier}</td>
-                    <td className="px-4 py-2 text-xs font-medium">{product.name}</td>
-                    <td className="px-4 py-2 text-xs font-medium">{product.email}</td>
-                    <td className="px-4 py-2 text-xs font-medium">{product.phone}</td>
-                    <td className="px-4 py-2 text-xs font-medium">{product.address}</td>
+                    <td className="px-4 py-2 text-xs border-b border-white/10">{product.supplier}</td>
+                    <td className="px-4 py-2 text-xs border-b border-white/10">{product.name}</td>
+                    <td className="px-4 py-2 text-xs border-b border-white/10">{product.email}</td>
+                    <td className="px-4 py-2 text-xs border-b border-white/10">{product.phone}</td>
+                    <td className="px-4 py-2 text-xs border-b border-white/10">{product.address}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            {/* Pagination */}
+            <div className="flex justify-between items-center px-4 py-3 bg-white/10 border-t border-white/10">
+              <button
+                className="px-4 py-1 bg-[#4F7942] text-white rounded-full disabled:opacity-50"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </button>
+              <span className="text-sm text-gray-400">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                className="px-4 py-1 bg-[#4F7942] text-white rounded-full disabled:opacity-50"
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
           </div>
 
-          {/* Pagination */}
-          <div className="flex justify-between mt-4">
-            <button
-              className="px-4 py-1 bg-[#4F7942] text-white rounded disabled:opacity-50"
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              Previous
-            </button>
-            <span className="text-sm text-gray-400">
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              className="px-4 py-1 bg-[#4F7942] text-white rounded disabled:opacity-50"
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </button>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-10">
-          <div className="bg-db-50 p-6 rounded-md w-full max-w-lg">
-            <h2 className="text-xl text-primary-50 font-semibold mb-4">Add New Supplier</h2>
+          <div className="rounded-xl p-5 border border-white/20 bg-white/10 backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
+            <h2 className="text-xl text-white/90 font-semibold mb-4">Add New Supplier</h2>
             <div className="grid grid-cols-2 gap-4">
               {Object.keys(newUser).map((field) => (
                 <div className="relative" key={field}>
@@ -153,7 +149,7 @@ const Supplier = () => {
                     placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
                     value={newUser[field]}
                     onChange={handleChange}
-                    className="border text-xs border-gray-300 font-semibold text-primary-50 px-3 py-2 rounded w-full"
+                    className="border-1 text-xs border-gray-300 font-semibold text-white/80 px-3 py-2 rounded-full w-full"
                   />
                 </div>
               ))}
@@ -164,13 +160,13 @@ const Supplier = () => {
                   setShowModal(false);
                   resetForm();
                 }}
-                className="px-4 py-2 bg-gray-400 text-white rounded"
+                className="px-4 py-2 rounded-full bg-gray-400 text-white hover:bg-white/80 hover:text-primary-50 "
               >
                 Cancel
               </button>
               <button
                 onClick={handleAddSupplier}
-                className="px-4 py-2 bg-[#4F7942] text-white rounded hover:bg-hf-100"
+                className="px-4 py-2 bg-bg-50 hover:bg-selected-50 text-white rounded-full hover:bg-hf-100"
               >
                 Add Product
               </button>

@@ -52,15 +52,15 @@ const PurchaseReturnDetail = () => {
       </div>
 
       {/* Supplier Info */}
-      <div className="flex flex-col w-full items-center justify-center text-center space-y-2 text-primary-50">
+      <div className="flex flex-col w-full items-center justify-center text-center space-y-2 text-white/90">
         <h2 className="text-2xl font-bold">{decodedSupplier}</h2>
         <p className="text-sm">{supplierInfo?.address}</p>
-        <h1 className="mt-5 border-2 w-50 text-primary-50 text-2xl">Return Invoice</h1>
+        <h1 className="mt-5 border-2 w-50  text-2xl">Return Invoice</h1>
       </div>
 
       {/* Contact Info */}
       <div className="flex justify-between mt-5 px-5">
-        <div className="text-xs space-y-2 text-primary-50">
+        <div className="text-xs space-y-2 text-white/90">
           <p><b>Email:</b> {supplierInfo?.email}</p>
           <p><b>Phone:</b> {supplierInfo?.phone}</p>
           <p><b>Address:</b> {supplierInfo?.address}</p>
@@ -68,7 +68,7 @@ const PurchaseReturnDetail = () => {
         </div>
 
         {supplierPurchases.length > 0 && (
-          <div className="text-xs space-y-2 text-primary-50">
+          <div className="text-xs space-y-2 text-white/90">
             <p><b>Invoice No:</b> {supplierPurchases[0].invoiceNo}</p>
             <p><b>Date:</b> {new Date(supplierPurchases[0].purchaseDate).toLocaleDateString()}</p>
             <p><b>SalesMan:</b> {supplierInfo?.name}</p>
@@ -86,52 +86,52 @@ const PurchaseReturnDetail = () => {
       />
 
       {/* Table */}
-      <div className="mt-2">
-        <Card>
-          <CardContent>
+      <div className="overflow-y-auto mt-2 rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
+        {/* <Card> */}
+          {/* <CardContent> */}
             {filteredItems.length === 0 ? (
               <p className="text-gray-500">No return records found for this supplier.</p>
             ) : (
               <>
-                <table className="w-full mt-4 text-xs">
-                  <thead className="bg-[#4F7942] text-white text-xs text-left uppercase">
+                <table className="w-full table-auto text-white">
+                 <thead className="text-[10px] text-left uppercase bg-bg-50 text-white/80">
                     <tr>
-                      <th className="px-2 py-2">Product Name</th>
-                      <th className="px-2 py-2">Product Type</th>
-                      <th className="px-2 py-2">Returned Qty</th>
-                      <th className="px-2 py-2">Cost Price</th>
-                      <th className="px-2 py-2">Batch No</th>
-                      <th className="px-2 py-2">Expiry</th>
-                      <th className="px-2 py-2">Discount</th>
-                      <th className="px-2 py-2">Total</th>
+                      <th className="px-4 py-3  border-b border-white/10">Product Name</th>
+                      <th className="px-2 py-1 border-b border-white/10">Product Type</th>
+                      <th className="px-2 py-1 border-b border-white/10">returned Qty</th>
+                      <th className="px-2 py-1 border-b border-white/10">Cost Price</th>
+                      <th className="px-2 py-1 border-b border-white/10">Batch No</th>
+                      <th className="px-2 py-1 border-b border-white/10">Expiry</th>
+                      <th className="px-2 py-1 border-b border-white/10">Discount</th>
+                      <th className="px-2 py-1 border-b border-white/10">Total</th>
                     </tr>
                   </thead>
-                  <tbody>
+                   <tbody className="text-[10px] ">
                     {paginatedProducts.map((item, idx) => (
                       <tr key={idx} className="border-b">
-                        <td className="px-2 py-1 text-[11px]">{item.productName}</td>
-                        <td className="px-2 py-1 text-xs">{item.productType}</td>
-                        <td className="px-2 py-1 text-[11px] text-red-600 font-bold">{item.quantity}</td>
-                        <td className="px-2 py-1">{item.costPrice}</td>
-                        <td className="px-2 py-1 text-[11px]">{item.batchNo}</td>
-                        <td className="px-2 py-1 text-[11px]">
+                    <td className="px-4 py-2   border-b border-white/10">{item.productName}</td>
+                        <td className="px-4 py-2   border-b border-white/10">{item.productType}</td>
+                        <td className="px-4 py-2 text-warning-50 font-extrabold  border-b border-white/10">{item.quantity}</td>
+                        <td className="px-4 py-2   border-b border-white/10">{item.costPrice}</td>
+                        <td className="px-4 py-2   border-b border-white/10">{item.batchNo}</td>
+                        <td className="px-4 py-2   border-b border-white/10">
                           {new Date(item.expiryDate).toLocaleDateString()}
                         </td>
-                        <td className="px-2 py-1 text-[11px]">{item.discount}</td>
-                        <td className="px-2 py-1 text-[11px]">{item.lineTotal}</td>
+                        <td className="px-4 py-2   border-b border-white/10">{item.discount}</td>
+                        <td className="px-4 py-2   border-b border-white/10">{item.lineTotal}</td>
                       </tr>
                     ))}
-                    <tr className="bg-[#e5f0e3] font-semibold">
-                      <td colSpan={7} className="px-2 py-2 text-right">Total</td>
-                      <td className="px-2 py-2">{totalLineSum.toFixed(2)}</td>
+                    <tr className="font-semibold">
+                      <td colSpan={7} className="px-4 py-2   border-b border-white/10">Total</td>
+                      <td className="px-4 py-2   border-b border-white/10">{totalLineSum.toFixed(2)}</td>
                     </tr>
                   </tbody>
                 </table>
 
                 {/* Pagination Controls */}
-                <div className="flex justify-between mt-4">
+             <div className="flex justify-between items-center px-4 py-3 bg-white/10 border-t border-white/10">
                   <button
-                    className="px-4 py-1 bg-[#4F7942] text-white rounded disabled:opacity-50"
+            className="px-4 py-1 bg-[#4F7942] text-white rounded-full disabled:opacity-50"
                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
                   >
@@ -141,7 +141,7 @@ const PurchaseReturnDetail = () => {
                     Page {currentPage} of {totalPages}
                   </span>
                   <button
-                    className="px-4 py-1 bg-[#4F7942] text-white rounded disabled:opacity-50"
+            className="px-4 py-1 bg-[#4F7942] text-white rounded-full disabled:opacity-50"
                     onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
                   >
@@ -150,8 +150,8 @@ const PurchaseReturnDetail = () => {
                 </div>
               </>
             )}
-          </CardContent>
-        </Card>
+          {/* </CardContent> */}
+        {/* </Card> */}
       </div>
     </div>
   );

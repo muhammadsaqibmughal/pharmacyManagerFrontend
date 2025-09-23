@@ -46,7 +46,7 @@ const Dashboard = () => {
 
 
   return (
-    <div className="p-6 w-full overflow-hidden text-primary-50 bg-db-50 min-h-screen">
+    <div className="p-6 w-full overflow-hidden text-primary-50 min-h-screen">
       <h1 className="text-2xl text-primary-50 font-semibold mb-6">Pharmacy Dashboard</h1>
 
       {/* Key Metrics */}

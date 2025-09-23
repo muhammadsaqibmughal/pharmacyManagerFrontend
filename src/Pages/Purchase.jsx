@@ -66,7 +66,7 @@ const Purchase = () => {
     <div className="mt-8 p-10">
         {/* *********** TOP ************ */}
         <div className="flex justify-between max-md:flex-col max-md:gap-2 max-md:justify-center items-center mb-4">
-            <h2 className="text-2xl text-primary-50 max-md:text-xl font-bold">Purchase Data</h2>
+            <h2 className="text-2xl text-white/90 max-md:text-xl font-bold">Purchase Data</h2>
             <div className="space-x-2  max-md:flex">
             <button
                 onClick={()=> setShowModal(true)}
@@ -90,83 +90,81 @@ const Purchase = () => {
 
 
         {/* ************ Table ************** */}
-        <Card>
-        <CardContent>
-          <div className="overflow-y-auto mt-2">
-            <table className="w-full">
-              <thead className="text-sm text-left uppercase text-white bg-[#4F7942]">
-                <tr className="row-span-3">
-                  <th className="px-4 py-2">Supplier</th>
-                  <th className="px-4 py-2">Invoice No</th>
-                  <th className="px-4 py-2">Purchase Date</th>
-                  <th className="px-4 py-2">Total Amount</th>
-                  <th className="px-4 py-2">Discount</th>
-                  <th className="px-4 py-2">Tax</th>
-                </tr>
-                <tr className=" col-span-6  h-3">
 
-                </tr>
-              </thead>
-              <tbody className="text-left">
-                {paginatedProducts.map((product, idx) => (
-                  <tr key={idx} className="border-b">
-                    <td>
-                      <Link
-                          to={`/pos/purchase/supplier/${encodeURIComponent(product.supplier)}`}
-                          className="text-blue-500 px-4 py-2 text-xs font-medium hover:underline hover:text-blue-700 transition-colors duration-200"
-                        >
-                          {product.supplier}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-2 text-xs font-medium">{product.invoiceNo}</td>
-                    <td className="px-4 py-2 text-xs font-medium">{new Date(product.purchaseDate).toLocaleDateString()}</td>
-                    <td className="px-4 py-2 text-xs font-medium">{product.totalAmount}</td>
-                    <td className="px-4 py-2 text-xs font-medium">{product.discount}</td>
-                    <td className="px-4 py-2 text-xs font-medium">{product.tax}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      <div className="overflow-y-auto mt-2 rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
+        <table className="w-full table-auto text-white">
+          <thead className="text-xs text-left uppercase bg-bg-50 text-white/80">
+            <tr>
+              <th className="px-4 py-2 border-b border-white/10">Supplier</th>
+              <th className="px-4 py-2 border-b border-white/10">Invoice No</th>
+              <th className="px-4 py-2 border-b border-white/10">Purchase Date</th>
+              <th className="px-4 py-2 border-b border-white/10">Total Amount</th>
+              <th className="px-4 py-2 border-b border-white/10">Discount</th>
+              <th className="px-4 py-2 border-b border-white/10">Tax</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedProducts.map((product, idx) => (
+              <tr key={idx} className="hover:bg-white/10 transition-all duration-200">
+                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
+                  <Link
+                    to={`/pos/purchase/supplier/${encodeURIComponent(product.supplier)}`}
+                    className="text-blue-300 hover:text-blue-500 hover:underline"
+                  >
+                    {product.supplier}
+                  </Link>
+                </td>
+                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">{product.invoiceNo}</td>
+                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
+                  {new Date(product.purchaseDate).toLocaleDateString()}
+                </td>
+                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">{product.totalAmount}</td>
+                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">{product.discount}</td>
+                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">{product.tax}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-          {/* Pagination */}
-          <div className="flex justify-between mt-4">
-            <button
-              className="px-4 py-1 bg-[#4F7942] text-white rounded disabled:opacity-50"
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              Previous
-            </button>
-            <span className="text-sm text-gray-400">
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              className="px-4 py-1 bg-[#4F7942] text-white rounded disabled:opacity-50"
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </button>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Pagination */}
+        <div className="flex justify-between items-center px-4 py-3 bg-white/10 border-t border-white/10">
+          <button
+            className="px-4 py-1 bg-[#4F7942] text-white rounded-full disabled:opacity-50"
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+          <span className="text-sm text-gray-300">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className="px-4 py-1 bg-[#4F7942] text-white rounded-full disabled:opacity-50"
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      </div>
+
+
 
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-10">
-          <div className="bg-db-50 p-6 rounded-md w-full max-w-lg">
-            <h2 className="text-xl text-primary-50 font-semibold mb-4">Add New Purchase</h2>
+          <div className="rounded-xl p-6 w-full max-w-lg border border-white/20 bg-white/10 backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
+            <h2 className="text-xl text-white/90 font-semibold mb-4">Add New Purchase</h2>
             <div className="grid grid-cols-2 gap-4">
               {Object.keys(newPurchase).map((field) => (
                 <div className="relative" key={field}>
                   <input
-                    type="text"
+                    type={field.includes("Date") ? "date" : "text"}
                     name={field}
                     placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
                     value={newPurchase[field]}
                     onChange={handleChange}
-                    className="border text-xs border-gray-300 font-semibold text-primary-50 px-3 py-2 rounded w-full"
+                    className="border-1 text-xs border-gray-300 font-semibold text-white/90 px-3 py-2 rounded-full w-full bg-white/5 backdrop-blur-sm"
                   />
                 </div>
               ))}
@@ -177,13 +175,13 @@ const Purchase = () => {
                   setShowModal(false);
                   resetForm();
                 }}
-                className="px-4 py-2 bg-gray-400 text-white rounded"
+                className="px-4 py-2 rounded-full bg-gray-400 text-white hover:bg-white/80 hover:text-primary-50 "
               >
                 Cancel
               </button>
               <button
                 onClick={handleAddPurchase}
-                className="px-4 py-2 bg-[#4F7942] text-white rounded hover:bg-hf-100"
+                className="px-4 py-2 bg-bg-50 hover:bg-selected-50 text-white rounded-full hover:bg-hf-100"
               >
                 Add Purchase
               </button>
