@@ -25,9 +25,9 @@ const AllProduct = () => {
       try {
         setIsLoading(true);
         const response = await getProduct();
-        // Assuming response.data holds the product array
         setProducts(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
+        console.log(error)
         setErrorMsg("Failed to load products");
       } finally {
         setIsLoading(false);
@@ -37,7 +37,7 @@ const AllProduct = () => {
     fetchProducts();
   }, []);
 
-  // Filter products based on search term
+
   const filteredProducts = products.filter((product) => {
     const term = searchTerm.toLowerCase();
     return (
@@ -60,7 +60,6 @@ const AllProduct = () => {
   };
 
   const handleAddProduct = async () => {
-    // Prevent adding if duplicate
     const exists = products.find(
       (p) => p.brandName.toLowerCase() === newProduct.brandName.toLowerCase()
     );
@@ -73,10 +72,7 @@ const AllProduct = () => {
       setIsLoading(true);
       const addedProduct = await addProduct(newProduct);
 
-      // Log the returned product to ensure structure
       console.log("Added product response:", addedProduct);
-
-      // If your API wraps the product in data or something else adjust accordingly
       const productToAdd = addedProduct.data || addedProduct;
 
       if (!productToAdd || !productToAdd.brandName) {
