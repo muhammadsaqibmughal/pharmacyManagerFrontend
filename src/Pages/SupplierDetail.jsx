@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { users, purchaseDataa, purchases } from "../constants";
 import Card, { CardContent } from "../components/Card";
 
@@ -15,6 +15,7 @@ const SupplierDetail = () => {
   );
 
   const [purchaseData, setPurchaseData] = useState(purchases);
+  const [returnQuantities, setReturnQuantities] = useState({});
   const [newPurchase, setNewPurchase] = useState({
     productName: "",
     productType: "",
@@ -37,21 +38,19 @@ const SupplierDetail = () => {
   const [disabledFields, setDisabledFields] = useState(true);
   const [isNewProduct, setIsNewProduct] = useState(false);
 
+  // Filtered, Paginated Products
   const filteredItems = purchaseData.filter((product) => {
     const term = searchTerm.toLowerCase();
     return product.productName.toLowerCase().includes(term);
   });
-
-  const totalLineSum = filteredItems.reduce((acc, item) => {
-    const total = parseFloat(item.lineTotal) || 0;
-    return acc + total;
-  }, 0);
 
   const totalPages = Math.ceil(filteredItems.length / ITEM_PER_PAGE);
   const paginatedProducts = filteredItems.slice(
     (currentPage - 1) * ITEM_PER_PAGE,
     currentPage * ITEM_PER_PAGE
   );
+
+  const totalLineSum = filteredItems.reduce((acc, item) => acc + (parseFloat(item.lineTotal) || 0), 0);
 
   const handleAddPurchase = () => {
     setPurchaseData([newPurchase, ...purchaseData]);
@@ -67,17 +66,15 @@ const SupplierDetail = () => {
   const handleProductNameBlur = () => {
     setIsLoading(true);
     setDisabledFields(true);
-
     setTimeout(() => {
       const exists = purchaseData.some(
         (item) =>
-          item.productName.toLowerCase() ===
-          newPurchase.productName.toLowerCase()
+          item.productName.toLowerCase() === newPurchase.productName.toLowerCase()
       );
       setIsNewProduct(!exists);
       setDisabledFields(false);
       setIsLoading(false);
-    }, 1000); // Simulated loading
+    }, 1000);
   };
 
   const resetForm = () => {
@@ -100,127 +97,131 @@ const SupplierDetail = () => {
     setDisabledFields(true);
   };
 
+  const handleReturnQuantityChange = (index, value) => {
+    setReturnQuantities({ ...returnQuantities, [index]: value });
+  };
+
+  const handleReturn = (product) => {
+    const quantityToReturn = returnQuantities[product.productName];
+    if (!quantityToReturn || isNaN(quantityToReturn)) {
+      alert("Enter a valid return quantity.");
+      return;
+    }
+
+    const returnData = JSON.parse(localStorage.getItem("purchaseReturns") || "[]");
+
+    const returnedItem = {
+      ...product,
+      quantity: quantityToReturn,
+      originalQuantity: product.quantity,
+      supplier: decodedSupplier,
+    };
+
+    localStorage.setItem("purchaseReturns", JSON.stringify([returnedItem, ...returnData]));
+    alert("Product return recorded.");
+  };
+
   return (
     <div className="p-10">
       {/* Header */}
       <div className="flex justify-between gap-2 items-center mb-2">
         <div className="rounded-full px-4 py-2 bg-[#4F7942]">
-          <Link
-            to="/pos/purchase/purchase"
-            className="text-sm text-white hover:bg-hf-100"
-          >
-            ← Back
-          </Link>
+          <Link to="/pos/purchase/purchase" className="text-sm text-white">← Back</Link>
         </div>
-
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-[#4F7942] text-white max-md:text-sm px-4 py-1 h-10 rounded-full hover:bg-hf-100"
-        >
-          Add New Purchase
-        </button>
+        <button onClick={() => setShowModal(true)} className="bg-[#4F7942] text-white px-4 py-1 rounded-full">Add New Purchase</button>
       </div>
 
       {/* Supplier Info */}
-      <div className="flex justify-center items-center w-full text-primary-50 font-semibold">
-        <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold">{decodedSupplier}</h2>
-          <p className="text-sm">{supplierInfo?.address}</p>
-          <h1 className="mt-5 border-2 text-2xl">Invoice</h1>
-        </div>
+      <div className="flex flex-col w-full items-center justify-center text-center space-y-2 text-primary-50">
+        <h2 className="text-2xl font-bold">{decodedSupplier}</h2>
+        <p className="text-sm">{supplierInfo?.address}</p>
+        <h1 className="mt-5 border-2 w-50 font-bold text-primary-50 text-2xl">Invoice</h1>
       </div>
 
-      {/* Supplier Contact Info & Purchase Meta */}
-      <div className="flex items-start justify-between mt-5 px-5 py-2">
-        <div className="gap-2 space-y-2">
-          <p className="text-primary-50 text-xs font-medium">
-            <span className="font-semibold">Email:</span> {supplierInfo?.email}
-          </p>
-          <p className="text-primary-50 text-xs font-medium">
-            <span className="font-semibold">Phone:</span> {supplierInfo?.phone}
-          </p>
-          <p className="text-primary-50 text-xs font-medium">
-            <span className="font-semibold">Address:</span> {supplierInfo?.address}
-          </p>
-          <p className="text-primary-50 text-xs font-medium">
-            <span className="font-semibold">Drug Lic #:</span>{" "}
-            {supplierInfo?.drug || "N/A"}
-          </p>
+      {/* Contact Info */}
+      <div className="flex justify-between mt-5 px-5">
+        <div className="text-xs space-y-2 text-primary-50">
+          <p><b>Email:</b> {supplierInfo?.email}</p>
+          <p><b>Phone:</b> {supplierInfo?.phone}</p>
+          <p><b>Address:</b> {supplierInfo?.address}</p>
+          <p><b>Drug Lic #:</b> {supplierInfo?.drug || "N/A"}</p>
         </div>
 
         {supplierPurchases.length > 0 && (
-          <div className="gap-2 space-y-2">
-            <p className="text-primary-50 text-xs font-medium">
-              <span className="font-semibold">Invoice No:</span>{" "}
-              {supplierPurchases[0].invoiceNo}
-            </p>
-            <p className="text-primary-50 text-xs font-medium">
-              <span className="font-semibold">Date:</span>{" "}
-              {new Date(supplierPurchases[0].purchaseDate).toLocaleDateString()}
-            </p>
-            <p className="text-primary-50 text-xs font-medium">
-              <span className="font-semibold">SalesMan:</span>  {supplierInfo.name} 
-            </p>
+          <div className="text-xs space-y-2 text-primary-50">
+            <p><b>Invoice No:</b> {supplierPurchases[0].invoiceNo}</p>
+            <p><b>Date:</b> {new Date(supplierPurchases[0].purchaseDate).toLocaleDateString()}</p>
+            <p><b>SalesMan:</b> {supplierInfo?.name}</p>
           </div>
         )}
       </div>
 
       {/* Search Bar */}
-      <div className="mb-4 mt-2 bg-[#acc5b0ff] rounded-full">
-        <input
-          type="text"
-          placeholder="Search by name..."
-          className="px-4 py-2 w-full font-semibold text-primary-50 outline-none text-sm"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
+      <input
+        type="text"
+        placeholder="Search by name..."
+        className="my-4 px-4 py-2 w-full rounded-full bg-[#acc5b0ff] text-primary-50 text-sm"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
 
       {/* Table */}
       <Card>
         <CardContent>
-          <div className="overflow-y-auto overflow-x-auto mt-2">
-            <table className="w-full">
-              <thead className="text-[9px] text-left uppercase text-white bg-[#4F7942]">
+          <div className="overflow-auto">
+            <table className="w-full text-xs">
+              <thead className="text-white text-[11px] text-left bg-[#4F7942]">
                 <tr>
-                  <th className="px-4 py-2">Product Name</th>
-                  <th className="px-4 py-2">Product Type</th>
-                  <th className="px-4 py-2">Quantity</th>
-                  <th className="px-4 py-2">Cost Price</th>
-                  <th className="px-4 py-2">Batch No</th>
-                  <th className="px-4 py-2">Expiry Date</th>
-                  <th className="px-4 py-2">Discount </th>
-                  <th className="px-4 py-2">Discount Payment</th>
-                  <th className="px-4 py-2">Total</th>
+                  <th className="px-2 py-1">Product Name</th>
+                  <th className="px-2 py-1">Product Type</th>
+                  <th className="px-2 py-1">Quantity</th>
+                  <th className="px-2 py-1">Cost Price</th>
+                  <th className="px-2 py-1">Batch No</th>
+                  <th className="px-2 py-1">Expiry</th>
+                  <th className="px-2 py-1">Discount</th>
+                  <th className="px-2 py-1">Disc. Payment</th>
+                  <th className="px-2 py-1">Total</th>
+                  <th className="px-2 py-1">Return Qty</th>
+                  <th className="px-2 py-1">Action</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="text-[10px]">
                 {paginatedProducts.map((product, idx) => (
                   <tr key={idx} className="border-b">
-                    <td className="px-4 py-2 text-xs">{product.productName}</td>
-                    <td className="px-4 py-2 text-xs">{product.productType}</td>
-                    <td className="px-4 py-2 text-xs">{product.quantity}</td>
-                    <td className="px-4 py-2 text-xs">{product.costPrice}</td>
-                    <td className="px-4 py-2 text-xs">{product.batchNo}</td>
-                    <td className="px-4 py-2 text-xs">
-                      {new Date(product.expiryDate).toLocaleDateString()}
+                    <td className="px-2 py-1">{product.productName}</td>
+                    <td className="px-2 py-1">{product.productType}</td>
+                    <td className="px-2 py-1">{product.quantity}</td>
+                    <td className="px-2 py-1">{product.costPrice}</td>
+                    <td className="px-2 py-1">{product.batchNo}</td>
+                    <td className="px-2 py-1">{new Date(product.expiryDate).toLocaleDateString()}</td>
+                    <td className="px-2 py-1">{product.discount}</td>
+                    <td className="px-2 py-1">{product.discountPayment}</td>
+                    <td className="px-2 py-1">{product.lineTotal}</td>
+                    <td className="px-2 py-1">
+                      <input
+                        type="text"
+                        className="px-4 py-2 w-20 font-semibold bg-[#acc5b0ff] text-primary-50 outline-none text-[10px]"
+                        placeholder="quantity.."
+                        value={returnQuantities[product.productName] || ""}
+                        onChange={(e) =>
+                          handleReturnQuantityChange(product.productName, e.target.value)
+                        }
+                      />
                     </td>
-                    <td className="px-4 py-2 text-xs">{product.discount}</td>
-                    <td className="px-4 py-2 text-xs">
-                      {product.discountPayment}
+                    <td className="px-2 py-1">
+                      <button
+                        onClick={() => handleReturn(product)}
+                        className="text-xs px-2 py-1 bg-red-600 text-white rounded"
+                      >
+                        Return
+                      </button>
                     </td>
-                    <td className="px-4 py-2 text-xs">{product.lineTotal}</td>
                   </tr>
                 ))}
-
-                {/* Total Row */}
                 <tr className="bg-[#e5f0e3] font-semibold">
-                  <td colSpan={8} className="px-4 py-2 text-xs">
-                    Total
-                  </td>
-                  <td className="px-4 py-2 text-xs">
-                    {totalLineSum.toFixed(2)}
-                  </td>
+                  <td colSpan={8} className="px-2 py-2">Total</td>
+                  <td className="px-2 py-2">{totalLineSum.toFixed(2)}</td>
+                  <td colSpan={2}></td>
                 </tr>
               </tbody>
             </table>
@@ -240,9 +241,7 @@ const SupplierDetail = () => {
             </span>
             <button
               className="px-4 py-1 bg-[#4F7942] text-white rounded disabled:opacity-50"
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-              }
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
             >
               Next
@@ -251,7 +250,7 @@ const SupplierDetail = () => {
         </CardContent>
       </Card>
 
-      {/* Modal */}
+            {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-10">
           <div className="bg-db-50 p-6 rounded-md w-full max-w-lg">
@@ -332,6 +331,7 @@ const SupplierDetail = () => {
           </div>
         </div>
       )}
+    
     </div>
   );
 };

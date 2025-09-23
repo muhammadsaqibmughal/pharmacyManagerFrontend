@@ -23,7 +23,9 @@ import OtpVerification from "./components/OtpVerification";
 import PendingApproval from "./Pages/PendingApproval";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import RequireLogin from "./utils/RequireLogin";
-
+import PurchaseReturnDetail from "./Pages/PurchaseReturnDetail";
+import Sales from "./Pages/Sales";
+import SalesReturn from "./Pages/SalesReturn";
 const HomeLayout = () => (
   <>
     <Navbar />
@@ -85,13 +87,16 @@ const App = () => {
         >
           {/* Protected POS pages */}
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="/pos/pos" element={<PosPage />} />
           <Route path="products/add" element={<AllProduct />} />
           <Route path="products/package" element={<AllPackages />} />
           <Route path="products/expiryProduct" element={<ExpiryProducts />} />
-          <Route path="products/inventory" element={<Inventry />} />
+          <Route path="products/inventry" element={<Inventry />} />
           <Route path="purchase/supplier" element={<Supplier />} />
           <Route path="purchase/purchase" element={<Purchase />} />
           <Route path="purchase/purchaseReturn" element={<PurchaseReturen />} />
+          <Route path="sales/sales" element={<Sales />} />
+          <Route path="sales/salesReturn" element={<SalesReturn />} />
           <Route path="customers" element={<Customer />} />
           <Route path="reports" element={<Reports />} />
           <Route path="settings" element={<Settings />} />
@@ -99,6 +104,7 @@ const App = () => {
 
           {/* Dynamic route under POS layout  */}
           <Route path="purchase/supplier/:supplierName" element={<SupplierDetail />} />
+          <Route path="purchase-return/supplier/:supplierName" element={<PurchaseReturnDetail />} />
         </Route>
 
       </Routes>

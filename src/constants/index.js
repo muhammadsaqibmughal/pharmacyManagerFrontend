@@ -8,9 +8,17 @@ import {
   FaExchangeAlt,
   FaMapMarkedAlt
 } from 'react-icons/fa';
-import { MdDashboard } from 'react-icons/md';
-import { FiBox, FiUsers, FiBarChart2 } from 'react-icons/fi';
-import { AiOutlineShoppingCart } from 'react-icons/ai';
+// import { MdDashboard } from 'react-icons/md';
+// import { FiBox, FiUsers, FiBarChart2 } from 'react-icons/fi';
+// import { AiOutlineShoppingCart } from 'react-icons/ai';
+import {
+  MdDashboard,
+  MdPointOfSale,
+  MdOutlineTrendingUp,
+} from "react-icons/md";
+import { FaBoxOpen, FaShoppingCart, FaUserFriends } from "react-icons/fa";
+import { AiOutlineBarChart } from "react-icons/ai";
+import { TbReportAnalytics } from "react-icons/tb";
 
 
 export const navLinks = [
@@ -226,7 +234,7 @@ export const pos = [
   {
     name: 'Products',
     // href: '/pos/products',
-    icon: FiBox ,
+    icon: FaBoxOpen ,
     subitems: [  
       { name: "Add Product", href: "/pos/products/add" },
       { name: "Add Package", href: "/pos/products/package" },
@@ -237,19 +245,22 @@ export const pos = [
   {
     name: 'POS',
     href: '/pos/pos',
-    icon: AiOutlineShoppingCart,
+    icon: MdPointOfSale,
   },
     {
     name: 'Sales',
-    href: '/pos/products',
-    icon: FiBox ,
-    subitems: [{ name: "Sales Return", href: "/pos/sales/return" }],
+    // href: '/pos/products',
+    icon: AiOutlineBarChart ,
+    subitems: [  
+      { name: "Sales", href: "/pos/sales/sales" },
+      { name: "Sales Return", href: "/pos/sales/salesReturn" },
+    ],
 
   },
     {
     name: 'Purchase',
     // href: '/pos/products',
-    icon: FiBox ,
+    icon: FaShoppingCart ,
     subitems: [
       { name: "Supplier", href: "/pos/purchase/supplier" },
       { name: "Purchase", href: "/pos/purchase/purchase" },
@@ -260,17 +271,17 @@ export const pos = [
   {
     name: 'Customers',
     href: '/pos/customers',
-    icon: FiUsers,
+    icon: FaUserFriends,
   },
   {
     name: 'Forcasting',
     href: '/pos/customers',
-    icon: FiUsers,
+    icon: MdOutlineTrendingUp,
   },
   {
     name: 'Reports',
     href: '/pos/reports',
-    icon: FiBarChart2,
+    icon: TbReportAnalytics,
   },
 ];
 

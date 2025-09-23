@@ -3,7 +3,7 @@ import * as Yup from "yup";
 import { managerLogin } from "../api/pharmacyApi";
 import { useNavigate } from "react-router-dom";
 
-const useLoginFormik = (setFormError) => {
+ const useLoginFormik = (setFormError, setLoading) => {
   const navigate = useNavigate();
 
   return useFormik({
@@ -16,15 +16,14 @@ const useLoginFormik = (setFormError) => {
       password: Yup.string().required("Password is required"),
     }),
     onSubmit: async (values, { setSubmitting, resetForm }) => {
-      setFormError(""); // Clear previous errors
+      setFormError(""); 
+      setLoading(true);  // Set loading while submitting
 
       try {
         const res = await managerLogin(values);
 
         if (res.status === "success") {
           resetForm();
-
-          // Save user status and info in local storage (NOT token anymore)
           localStorage.setItem(
             "user",
             JSON.stringify({
@@ -36,7 +35,7 @@ const useLoginFormik = (setFormError) => {
             })
           );
 
-          // Conditional redirect based on pharmacy status
+          // Conditional navigation
           if (!res.user.pharmacy?.isRegistered) {
             navigate("/form");
           } else if (!res.user.pharmacy?.isApproved) {
@@ -56,9 +55,10 @@ const useLoginFormik = (setFormError) => {
         }
       } finally {
         setSubmitting(false);
+        setLoading(false); // Done loading
       }
     },
   });
 };
 
-export default useLoginFormik;
+export default useLoginFormik

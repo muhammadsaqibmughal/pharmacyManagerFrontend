@@ -6,6 +6,7 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 const SignUp = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [formErrorLogin, setFormErrorLogin] = useState("");
   const [formErrorRegister, setFormErrorRegister] = useState("");
@@ -13,14 +14,24 @@ const SignUp = () => {
   const [showPasswordRegister, setShowPasswordRegister] = useState(false);
 
   const loginFormik = useLoginFormik(
-    () => navigate("/form"),
-    setFormErrorLogin
+    setFormErrorLogin,
+    setLoading // Pass setLoading here
   );
 
   const registerFormik = useRegisterFormik(
     (email) => navigate(`/verify-email?email=${encodeURIComponent(email)}`),
     setFormErrorRegister
   );
+
+  // ❗ keep hook calls above return
+  if (loading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-db-50">
+        <p className="text-lg text-primary-50">Logging in...</p>
+      </div>
+    );
+  }
+
 
   const handleSwitchToSignUp = () => {
     setIsLogin(false);
@@ -43,7 +54,7 @@ const SignUp = () => {
 
       {/* Right Side */}
       <div className="flex bg-db-50 w-1/2 max-md:w-full justify-center items-center transition-all duration-500">
-        <div className="flex flex-col justify-center mt-[-80px] items-center w-full gap-3 p-10">
+        <div className="flex flex-col justify-center mb-80 items-center w-full gap-3 p-10">
           <h1 className="text-center text-bg-50 text-3xl font-bold">PharmaConnect +</h1>
           <p className="text-Secondary-50 text-xs text-center">
             {isLogin
@@ -199,7 +210,7 @@ const SignUp = () => {
                 <button
                   type="submit"
                   disabled={registerFormik.isSubmitting}
-                  className="w-full mt-7 py-2 bg-bg-50 text-primary-50 rounded-xl hover:bg-black hover:text-white transition"
+                  className="w-full mt-7 py-2 bg-bg-50 text-primary-50 rounded-xl hover:bg-selected-50 hover:text-white transition"
                 >
                   {registerFormik.isSubmitting ? "Signing Up..." : "Sign Up"}
                 </button>

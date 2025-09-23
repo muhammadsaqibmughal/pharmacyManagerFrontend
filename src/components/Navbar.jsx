@@ -45,9 +45,9 @@ const Navbar = () => {
 
         <button
           onClick={handleRegisterClick}
-          className="bg-bg-50 hover:bg-selected-50 rounded-xl p-1.5 transition duration-300"
+          className="border-2 border-selected-50 hover:bg-selected-50 text-white rounded-xl p-1.5 transition duration-300"
         >
-          <span className="text-primary-50 hover:text-white">Register</span>
+          <span className="">Register</span>
         </button>
       </div>
     </div>
