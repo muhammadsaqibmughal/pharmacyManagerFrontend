@@ -46,7 +46,7 @@ const PurchaseReturnDetail = () => {
     <div className="p-10">
       {/* Back Button */}
       <div className="rounded-full inline px-4 py-2 bg-[#4F7942]">
-        <Link to="/pos/purchase/purchaseReturn" className="text-sm text-white">
+        <Link to="/pos/purchase/purchaseReturn" className="text-sm text-primary-50">
           ← Back
         </Link>
       </div>
@@ -109,16 +109,16 @@ const PurchaseReturnDetail = () => {
                    <tbody className="text-[10px] ">
                     {paginatedProducts.map((item, idx) => (
                       <tr key={idx} className="border-b">
-                    <td className="px-4 py-2   border-b border-white/10">{item.productName}</td>
-                        <td className="px-4 py-2   border-b border-white/10">{item.productType}</td>
-                        <td className="px-4 py-2 text-warning-50 font-extrabold  border-b border-white/10">{item.quantity}</td>
-                        <td className="px-4 py-2   border-b border-white/10">{item.costPrice}</td>
-                        <td className="px-4 py-2   border-b border-white/10">{item.batchNo}</td>
-                        <td className="px-4 py-2   border-b border-white/10">
+                    <td className="px-4 py-2   border-b border-primary-50">{item.productName}</td>
+                        <td className="px-4 py-2   border-b border-primary-50">{item.productType}</td>
+                        <td className="px-4 py-2 text-warning-50 font-extrabold  border-b border-primary-50">{item.quantity}</td>
+                        <td className="px-4 py-2   border-b border-primary-50">{item.costPrice}</td>
+                        <td className="px-4 py-2   border-b border-primary-50">{item.batchNo}</td>
+                        <td className="px-4 py-2   border-b border-primary-50">
                           {new Date(item.expiryDate).toLocaleDateString()}
                         </td>
-                        <td className="px-4 py-2   border-b border-white/10">{item.discount}</td>
-                        <td className="px-4 py-2   border-b border-white/10">{item.lineTotal}</td>
+                        <td className="px-4 py-2   border-b border-primary-50">{item.discount}</td>
+                        <td className="px-4 py-2   border-b border-primary-50">{item.lineTotal}</td>
                       </tr>
                     ))}
                     <tr className="font-semibold">

@@ -2,8 +2,8 @@
 @import "tailwindcss";
 
 html, body {
-  background: #1c1c21;
-  color: aliceblue;
+  background: aliceblue;
+  color: #1c1c21;
   overflow: auto;
   scroll-behavior: smooth;
   height: 100dvh;

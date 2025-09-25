@@ -51,67 +51,63 @@ const FormLayout = () => (
 
 const App = () => {
   return (
-    // <>
-    //   <Routes>
-    //     {/* Public Routes */}
-    //     <Route path="/" element={<HomeLayout />} />
-    //     <Route path="/signup" element={<SignUpLayout />} />
-    //     <Route path="/verify-email" element={<OtpVerification />} />
-
-    //     {/* Protected Routes: Only logged-in users can access */}
-    //     <Route
-    //       path="/form"
-    //       element={
-    //         <RequireLogin>
-    //           <FormLayout />
-    //         </RequireLogin>
-    //       }
-    //     />
-    //     <Route
-    //       path="/pending-approval"
-    //       element={
-    //         <RequireLogin>
-    //           <PendingApproval />
-    //         </RequireLogin>
-    //       }
-    //     />
-
-    //     {/* Protected Route: Only logged-in users with approved pharmacy can access */}
-    //     <Route
-    //       path="/pos"
-    //       element={
-    //         <ProtectedRoute>
-    //           <Pos />
-    //         </ProtectedRoute>
-    //       }
-    //     >
-    //       {/* Protected POS pages */}
-    //       <Route path="dashboard" element={<Dashboard />} />
-    //       <Route path="/pos/pos" element={<PosPage />} />
-    //       <Route path="products/add" element={<AllProduct />} />
-    //       <Route path="products/package" element={<AllPackages />} />
-    //       <Route path="products/expiryProduct" element={<ExpiryProducts />} />
-    //       <Route path="products/inventry" element={<Inventry />} />
-    //       <Route path="purchase/supplier" element={<Supplier />} />
-    //       <Route path="purchase/purchase" element={<Purchase />} />
-    //       <Route path="purchase/purchaseReturn" element={<PurchaseReturen />} />
-    //       <Route path="sales/sales" element={<Sales />} />
-    //       <Route path="sales/salesReturn" element={<SalesReturn />} />
-    //       <Route path="customers" element={<Customer />} />
-    //       <Route path="reports" element={<Reports />} />
-    //       <Route path="settings" element={<Settings />} />
-    //       <Route path="posPage" element={<PosPage />} />
-
-    //       {/* Dynamic route under POS layout  */}
-    //       <Route path="purchase/supplier/:supplierName" element={<SupplierDetail />} />
-    //       <Route path="purchase-return/supplier/:supplierName" element={<PurchaseReturnDetail />} />
-    //     </Route>
-
-    //   </Routes>
-    // </>
-
     <>
-      <PendingApproval/>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<HomeLayout />} />
+        <Route path="/signup" element={<SignUpLayout />} />
+        <Route path="/verify-email" element={<OtpVerification />} />
+
+        {/* Protected Routes: Only logged-in users can access */}
+        <Route
+          path="/form"
+          element={
+            <RequireLogin>
+              <FormLayout />
+            </RequireLogin>
+          }
+        />
+        <Route
+          path="/pending-approval"
+          element={
+            <RequireLogin>
+              <PendingApproval />
+            </RequireLogin>
+          }
+        />
+
+        {/* Protected Route: Only logged-in users with approved pharmacy can access */}
+        <Route
+          path="/pos"
+          element={
+            <ProtectedRoute>
+              <Pos />
+            </ProtectedRoute>
+          }
+        >
+          {/* Protected POS pages */}
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="/pos/pos" element={<PosPage />} />
+          <Route path="products/add" element={<AllProduct />} />
+          <Route path="products/package" element={<AllPackages />} />
+          <Route path="products/expiryProduct" element={<ExpiryProducts />} />
+          <Route path="products/inventry" element={<Inventry />} />
+          <Route path="purchase/supplier" element={<Supplier />} />
+          <Route path="purchase/purchase" element={<Purchase />} />
+          <Route path="purchase/purchaseReturn" element={<PurchaseReturen />} />
+          <Route path="sales/sales" element={<Sales />} />
+          <Route path="sales/salesReturn" element={<SalesReturn />} />
+          <Route path="customers" element={<Customer />} />
+          <Route path="reports" element={<Reports />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="posPage" element={<PosPage />} />
+
+          {/* Dynamic route under POS layout  */}
+          <Route path="purchase/:id" element={<SupplierDetail />} /> 
+          <Route path="purchase-return/supplier/:supplierName" element={<PurchaseReturnDetail />} />
+        </Route>
+
+      </Routes>
     </>
   );
 };

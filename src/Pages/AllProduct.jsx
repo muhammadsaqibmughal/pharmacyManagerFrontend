@@ -131,7 +131,7 @@ const AllProduct = () => {
     <div className="mt-8 p-10 ">
       {/* Top Bar */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl text-white font-bold">All Products</h2>
+        <h2 className="text-2xl text-primary-50 font-bold">All Products</h2>
         <button
           onClick={() => {
             setShowModal(true);
@@ -155,10 +155,10 @@ const AllProduct = () => {
       </div>
 
       {/* Product Table */}
-      {/* <Card> */}
-        {/* <CardContent> */}
+      <Card>
+        <CardContent>
       <div className="overflow-y-auto mt-2 rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
-        <table className="w-full table-auto text-white">
+        <table className="w-full table-auto text-primary-50">
           <thead className="text-sm text-left uppercase bg-bg-50 text-white/80">
             <tr>
               <th className="px-4 py-3 border-b border-white/10">Brand Name</th>
@@ -172,16 +172,16 @@ const AllProduct = () => {
               <tr
                 key={product.id || product.barcode || product.brandName}
               >
-                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
+                <td className="px-4 py-2 text-xs font-medium border-b border-primary-50">
                   {product.brandName}
                 </td>
-                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
+                <td className="px-4 py-2 text-xs font-medium border-b border-primary-50">
                   {product.genericName}
                 </td>
-                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
+                <td className="px-4 py-2 text-xs font-medium border-b border-primary-50">
                   {product.manufacturer}
                 </td>
-                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
+                <td className="px-4 py-2 text-xs font-medium border-b border-primary-50">
                   {product.barcode}
                 </td>
               </tr>
@@ -198,7 +198,7 @@ const AllProduct = () => {
           >
             Previous
           </button>
-          <span className="text-sm text-white/70">
+          <span className="text-sm text-primary-50">
             Page {currentPage} of {totalPages}
           </span>
           <button
@@ -210,12 +210,8 @@ const AllProduct = () => {
           </button>
         </div>
       </div>
-
-
-
-
-        {/* </CardContent> */}
-      {/* </Card> */}
+        </CardContent>
+      </Card>
 
       {/* Modal */}
       {showModal && (

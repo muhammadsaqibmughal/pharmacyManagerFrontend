@@ -251,7 +251,7 @@ const AllPackages = () => {
   return (
     <div className="mt-8 p-10">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl text-white/90 font-bold">All Packages</h2>
+        <h2 className="text-2xl text-primary-50 font-bold">All Packages</h2>
         <button
           onClick={() => {
             setShowModal(true);
@@ -278,7 +278,7 @@ const AllPackages = () => {
       ) : (
         <>
       <div className="overflow-y-auto mt-2 rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
-        <table className="w-full table-auto text-white">
+        <table className="w-full table-auto text-primary-50">
           <thead className="text-sm text-left uppercase bg-bg-50 text-white/80">
             <tr>
               <th className="px-4 py-3  border-b border-white/10">Medicine</th>
@@ -292,16 +292,16 @@ const AllPackages = () => {
                 <tr
                   key={`${product.medicineId}-${product.packageType}-${product.unitsPerPack}`}
                 >
-                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
+                <td className="px-4 py-2 text-xs font-medium border-b border-primary-50">
                     {getMedicineBrandName(product.medicineId)}
                   </td>
-                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
+                <td className="px-4 py-2 text-xs font-medium border-b border-primary-50">
                     {product.packageType}
                   </td>
-                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
+                <td className="px-4 py-2 text-xs font-medium border-b border-primary-50">
                     {product.unitsPerPack}
                   </td>
-                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
+                <td className="px-4 py-2 text-xs font-medium border-b border-primary-50">
                     {product.unitType}
                   </td>
                 </tr>
@@ -329,7 +329,7 @@ const AllPackages = () => {
           >
             Previous
           </button>
-          <span className="text-sm text-gray-400">
+          <span className="text-sm text-primary-50">
             Page {currentPage} of {totalPages}
           </span>
           <button

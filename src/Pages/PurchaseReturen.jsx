@@ -66,7 +66,7 @@ const PurchaseReturn = () => {
     <div className="mt-8 p-10">
         {/* *********** TOP ************ */}
         <div className="flex justify-between max-md:flex-col max-md:gap-2 max-md:justify-center items-center mb-4">
-            <h2 className="text-2xl text-white/90 max-md:text-xl font-bold">Purchase Return Data</h2>
+            <h2 className="text-2xl text-primary-50 max-md:text-xl font-bold">Purchase Return Data</h2>
         </div>
 
         {/* ********* Search Bar ********** */}
@@ -84,7 +84,7 @@ const PurchaseReturn = () => {
         {/* ************ Table ************** */}
       
       <div className="overflow-y-auto mt-2 rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
-        <table className="w-full table-auto text-white">
+        <table className="w-full table-auto text-primary-50">
           <thead className="text-xs text-left uppercase bg-bg-50 text-white/80">
                 <tr className="row-span-3">
                   <th className="px-4 py-2 border-b border-white/10">Supplier</th>
@@ -101,7 +101,7 @@ const PurchaseReturn = () => {
               <tbody>
                 {paginatedProducts.map((product, idx) => (
                   <tr key={idx} className="hover:bg-white/10 transition-all duration-200">
-                    <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
+                    <td className="px-4 py-2 text-xs font-medium border-b border-primary-50">
                       <Link
                         to={`/pos/purchase-return/supplier/${encodeURIComponent(product.supplier)}`}
                         className="text-blue-300 hover:text-blue-500 hover:underline"
@@ -109,13 +109,13 @@ const PurchaseReturn = () => {
                         {product.supplier}
                       </Link>
                     </td>
-                    <td className="px-4 py-2 text-xs font-medium border-b border-white/10">{product.invoiceNo}</td>
-                    <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
+                    <td className="px-4 py-2 text-xs font-medium border-b border-primary-50">{product.invoiceNo}</td>
+                    <td className="px-4 py-2 text-xs font-medium border-b border-primary-50">
                       {new Date(product.purchaseDate).toLocaleDateString()}
                     </td>
-                    <td className="px-4 py-2 text-xs font-medium border-b border-white/10">{product.totalAmount}</td>
-                    <td className="px-4 py-2 text-xs font-medium border-b border-white/10">{product.discount}</td>
-                    <td className="px-4 py-2 text-xs font-medium border-b border-white/10">{product.tax}</td>
+                    <td className="px-4 py-2 text-xs font-medium border-b border-primary-50">{product.totalAmount}</td>
+                    <td className="px-4 py-2 text-xs font-medium border-b border-primary-50">{product.discount}</td>
+                    <td className="px-4 py-2 text-xs font-medium border-b border-primary-50">{product.tax}</td>
                   </tr>
                 ))}
               </tbody>

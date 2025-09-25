@@ -1,47 +1,87 @@
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { users, purchaseDataa, purchases } from "../constants";
-import Card, { CardContent } from "../components/Card";
+import {
+  addPurchaseItem,
+  getPurchaseItems,
+  getPurchase,
+} from "../api/purchaseAPI";
+
+import { getPackage } from "../api/packageAPI";
+import { getProduct } from "../api/productsApi";
+import { getPharmacyProduct } from "../api/inventoryAPI";
+import { getSupplier } from "../api/supplierAPI";
+import Select from "react-select";
 
 const ITEM_PER_PAGE = 10;
 
 const SupplierDetail = () => {
-  const { supplierName } = useParams();
-  const decodedSupplier = decodeURIComponent(supplierName);
+  const { id } = useParams();
 
-  const supplierInfo = users.find((user) => user.supplier === decodedSupplier);
-  const supplierPurchases = purchaseDataa.filter(
-    (item) => item.supplier === decodedSupplier
-  );
-
-  const [purchaseData, setPurchaseData] = useState(purchases);
+  const [purchaseData, setPurchaseData] = useState([]);
+  const [purchaseDetails, setPurchaseDetails] = useState([]);
   const [returnQuantities, setReturnQuantities] = useState({});
-  const [newPurchase, setNewPurchase] = useState({
-    productName: "",
-    productType: "",
-    quantity: "",
-    costPrice: "",
-    batchNo: "",
-    expiryDate: "",
-    discount: "",
-    discountPayment: "",
-    lineTotal: "",
-    packageType: "",
-    shelf: "",
-    reorderLevel: "",
-  });
-
+  const [medicines, setMedicines] = useState([]);
+  const [allPackage, setAllPackage] = useState([]);
+  const [pharmacyMedicine, setPharmacyMedicine] = useState([]);
+  const [supplierInfo, setSupplierInfo] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [disabledFields, setDisabledFields] = useState(true);
   const [isNewProduct, setIsNewProduct] = useState(false);
 
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const [medRes, pkgRes, pharmMedRes, itemRes, suplierRes, purchaseRes] =
+          await Promise.all([
+            getProduct(),
+            getPackage(),
+            getPharmacyProduct(),
+            getPurchaseItems(id),
+            getSupplier(),
+            getPurchase(),
+          ]);
+
+        setAllPackage(Array.isArray(pkgRes.data) ? pkgRes.data : []);
+        setMedicines(Array.isArray(medRes.data) ? medRes.data : []);
+        setPurchaseData(Array.isArray(itemRes.data) ? itemRes.data : []);
+        setPharmacyMedicine(
+          Array.isArray(pharmMedRes.data) ? pharmMedRes.data : []
+        );
+        setSupplierInfo(Array.isArray(suplierRes.data) ? suplierRes.data : []);
+        setPurchaseDetails(
+          Array.isArray(purchaseRes.data) ? purchaseRes.data : []
+        );
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetch();
+  }, [id]);
+
+  const [newPurchase, setNewPurchase] = useState({
+    pharmacyProductId: "",
+    quantity: "",
+    costPrice: "",
+    sellingPrice: "",
+    batchNumber: "",
+    expiryDate: "",
+    medicineId: "",
+    packagingId: "",
+    reorderLevel: "",
+    shelf: "",
+    packsPerBox: "",
+    packsBarcode: "",
+  });
+
   // Filtered, Paginated Products
-  const filteredItems = purchaseData.filter((product) => {
+  const filteredItems = (purchaseData || []).filter((product) => {
     const term = searchTerm.toLowerCase();
-    return product.productName.toLowerCase().includes(term);
+    return (
+      product?.medicineName?.toLowerCase().includes(term) ||
+      product?.packagingType?.toLowerCase().includes(term)
+    );
   });
 
   const totalPages = Math.ceil(filteredItems.length / ITEM_PER_PAGE);
@@ -50,74 +90,96 @@ const SupplierDetail = () => {
     currentPage * ITEM_PER_PAGE
   );
 
-  const totalLineSum = filteredItems.reduce((acc, item) => acc + (parseFloat(item.lineTotal) || 0), 0);
+  const totalLineSum = filteredItems.reduce(
+    (acc, item) => acc + (parseFloat(item.lineTotal) || 0),
+    0
+  );
 
-  const handleAddPurchase = () => {
-    setPurchaseData([newPurchase, ...purchaseData]);
-    setShowModal(false);
-    resetForm();
+  // Add Purchase
+  const handleAddPurchase = async () => {
+    const payload = {
+      ...newPurchase,
+      pharmacyProductId: newPurchase.pharmacyProductId || null,
+      quantity: newPurchase.quantity ? Number(newPurchase.quantity) : 0,
+      costPrice: newPurchase.costPrice ? Number(newPurchase.costPrice) : 0,
+      sellingPrice: newPurchase.sellingPrice
+        ? Number(newPurchase.sellingPrice)
+        : 0,
+      reorderLevel: newPurchase.reorderLevel
+        ? Number(newPurchase.reorderLevel)
+        : 0,
+      packsPerBox: newPurchase.packsPerBox
+        ? Number(newPurchase.packsPerBox)
+        : 0,
+      expiryDate: newPurchase.expiryDate
+        ? new Date(newPurchase.expiryDate).toISOString()
+        : null,
+    };
+
+    try {
+      const response = await addPurchaseItem(payload, id);
+      console.log("Purchase Added, Status:", response.status);
+      const itemRes = await getPurchaseItems(id);
+      if (itemRes.status == "success") {
+        setPurchaseData(Array.isArray(itemRes.data) ? itemRes.data : []);
+      }
+      setShowModal(false);
+      resetForm();
+    } catch (error) {
+      console.error("Error adding purchase:", error);
+    }
   };
 
+  // Input Change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewPurchase({ ...newPurchase, [name]: value });
   };
 
-  const handleProductNameBlur = () => {
-    setIsLoading(true);
-    setDisabledFields(true);
-    setTimeout(() => {
-      const exists = purchaseData.some(
-        (item) =>
-          item.productName.toLowerCase() === newPurchase.productName.toLowerCase()
-      );
-      setIsNewProduct(!exists);
-      setDisabledFields(false);
-      setIsLoading(false);
-    }, 1000);
-  };
-
   const resetForm = () => {
     setNewPurchase({
-      productName: "",
-      productType: "",
+      pharmacyProductId: "",
       quantity: "",
       costPrice: "",
-      batchNo: "",
+      sellingPrice: "",
+      batchNumber: "",
       expiryDate: "",
-      discount: "",
-      discountPayment: "",
-      lineTotal: "",
-      packageType: "",
-      shelf: "",
+      medicineId: "",
+      packagingId: "",
       reorderLevel: "",
+      shelf: "",
+      packsPerBox: "",
+      packsBarcode: "",
     });
     setIsLoading(false);
     setIsNewProduct(false);
-    setDisabledFields(true);
   };
 
-  const handleReturnQuantityChange = (index, value) => {
-    setReturnQuantities({ ...returnQuantities, [index]: value });
+  const handleReturnQuantityChange = (id, value) => {
+    setReturnQuantities({ ...returnQuantities, [id]: value });
   };
 
   const handleReturn = (product) => {
-    const quantityToReturn = returnQuantities[product.productName];
+    const quantityToReturn = returnQuantities[product.id];
     if (!quantityToReturn || isNaN(quantityToReturn)) {
       alert("Enter a valid return quantity.");
       return;
     }
 
-    const returnData = JSON.parse(localStorage.getItem("purchaseReturns") || "[]");
+    const returnData = JSON.parse(
+      localStorage.getItem("purchaseReturns") || "[]"
+    );
 
     const returnedItem = {
       ...product,
       quantity: quantityToReturn,
       originalQuantity: product.quantity,
-      supplier: decodedSupplier,
     };
 
-    localStorage.setItem("purchaseReturns", JSON.stringify([returnedItem, ...returnData]));
+    localStorage.setItem(
+      "purchaseReturns",
+      JSON.stringify([returnedItem, ...returnData])
+    );
     alert("Product return recorded.");
   };
 
@@ -126,34 +188,69 @@ const SupplierDetail = () => {
       {/* Header */}
       <div className="flex justify-between gap-2 items-center mb-2">
         <div className="rounded-full px-4 py-2 bg-[#4F7942]">
-          <Link to="/pos/purchase/purchase" className="text-sm text-white">← Back</Link>
+          <Link to="/pos/purchase/purchase" className="text-sm text-primary-50">
+            ← Back
+          </Link>
         </div>
-        <button onClick={() => setShowModal(true)} className="bg-[#4F7942] text-white px-4 py-1 rounded-full">Add New Purchase</button>
+        <button
+          onClick={() => setShowModal(true)}
+          className="bg-[#4F7942] text-white px-4 py-1 rounded-full"
+        >
+          Add New Purchase Item
+        </button>
       </div>
 
       {/* Supplier Info */}
       <div className="flex flex-col w-full items-center justify-center text-center space-y-2 text-white/90">
-        <h2 className="text-2xl font-bold">{decodedSupplier}</h2>
-        <p className="text-sm">{supplierInfo?.address}</p>
-        <h1 className="mt-5 border-2 w-50 font-bold  text-2xl">Invoice</h1>
+        <h2 className="text-2xl font-bold">
+          {supplierInfo[0]?.name || "Supplier"}
+        </h2>
+        <p className="text-sm">
+          {supplierInfo[0]?.address || "No Address Provided"}
+        </p>
+        <h1 className="mt-5 border-2 w-50 font-bold text-2xl">Invoice</h1>
       </div>
 
       {/* Contact Info */}
       <div className="flex justify-between mt-5 px-5">
+        {/* Left - Supplier Contact */}
         <div className="text-xs space-y-2 text-white/90">
-          <p><b>Email:</b> {supplierInfo?.email}</p>
-          <p><b>Phone:</b> {supplierInfo?.phone}</p>
-          <p><b>Address:</b> {supplierInfo?.address}</p>
-          <p><b>Drug Lic #:</b> {supplierInfo?.drug || "N/A"}</p>
+          <p>
+            <b>Contact:</b> {supplierInfo[0]?.contact || "N/A"}
+          </p>
+          <p>
+            <b>Email:</b> {supplierInfo[0]?.email || "N/A"}
+          </p>
+          <p>
+            <b>Address:</b> {supplierInfo[0]?.address || "N/A"}
+          </p>
+          <p>
+            <b>Supplier:</b> {supplierInfo[0]?.supplier || "N/A"}
+          </p>
         </div>
 
-        {supplierPurchases.length > 0 && (
-          <div className="text-xs space-y-2 text-white/90">
-            <p><b>Invoice No:</b> {supplierPurchases[0].invoiceNo}</p>
-            <p><b>Date:</b> {new Date(supplierPurchases[0].purchaseDate).toLocaleDateString()}</p>
-            <p><b>SalesMan:</b> {supplierInfo?.name}</p>
-          </div>
-        )}
+        {/* Right - Invoice Info */}
+
+        <div className="text-xs space-y-2 text-white/90">
+          <p>
+            <b>Invoice No:</b> {purchaseDetails[0]?.invoiceNo || "N/A"}
+          </p>
+          <p>
+            <b>Date:</b>{" "}
+            {purchaseDetails[0]?.purchaseDate
+              ? new Date(purchaseDetails[0].purchaseDate).toLocaleDateString()
+              : "N/A"}
+          </p>
+          <p>
+            <b>Total Amount:</b> {purchaseDetails[0]?.totalAmount || 0}
+          </p>
+          <p>
+            <b>Discount:</b> {purchaseDetails[0]?.discount || 0}
+          </p>
+          <p>
+            <b>Tax:</b> {purchaseDetails[0]?.tax || 0}
+          </p>
+        </div>
       </div>
 
       {/* Search Bar */}
@@ -166,149 +263,283 @@ const SupplierDetail = () => {
       />
 
       {/* Table */}
-    
-      <div className="overflow-y-auto mt-2 rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
-        <table className="w-full table-auto text-white">
-          <thead className="text-[10px] text-left uppercase bg-bg-50 text-white/80">
-                <tr>
-                  <th className="px-4 py-3  border-b border-white/10">Product Name</th>
-                  <th className="px-2 py-1 border-b border-white/10">Product Type</th>
-                  <th className="px-2 py-1 border-b border-white/10">Quantity</th>
-                  <th className="px-2 py-1 border-b border-white/10">Cost Price</th>
-                  <th className="px-2 py-1 border-b border-white/10">Batch No</th>
-                  <th className="px-2 py-1 border-b border-white/10">Expiry</th>
-                  <th className="px-2 py-1 border-b border-white/10">Discount</th>
-                  <th className="px-2 py-1 border-b border-white/10">Disc. Payment</th>
-                  <th className="px-2 py-1 border-b border-white/10">Total</th>
-                  <th className="px-2 py-1 border-b border-white/10">Return Qty</th>
-                  <th className="px-2 py-1 border-b border-white/10">Action</th>
-                </tr>
-              </thead>
-              <tbody className="text-[10px] ">
-                {paginatedProducts.map((product, idx) => (
-                  <tr key={idx} className="border-b">
-                    <td className="px-4 py-2   border-b border-white/10">{product.productName}</td>
-                    <td className="px-4 py-2   border-b border-white/10">{product.productType}</td>
-                    <td className="px-4 py-2   border-b border-white/10">{product.quantity}</td>
-                    <td className="px-4 py-2   border-b border-white/10">{product.costPrice}</td>
-                    <td className="px-4 py-2   border-b border-white/10">{product.batchNo}</td>
-                    <td className="px-4 py-2   border-b border-white/10">{new Date(product.expiryDate).toLocaleDateString()}</td>
-                    <td className="px-4 py-2   border-b border-white/10">{product.discount}</td>
-                    <td className="px-4 py-2   border-b border-white/10">{product.discountPayment}</td>
-                    <td className="px-4 py-2   border-b border-white/10">{product.lineTotal}</td>
-                    <td className="px-4 py-2   border-b border-white/10">
-                      <input
-                        type="text"
-                        className="px-4 py-2 w-18 font-semibold rounded-full bg-[#acc5b0ff] text-primary-50 outline-none text-[10px]"
-                        placeholder="quantity.."
-                        value={returnQuantities[product.productName] || ""}
-                        onChange={(e) =>
-                          handleReturnQuantityChange(product.productName, e.target.value)
-                        }
-                      />
-                    </td>
-                    <td className="px-4 py-2   border-b border-white/10">
-                      <button
-                        onClick={() => handleReturn(product)}
-                        className="text-xs px-2 py-1 bg-hf-50 text-white rounded-full"
-                      >
-                        Return
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                <tr className="font-semibold">
-                  <td colSpan={8} className="px-4 py-2  text-[10px] border-b border-white/10">Total</td>
-                  <td className="px-4 py-2   border-b text-[10px] border-white/10">{totalLineSum.toFixed(2)}</td>
-                  <td colSpan={2}></td>
-                </tr>
-              </tbody>
-            </table>
-            {/* Pagination */}
-             <div className="flex justify-between items-center px-4 py-3 bg-white/10 border-t border-white/10">
-              <button
+      <div className="overflow-y-auto mt-2 rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg shadow">
+        <table className="w-full table-auto text-primary-50">
+          <thead className="text-[10px] uppercase bg-bg-50 text-white/80">
+            <tr>
+              <th className="px-4 py-3">Product Name</th>
+              <th className="px-2 py-1">Package</th>
+              <th className="px-2 py-1">Quantity</th>
+              <th className="px-2 py-1">Cost Price</th>
+              <th className="px-2 py-1">Batch No</th>
+              <th className="px-2 py-1">Expiry</th>
+              <th className="px-2 py-1">Total</th>
+              <th className="px-2 py-1">Return Qty</th>
+              <th className="px-2 py-1">Action</th>
+            </tr>
+          </thead>
+          <tbody className="text-[10px]">
+            {paginatedProducts.map((product, idx) => (
+              <tr key={idx} className="border-b">
+                <td className="px-4 py-2">{product.medicineName}</td>
+                <td className="px-4 py-2">{product.packagingType}</td>
+                <td className="px-4 py-2">{product.quantity}</td>
+                <td className="px-4 py-2">{product.costPrice}</td>
+                <td className="px-4 py-2">{product.batchNumber}</td>
+                <td className="px-4 py-2">
+                  {product.expiryDate
+                    ? new Date(product.expiryDate).toLocaleDateString()
+                    : "-"}
+                </td>
+                <td className="px-4 py-2">{product.lineTotal}</td>
+                <td className="px-4 py-2">
+                  <input
+                    type="text"
+                    className="px-2 py-1 w-16 font-semibold rounded-full bg-[#acc5b0ff] text-primary-50 outline-none text-[10px]"
+                    placeholder="Qty"
+                    value={returnQuantities[product.id] || ""}
+                    onChange={(e) =>
+                      handleReturnQuantityChange(product.id, e.target.value)
+                    }
+                  />
+                </td>
+                <td className="px-4 py-2">
+                  <button
+                    onClick={() => handleReturn(product)}
+                    className="text-xs px-2 py-1 bg-hf-50 text-white rounded-full"
+                  >
+                    Return
+                  </button>
+                </td>
+              </tr>
+            ))}
+            <tr className="font-semibold">
+              <td colSpan={8} className="px-4 py-2">
+                Total
+              </td>
+              <td className="px-4 py-2">{totalLineSum.toFixed(2)}</td>
+              <td colSpan={2}></td>
+            </tr>
+          </tbody>
+        </table>
+
+        {/* Pagination */}
+        <div className="flex justify-between items-center px-4 py-3 bg-white/10 border-t border-white/10">
+          <button
             className="px-4 py-1 bg-[#4F7942] text-white rounded-full disabled:opacity-50"
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </button>
-              <span className="text-sm text-gray-400">
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+          <span className="text-sm text-gray-400">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
             className="px-4 py-1 bg-[#4F7942] text-white rounded-full disabled:opacity-50"
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
-            </div>
-          </div>
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      </div>
 
-
-
-            {/* Modal */}
+      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-10">
           <div className="bg-db-50 p-6 rounded-md w-full max-w-lg">
             <h2 className="text-xl text-primary-50 font-semibold mb-4">
               Add New Purchase
             </h2>
+
             <div className="grid grid-cols-3 gap-4">
-              {Object.entries(newPurchase).map(([field, value]) => {
-                const extraFields = ["packageType", "shelf", "reorderLevel"];
-                const shouldShow =
-                  !extraFields.includes(field) || isNewProduct;
-
-                if (!shouldShow) return null;
-
-                return (
-                  <div className="relative" key={field}>
+              {(isNewProduct
+                ? [
+                    "medicineId",
+                    "packagingId",
+                    "reorderLevel",
+                    "shelf",
+                    "packsPerBox",
+                    "packsBarcode",
+                    "quantity",
+                    "costPrice",
+                    "sellingPrice",
+                    "batchNumber",
+                    "expiryDate",
+                  ]
+                : [
+                    "pharmacyProductId",
+                    "quantity",
+                    "costPrice",
+                    "sellingPrice",
+                    "batchNumber",
+                    "expiryDate",
+                  ]
+              ).map((field) => (
+                <div className="relative" key={field}>
+                  {field === "pharmacyProductId" ? (
+                    <Select
+                      name="pharmacyProductId"
+                      value={
+                        pharmacyMedicine.find(
+                          (p) => p.id === newPurchase.pharmacyProductId
+                        )
+                          ? {
+                              value: newPurchase.pharmacyProductId,
+                              label: `${
+                                pharmacyMedicine.find(
+                                  (p) => p.id === newPurchase.pharmacyProductId
+                                )?.medicine.brandName
+                              } - ${
+                                pharmacyMedicine.find(
+                                  (p) => p.id === newPurchase.pharmacyProductId
+                                )?.packaging.packageType
+                              }`,
+                            }
+                          : null
+                      }
+                      options={pharmacyMedicine.map((product) => ({
+                        value: product.id,
+                        label: `${product.medicine.brandName} - ${product.packaging.packageType}`,
+                      }))}
+                      onChange={(selectedOption) => {
+                        setNewPurchase({
+                          ...newPurchase,
+                          pharmacyProductId: selectedOption
+                            ? selectedOption.value
+                            : "",
+                        });
+                        setIsNewProduct(false);
+                      }}
+                      onInputChange={(inputValue) => {
+                        if (inputValue.trim() !== "") {
+                          const exists = pharmacyMedicine.some((p) =>
+                            `${p.medicine.brandName} - ${p.packaging.packageType}`
+                              .toLowerCase()
+                              .includes(inputValue.toLowerCase())
+                          );
+                          setIsNewProduct(!exists);
+                        } else {
+                          setIsNewProduct(false);
+                        }
+                      }}
+                      isClearable
+                      isSearchable
+                      placeholder="Search.."
+                      classNamePrefix="react-select"
+                    />
+                  ) : field === "medicineId" ? (
+                    <>
+                      <label className="block text-xs font-semibold text-primary-50 mb-1">
+                        Select Medicine
+                      </label>
+                      {medicines.length > 0 ? (
+                        <Select
+                          name="medicineId"
+                          value={
+                            medicines.find(
+                              (m) => m.id === newPurchase.medicineId
+                            )
+                              ? {
+                                  value: newPurchase.medicineId,
+                                  label: medicines.find(
+                                    (m) => m.id === newPurchase.medicineId
+                                  )?.brandName,
+                                }
+                              : null
+                          }
+                          options={medicines.map((m) => ({
+                            value: m.id,
+                            label: m.brandName,
+                          }))}
+                          onChange={(selectedOption) =>
+                            setNewPurchase({
+                              ...newPurchase,
+                              medicineId: selectedOption
+                                ? selectedOption.value
+                                : "",
+                              packagingId: "",
+                            })
+                          }
+                          isClearable
+                          isSearchable
+                          placeholder="Search.."
+                          classNamePrefix="react-select"
+                        />
+                      ) : (
+                        <p className="text-red-500 text-xs">
+                          ⚠ Please add medicine first before adding purchase.
+                        </p>
+                      )}
+                    </>
+                  ) : field === "packagingId" ? (
+                    <>
+                      <label className="block text-xs font-semibold text-primary-50 mb-1">
+                        Select Package
+                      </label>
+                      <Select
+                        name="packagingId"
+                        value={
+                          allPackage.find(
+                            (p) => p.id === newPurchase.packagingId
+                          )
+                            ? {
+                                value: newPurchase.packagingId,
+                                label: allPackage.find(
+                                  (p) => p.id === newPurchase.packagingId
+                                )?.packageType,
+                              }
+                            : null
+                        }
+                        options={allPackage
+                          .filter(
+                            (pkg) => pkg.medicineId === newPurchase.medicineId
+                          )
+                          .map((pkg) => ({
+                            value: pkg.id,
+                            label: pkg.packageType,
+                          }))}
+                        onChange={(selectedOption) =>
+                          setNewPurchase({
+                            ...newPurchase,
+                            packagingId: selectedOption
+                              ? selectedOption.value
+                              : "",
+                          })
+                        }
+                        isClearable
+                        isSearchable
+                        placeholder={
+                          newPurchase.medicineId ? "Search.." : "Select.."
+                        }
+                        isDisabled={!newPurchase.medicineId}
+                        classNamePrefix="react-select"
+                      />
+                    </>
+                  ) : (
                     <input
-                      type="text"
+                      type={field === "expiryDate" ? "date" : "text"}
                       name={field}
                       placeholder={
                         field.charAt(0).toUpperCase() + field.slice(1)
                       }
-                      value={value}
+                      value={newPurchase[field] || ""}
                       onChange={handleChange}
-                      onBlur={field === "productName" ? handleProductNameBlur : undefined}
-                      disabled={field !== "productName" && disabledFields}
+                      disabled={isLoading && field !== "pharmacyProductId"}
                       className={`border text-xs border-gray-300 font-semibold text-primary-50 px-3 py-2 rounded w-full ${
-                        disabledFields && field !== "productName"
+                        isLoading && field !== "pharmacyProductId"
                           ? "bg-gray-200 cursor-not-allowed"
                           : ""
                       }`}
                     />
-                    {field === "productName" && isLoading && (
-                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                        <svg
-                          className="animate-spin h-4 w-4 text-[#4F7942]"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8v4l5-5-5-5v4a8 8 0 00-8 8z"
-                          ></path>
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                  )}
+                </div>
+              ))}
             </div>
+
             <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={() => {
@@ -329,7 +560,6 @@ const SupplierDetail = () => {
           </div>
         </div>
       )}
-    
     </div>
   );
 };
