@@ -270,7 +270,12 @@ const Purchase = () => {
           >
             Previous
           </button>
-          <span className="text-sm text-gray-300">
+          <span
+            className={`text-sm text-center ${
+              theme === "dark" ? "text-light-50" : "text-primary-50"
+            } `}
+          >
+            {" "}
             Page {currentPage} of {totalPages}
           </span>
           <button

@@ -12,11 +12,13 @@ import { getProduct } from "../api/productsApi";
 import { getPharmacyProduct } from "../api/inventoryAPI";
 import { getSupplier } from "../api/supplierAPI";
 import Select from "react-select";
+import { useTheme } from "../theme-support/ThemeContext";
 
 const ITEM_PER_PAGE = 10;
 
 const SupplierDetail = () => {
   const { id } = useParams();
+  const { theme } = useTheme();
 
   const [purchaseData, setPurchaseData] = useState([]);
   const [purchaseDetails, setPurchaseDetails] = useState([]);
@@ -170,86 +172,98 @@ const SupplierDetail = () => {
 
   //  Fixed handleReturn
   const confirmReturn = async () => {
-  if (!selectedProduct) {
-    alert("No product selected.");
-    return;
-  }
-
-  const quantityToReturn = Number(returnQuantity);
-
-  if (!quantityToReturn || isNaN(quantityToReturn)) {
-    alert("Enter a valid return quantity.");
-    return;
-  }
-
-  if (quantityToReturn > selectedProduct.quantity) {
-    alert("Return quantity cannot exceed available quantity.");
-    return;
-  }
-
-  //  Strict check: disallow return if no pharmacyProductId
-  if (!selectedProduct.pharmacyProductId) {
-    alert("This product is not linked to a pharmacy product. Cannot process return.");
-    return;
-  }
-
-  try {
-    const payload = {
-      purchaseItemId: selectedProduct.id,
-      pharmacyProductId: selectedProduct.pharmacyProductId,
-      quantity: quantityToReturn,
-      costPrice: selectedProduct.costPrice,
-      batchNumber: selectedProduct.batchNumber,
-      expiryDate: selectedProduct.expiryDate,
-      reason: returnReason,
-    };
-
-    const response = await returnPurchaseItem(id, payload);
-
-    if (response.status === "success" ) {
-      alert("Return processed successfully!");
-
-      // Refresh data
-      const [itemRes, purchaseRes] = await Promise.all([
-        getPurchaseItems(id),
-        getPurchase(),
-      ]);
-
-      setPurchaseData(Array.isArray(itemRes.data) ? itemRes.data : []);
-      setPurchaseDetails(Array.isArray(purchaseRes.data) ? purchaseRes.data : []);
-
-      // Reset modal
-      setShowReturnModal(false);
-      setSelectedProduct(null);
-      setReturnReason("");
-      setReturnQuantity("");
+    if (!selectedProduct) {
+      alert("No product selected.");
+      return;
     }
-  } catch (error) {
-    console.error("Error returning product:", error);
-    alert(error.response?.data?.error || "Failed to return item");
-  }
-};
 
+    const quantityToReturn = Number(returnQuantity);
+
+    if (!quantityToReturn || isNaN(quantityToReturn)) {
+      alert("Enter a valid return quantity.");
+      return;
+    }
+
+    if (quantityToReturn > selectedProduct.quantity) {
+      alert("Return quantity cannot exceed available quantity.");
+      return;
+    }
+
+    //  Strict check: disallow return if no pharmacyProductId
+    if (!selectedProduct.pharmacyProductId) {
+      alert(
+        "This product is not linked to a pharmacy product. Cannot process return."
+      );
+      return;
+    }
+
+    try {
+      const payload = {
+        purchaseItemId: selectedProduct.id,
+        pharmacyProductId: selectedProduct.pharmacyProductId,
+        quantity: quantityToReturn,
+        costPrice: selectedProduct.costPrice,
+        batchNumber: selectedProduct.batchNumber,
+        expiryDate: selectedProduct.expiryDate,
+        reason: returnReason,
+      };
+
+      const response = await returnPurchaseItem(id, payload);
+
+      if (response.status === "success") {
+        alert("Return processed successfully!");
+
+        // Refresh data
+        const [itemRes, purchaseRes] = await Promise.all([
+          getPurchaseItems(id),
+          getPurchase(),
+        ]);
+
+        setPurchaseData(Array.isArray(itemRes.data) ? itemRes.data : []);
+        setPurchaseDetails(
+          Array.isArray(purchaseRes.data) ? purchaseRes.data : []
+        );
+
+        // Reset modal
+        setShowReturnModal(false);
+        setSelectedProduct(null);
+        setReturnReason("");
+        setReturnQuantity("");
+      }
+    } catch (error) {
+      console.error("Error returning product:", error);
+      alert(error.response?.data?.error || "Failed to return item");
+    }
+  };
 
   return (
-    <div className="p-10">
+    <div
+      className={`mt-8 p-10 ${
+        theme === "dark" ? "bg-dark-50" : " bg-light-50"
+      }`}
+    >
+      {" "}
       {/* Header */}
       <div className="flex justify-between gap-2 items-center mb-2">
-        <div className="rounded-full px-4 py-2 bg-[#4F7942]">
+        <div className="bg-bg-50 hover:bg-selected-50 cursor-pointer text-white px-4 py-2 h-10 rounded-full hover:bg-hf-100">
           <Link to="/pos/purchase/purchase" className="text-sm text-primary-50">
             ← Back
           </Link>
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="bg-[#4F7942] text-white px-4 py-1 rounded-full"
+          className="bg-bg-50 hover:bg-selected-50 cursor-pointer text-white px-4 py-1 h-10 rounded-full hover:bg-hf-100"
         >
           Add New Purchase Item
         </button>
       </div>
-
       {/* Supplier Info */}
-      <div className="flex flex-col w-full items-center justify-center text-center space-y-2 text-white/90">
+      <div
+        className={`flex flex-col w-full items-center justify-center text-center space-y-2 ${
+          theme === "dark" ? "text-light-50" : " text-primary-50"
+        }`}
+      >
+        {" "}
         <h2 className="text-2xl font-bold">
           {supplierInfo[0]?.name || "Supplier"}
         </h2>
@@ -258,11 +272,15 @@ const SupplierDetail = () => {
         </p>
         <h1 className="mt-5 border-2 w-50 font-bold text-2xl">Invoice</h1>
       </div>
-
       {/* Contact Info */}
       <div className="flex justify-between mt-5 px-5">
         {/* Left - Supplier Contact */}
-        <div className="text-xs space-y-2 text-white/90">
+        <div
+          className={`text-xs space-y-2 ${
+            theme === "dark" ? "text-light-50" : " text-primary-50"
+          }`}
+        >
+          {" "}
           <p>
             <b>Contact:</b> {supplierInfo[0]?.contact || "N/A"}
           </p>
@@ -278,7 +296,12 @@ const SupplierDetail = () => {
         </div>
 
         {/* Right - Invoice Info */}
-        <div className="text-xs space-y-2 text-white/90">
+        <div
+          className={`text-xs space-y-2 ${
+            theme === "dark" ? "text-light-50" : " text-primary-50"
+          }`}
+        >
+          {" "}
           <p>
             <b>Invoice No:</b> {purchaseDetails[0]?.invoiceNo || "N/A"}
           </p>
@@ -299,47 +322,79 @@ const SupplierDetail = () => {
           </p>
         </div>
       </div>
-
       {/* Search Bar */}
-      <input
-        type="text"
-        placeholder="Search by name..."
-        className="my-4 px-4 py-2 w-full rounded-full outline-none bg-[#acc5b0ff] text-primary-50 text-sm"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-
+      <div className="mt-4 mb-4  bg-search-50 rounded-full">
+        <input
+          type="text"
+          placeholder="Search by name..."
+          className="px-4 py-2 w-full outline-none font-semibold text-primary-50  text-sm"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
       {/* Table */}
-      <div className="overflow-y-auto mt-2 rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg shadow">
-        <table className="w-full table-auto text-primary-50">
-          <thead className="text-[10px] uppercase bg-bg-50 text-white/80">
-            <tr>
+      <div
+        className={`table-Main  ${
+          theme === "dark"
+            ? " border-white/10 bg-white/10"
+            : " border-black/10 bg-white/60"
+        }`}
+      >
+        <table
+          className={`w-full table-auto ${
+            theme === "dark" ? "text-light-50" : " text-primary-50"
+          }`}
+        >
+          <thead className="text-xs text-left h-11 uppercase bg-bg-50 text-white/80">
+            <tr
+              className={`border-b ${
+                theme === "dark" ? " border-white/20" : " border-black/20"
+              }`}
+            >
+              {" "}
               <th className="px-4 py-3">Product Name</th>
-              <th className="px-2 py-1">Package</th>
-              <th className="px-2 py-1">Quantity</th>
-              <th className="px-2 py-1">Cost Price</th>
-              <th className="px-2 py-1">Batch No</th>
-              <th className="px-2 py-1">Expiry</th>
-              <th className="px-2 py-1">Total</th>
-              <th className="px-2 py-1">Action</th>
+              <th className="px-4 py-2">Package</th>
+              <th className="px-4 py-2">Quantity</th>
+              <th className="px-4 py-2">Cost Price</th>
+              <th className="px-4 py-2">Batch No</th>
+              <th className="px-4 py-2">Expiry</th>
+              <th className="px-4 py-2">Total</th>
+              <th className="px-4 py-2">Action</th>
             </tr>
           </thead>
           <tbody className="text-[10px]">
             {paginatedProducts.map((product, idx) => (
-              <tr key={idx} className="border-b">
-                <td className="px-4 py-2">{product.medicineName}</td>
-                <td className="px-4 py-2">{product.packagingType}</td>
-                <td className="px-4 py-2">{product.quantity}</td>
-                <td className="px-4 py-2">{product.costPrice}</td>
-                <td className="px-4 py-2">{product.batchNumber}</td>
-                <td className="px-4 py-2">
+              <tr
+                key={idx}
+                className={` px-4 py-2 text-xs font-medium border-b ${
+                  theme === "dark" ? " border-white/40" : " border-black/50"
+                }`}
+              >
+                <td className="px-4 py-2 text-xs font-medium">
+                  {product.medicineName}
+                </td>
+                <td className="px-4 py-2 text-xs font-medium">
+                  {product.packagingType}
+                </td>
+                <td className="px-4 py-2 text-xs font-medium">
+                  {product.quantity}
+                </td>
+                <td className="px-4 py-2 text-xs font-medium">
+                  {product.costPrice}
+                </td>
+                <td className="px-4 py-2 text-xs font-medium">
+                  {product.batchNumber}
+                </td>
+                <td className="px-4 py-2 text-xs font-medium">
                   {product.expiryDate
                     ? new Date(product.expiryDate).toLocaleDateString()
                     : "-"}
                 </td>
-                <td className="px-4 py-2">{product.lineTotal}</td>
+                <td className="px-4 py-2 text-xs font-medium">
+                  {product.lineTotal}
+                </td>
 
-                <td className="px-4 py-2">
+                <td className="px-4 py-2 text-xs font-medium">
                   <button
                     onClick={() => openReturnModal(product)}
                     className="text-xs px-2 py-1 bg-hf-50 text-white rounded-full"
@@ -349,30 +404,48 @@ const SupplierDetail = () => {
                 </td>
               </tr>
             ))}
-            <tr className="font-semibold">
-              <td colSpan={8} className="px-4 py-2">
+            <tr
+              className={` px-4 py-2 text-xs font-medium border-b ${
+                theme === "dark" ? " border-white/40" : " border-black/50"
+              }`}
+            >
+              <td colSpan={6} className="px-4 py-2 text-xs font-bold">
                 Total
               </td>
-              <td className="px-4 py-2">{totalLineSum.toFixed(2)}</td>
+              <td className="px-4 py-2 text-xs font-bold">
+                {totalLineSum.toFixed(2)}
+              </td>
               <td colSpan={2}></td>
             </tr>
           </tbody>
         </table>
 
         {/* Pagination */}
-        <div className="flex justify-between items-center px-4 py-3 bg-white/10 border-t border-white/10">
+        <div
+          className={`flex justify-between items-center px-4 py-3  border-t ${
+            theme === "dark"
+              ? "bg-white/20 border-white/20"
+              : "bg-white/10 border-white/20"
+          }`}
+        >
+          {" "}
           <button
-            className="px-4 py-1 bg-[#4F7942] text-white rounded-full disabled:opacity-50"
+            className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
           >
             Previous
           </button>
-          <span className="text-sm text-gray-400">
+          <span
+            className={`text-sm text-center ${
+              theme === "dark" ? "text-light-50" : "text-primary-50"
+            } `}
+          >
+            {" "}
             Page {currentPage} of {totalPages}
           </span>
           <button
-            className="px-4 py-1 bg-[#4F7942] text-white rounded-full disabled:opacity-50"
+            className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
             onClick={() =>
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }
@@ -382,12 +455,22 @@ const SupplierDetail = () => {
           </button>
         </div>
       </div>
-
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-10">
-          <div className="bg-db-50 p-6 rounded-md w-full max-w-lg">
-            <h2 className="text-xl text-primary-50 font-semibold mb-4">
+          <div
+            className={`rounded-xl p-5 border ${
+              theme === "dark"
+                ? "border-white/20 bg-white/10"
+                : "border-white/40 bg-white/90"
+            }   backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]`}
+          >
+            <h2
+              className={`text-xl font-semibold mb-4 ${
+                theme === "dark" ? "text-light-50" : "text-primary-50"
+              }`}
+            >
+              {" "}
               Add New Purchase
             </h2>
 
@@ -568,7 +651,10 @@ const SupplierDetail = () => {
                       className={`border text-xs border-gray-300 font-semibold text-primary-50 px-3 py-2 rounded w-full ${
                         isLoading && field !== "pharmacyProductId"
                           ? "bg-gray-200 cursor-not-allowed"
-                          : ""
+                          : "",
+                            theme === "dark"
+                        ? "border-gray-300 text-white/90"
+                        : "border-black/40 text-primary-50"
                       }`}
                     />
                   )}
@@ -582,13 +668,13 @@ const SupplierDetail = () => {
                   setShowModal(false);
                   resetForm();
                 }}
-                className="px-4 py-2 bg-gray-400 text-white rounded"
+                className="px-4 py-2 rounded-full bg-gray-400 text-white hover:bg-white/80 hover:text-primary-50 "
               >
                 Cancel
               </button>
               <button
                 onClick={handleAddPurchase}
-                className="px-4 py-2 bg-[#4F7942] text-white rounded hover:bg-hf-100"
+                className="px-4 py-2 bg-bg-50 hover:bg-selected-50 text-white rounded-full hover:bg-hf-100"
               >
                 Add Purchase
               </button>
@@ -598,50 +684,81 @@ const SupplierDetail = () => {
       )}
       {showReturnModal && selectedProduct && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-20">
-          <div className="bg-db-50 p-6 rounded-md w-full max-w-md">
-            <h2 className="text-xl text-primary-50 font-semibold mb-4">
+          <div
+            className={`rounded-xl p-5 border ${
+              theme === "dark"
+                ? "border-white/20 bg-white/10"
+                : "border-white/40 bg-white/90"
+            }   backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]`}
+          >
+            <h2
+              className={`text-xl font-semibold mb-4 ${
+                theme === "dark" ? "text-light-50" : "text-primary-50"
+              }`}
+            >
+              {" "}
               Return Product
             </h2>
-            <p className="text-sm text-white mb-4">
+            <p
+              className={`  ${
+                theme === "dark" ? "text-light-50" : "text-primary-50"
+              }`}
+            >
               Returning <b>{selectedProduct.medicineName}</b>
             </p>
 
-            <div className="mb-3">
-              <label className="block text-xs font-semibold text-primary-50 mb-1">
+            <div className="mt-3">
+              {/* <label
+                className={` text-xs font-semibold mb-1${
+                  theme === "dark" ? "text-light-50" : "text-primary-50"
+                }`}
+              >
                 Quantity
-              </label>
+              </label> */}
               <input
                 type="number"
                 value={returnQuantity}
                 onChange={(e) => setReturnQuantity(e.target.value)}
                 placeholder="Enter return quantity"
-                className="w-full border px-3 py-2 rounded text-xs"
+                className={`border-1 text-xs  font-semibold px-3 py-2 rounded-full w-full ${
+                  theme === "dark"
+                    ? "border-gray-300 text-white/90"
+                    : "border-black/40 text-primary-50"
+                }`}
               />
             </div>
 
-            <div className="mb-3">
-              <label className="block text-xs font-semibold text-primary-50 mb-1">
+            <div className="mt-3">
+              {/* <label
+                className={` text-xs font-semibold ${
+                  theme === "dark" ? "text-light-50" : "text-primary-50"
+                }`}
+              >
                 Reason
-              </label>
+              </label> */}
               <input
                 type="text"
                 value={returnReason}
                 onChange={(e) => setReturnReason(e.target.value)}
                 placeholder="Enter reason for return"
-                className="w-full border px-3 py-2 rounded text-xs"
+                className={`border-1 text-xs  font-semibold px-3 py-2 rounded-full w-full ${
+                  theme === "dark"
+                    ? "border-gray-300 text-white/90"
+                    : "border-black/40 text-primary-50"
+                }`}
               />
             </div>
 
             <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={() => setShowReturnModal(false)}
-                className="px-4 py-2 bg-gray-400 text-white rounded"
+                className="px-4 py-2 rounded-full bg-gray-400 text-white hover:bg-white/80 hover:text-primary-50 "
               >
                 Cancel
               </button>
               <button
                 onClick={confirmReturn}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                className="px-4 py-2 bg-bg-50 hover:bg-selected-50 text-white rounded-full hover:bg-hf-100"
               >
                 Confirm Return
               </button>
