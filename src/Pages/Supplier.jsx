@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import Card, { CardContent } from "../components/Card";
 import { addSupplier, getSupplier } from "../api/supplierAPI";
+import { useTheme } from "../theme-support/ThemeContext";
 
 const ITEM_PER_PAGE = 8;
 
 const Supplier = () => {
+  const { theme } = useTheme();
+
   const [supplierData, setSupplierData] = useState([]);
   const [newUser, setNewUser] = useState({
     supplier: "",
@@ -84,16 +86,25 @@ const Supplier = () => {
   };
 
   return (
-    <div className="mt-8 p-10">
+    <div
+      className={`mt-8 p-10 ${
+        theme === "dark" ? "bg-dark-50" : " bg-light-50"
+      }`}
+    >
       {/* *********** TOP ************ */}
       <div className="flex justify-between max-md:flex-col max-md:gap-2 max-md:justify-center items-center mb-4">
-        <h2 className="text-2xl text-primary-50 max-md:text-xl font-bold">
+        <h2
+          className={`text-2xl ${
+            theme === "dark" ? "text-white/90" : " text-primary-50"
+          }  font-bold`}
+        >
+          {" "}
           Suppliers Data
         </h2>
         <div className="space-x-2  max-md:flex">
           <button
             onClick={() => setShowModal(true)}
-            className="bg-[#4F7942] text-white max-md:text-sm px-4 py-1 h-10 rounded-full hover:bg-hf-100"
+            className="bg-bg-50 hover:bg-selected-50 cursor-pointer text-white px-4 py-1 h-10 rounded-full hover:bg-hf-100"
           >
             Add Supplier
           </button>
@@ -101,7 +112,7 @@ const Supplier = () => {
       </div>
 
       {/* ********* Search Bar ********** */}
-      <div className="mb-4 bg-[#acc5b0ff] rounded-full">
+      <div className="mb-4 bg-search-50 rounded-full">
         <input
           type="text"
           placeholder="Search by name..."
@@ -112,34 +123,53 @@ const Supplier = () => {
       </div>
 
       {/* ************ Table ************** */}
-      <div className="overflow-y-auto mt-2 rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
-        <table className="w-full table-auto text-primary-50">
-          <thead className="text-xs text-left uppercase bg-bg-50 text-white/80">
-            <tr className="row-span-3">
-              <th className="px-4 py-3 border-b border-white/10">Supplier</th>
-              <th className="px-4 py-3 border-b border-white/10">Name</th>
-              <th className="px-4 py-3 border-b border-white/10">Email</th>
-              <th className="px-4 py-3 border-b border-white/10">Phone No</th>
-              <th className="px-4 py-3 border-b border-white/10">Address</th>
+      <div
+        className={`table-Main  ${
+          theme === "dark"
+            ? " border-white/10 bg-white/10"
+            : " border-black/10 bg-white/60"
+        }`}
+      >
+        <table
+          className={`w-full table-auto ${
+            theme === "dark" ? "text-light-50" : " text-primary-50"
+          }`}
+        >
+          <thead className="text-sm text-left uppercase h-11 bg-bg-50 text-white/80">
+            <tr
+              className={`border-b ${
+                theme === "dark" ? " border-white/20" : " border-black/20"
+              }`}
+            >
+              <th className="px-4 py-2">Supplier</th>
+              <th className="px-4 py-2">Name</th>
+              <th className="px-4 py-2">Email</th>
+              <th className="px-4 py-2">Phone No</th>
+              <th className="px-4 py-2">Address</th>
             </tr>
-            <tr className=" col-span-6  h-3"></tr>
+            {/* <tr className=" col-span-6  h-3"></tr> */}
           </thead>
           <tbody>
             {paginatedProducts.map((product, idx) => (
-              <tr key={idx} className="border-b">
-                <td className="px-4 py-2 text-xs border-b border-primary-50">
+              <tr
+                key={idx}
+                className={` px-4 py-2 text-xs font-medium border-b ${
+                  theme === "dark" ? " border-white/40" : " border-black/50"
+                }`}
+              >
+                <td className="px-4 py-2 text-xs font-medium ">
                   {product.supplier}
                 </td>
-                <td className="px-4 py-2 text-xs border-b border-primary-50">
+                <td className="px-4 py-2 text-xs font-medium ">
                   {product.name}
                 </td>
-                <td className="px-4 py-2 text-xs border-b border-primary-50">
+                <td className="px-4 py-2 text-xs font-medium ">
                   {product.email}
                 </td>
-                <td className="px-4 py-2 text-xs border-b border-primary-50">
+                <td className="px-4 py-2 text-xs font-medium ">
                   {product.contact}
                 </td>
-                <td className="px-4 py-2 text-xs border-b border-primary-50">
+                <td className="px-4 py-2 text-xs font-medium ">
                   {product.address}
                 </td>
               </tr>
@@ -147,19 +177,31 @@ const Supplier = () => {
           </tbody>
         </table>
         {/* Pagination */}
-        <div className="flex justify-between items-center px-4 py-3 bg-white/10 border-t border-white/10">
+        <div
+          className={`flex justify-between items-center px-4 py-3  border-t ${
+            theme === "dark"
+              ? "bg-white/20 border-white/20"
+              : "bg-white/10 border-white/20"
+          }`}
+        >
+          {" "}
           <button
-            className="px-4 py-1 bg-[#4F7942] text-white rounded-full disabled:opacity-50"
+            className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
           >
             Previous
           </button>
-          <span className="text-sm text-gray-400">
+          <span
+            className={`text-sm text-center ${
+              theme === "dark" ? "text-light-50" : "text-primary-50"
+            } `}
+          >
+            {" "}
             Page {currentPage} of {totalPages}
           </span>
           <button
-            className="px-4 py-1 bg-[#4F7942] text-white rounded-full disabled:opacity-50"
+            className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
             onClick={() =>
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }
@@ -173,8 +215,19 @@ const Supplier = () => {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-10">
-          <div className="rounded-xl p-5 border border-white/20 bg-white/10 backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
-            <h2 className="text-xl text-white/90 font-semibold mb-4">
+          <div
+            className={`rounded-xl p-5 border ${
+              theme === "dark"
+                ? "border-white/20 bg-white/10"
+                : "border-white/40 bg-white/90"
+            }   backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]`}
+          >
+            <h2
+              className={`text-xl font-semibold mb-4 ${
+                theme === "dark" ? "text-light-50" : "text-primary-50"
+              }`}
+            >
+              {" "}
               Add New Supplier
             </h2>
             <div className="grid grid-cols-2 gap-4">
@@ -186,7 +239,11 @@ const Supplier = () => {
                     placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
                     value={newUser[field]}
                     onChange={handleChange}
-                    className="border-1 text-xs border-gray-300 font-semibold text-white/80 px-3 py-2 rounded-full w-full"
+                    className={`border-1 text-xs  font-semibold px-3 py-2 rounded-full w-full ${
+                      theme === "dark"
+                        ? "border-gray-300 text-white/90"
+                        : "border-black/40 text-primary-50"
+                    }`}
                   />
                 </div>
               ))}
