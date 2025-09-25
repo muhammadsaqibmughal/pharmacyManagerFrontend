@@ -106,7 +106,7 @@ const App = () => {
           <Route path="posPage" element={<PosPage />} />
 
           {/* Dynamic route under POS layout  */}
-          <Route path="purchase/supplier/:supplierName" element={<SupplierDetail />} />
+          <Route path="purchase/:id" element={<SupplierDetail />} />
           <Route path="purchase-return/supplier/:supplierName" element={<PurchaseReturnDetail />} />
           <Route path="counter-detail/name/:name" element={<CounterDetail />} />
           <Route path="/pos/sale-detail/:name/:date" element={<SaleDetail />} />

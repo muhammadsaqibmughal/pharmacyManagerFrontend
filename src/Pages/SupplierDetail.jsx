@@ -4,6 +4,7 @@ import {
   addPurchaseItem,
   getPurchaseItems,
   getPurchase,
+  returnPurchaseItem,
 } from "../api/purchaseAPI";
 
 import { getPackage } from "../api/packageAPI";
@@ -19,7 +20,6 @@ const SupplierDetail = () => {
 
   const [purchaseData, setPurchaseData] = useState([]);
   const [purchaseDetails, setPurchaseDetails] = useState([]);
-  const [returnQuantities, setReturnQuantities] = useState({});
   const [medicines, setMedicines] = useState([]);
   const [allPackage, setAllPackage] = useState([]);
   const [pharmacyMedicine, setPharmacyMedicine] = useState([]);
@@ -29,6 +29,11 @@ const SupplierDetail = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isNewProduct, setIsNewProduct] = useState(false);
+
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [returnQuantity, setReturnQuantity] = useState("");
+  const [returnReason, setReturnReason] = useState("");
 
   useEffect(() => {
     const fetch = async () => {
@@ -59,6 +64,14 @@ const SupplierDetail = () => {
     };
     fetch();
   }, [id]);
+
+  // Open modal when clicking "Return" button
+  const openReturnModal = (product) => {
+    setSelectedProduct(product);
+    setReturnQuantity("");
+    setReturnReason("");
+    setShowReturnModal(true);
+  };
 
   const [newPurchase, setNewPurchase] = useState({
     pharmacyProductId: "",
@@ -155,33 +168,68 @@ const SupplierDetail = () => {
     setIsNewProduct(false);
   };
 
-  const handleReturnQuantityChange = (id, value) => {
-    setReturnQuantities({ ...returnQuantities, [id]: value });
-  };
+  //  Fixed handleReturn
+  const confirmReturn = async () => {
+  if (!selectedProduct) {
+    alert("No product selected.");
+    return;
+  }
 
-  const handleReturn = (product) => {
-    const quantityToReturn = returnQuantities[product.id];
-    if (!quantityToReturn || isNaN(quantityToReturn)) {
-      alert("Enter a valid return quantity.");
-      return;
-    }
+  const quantityToReturn = Number(returnQuantity);
 
-    const returnData = JSON.parse(
-      localStorage.getItem("purchaseReturns") || "[]"
-    );
+  if (!quantityToReturn || isNaN(quantityToReturn)) {
+    alert("Enter a valid return quantity.");
+    return;
+  }
 
-    const returnedItem = {
-      ...product,
+  if (quantityToReturn > selectedProduct.quantity) {
+    alert("Return quantity cannot exceed available quantity.");
+    return;
+  }
+
+  //  Strict check: disallow return if no pharmacyProductId
+  if (!selectedProduct.pharmacyProductId) {
+    alert("This product is not linked to a pharmacy product. Cannot process return.");
+    return;
+  }
+
+  try {
+    const payload = {
+      purchaseItemId: selectedProduct.id,
+      pharmacyProductId: selectedProduct.pharmacyProductId,
       quantity: quantityToReturn,
-      originalQuantity: product.quantity,
+      costPrice: selectedProduct.costPrice,
+      batchNumber: selectedProduct.batchNumber,
+      expiryDate: selectedProduct.expiryDate,
+      reason: returnReason,
     };
 
-    localStorage.setItem(
-      "purchaseReturns",
-      JSON.stringify([returnedItem, ...returnData])
-    );
-    alert("Product return recorded.");
-  };
+    const response = await returnPurchaseItem(id, payload);
+
+    if (response.status === "success" ) {
+      alert("Return processed successfully!");
+
+      // Refresh data
+      const [itemRes, purchaseRes] = await Promise.all([
+        getPurchaseItems(id),
+        getPurchase(),
+      ]);
+
+      setPurchaseData(Array.isArray(itemRes.data) ? itemRes.data : []);
+      setPurchaseDetails(Array.isArray(purchaseRes.data) ? purchaseRes.data : []);
+
+      // Reset modal
+      setShowReturnModal(false);
+      setSelectedProduct(null);
+      setReturnReason("");
+      setReturnQuantity("");
+    }
+  } catch (error) {
+    console.error("Error returning product:", error);
+    alert(error.response?.data?.error || "Failed to return item");
+  }
+};
+
 
   return (
     <div className="p-10">
@@ -230,7 +278,6 @@ const SupplierDetail = () => {
         </div>
 
         {/* Right - Invoice Info */}
-
         <div className="text-xs space-y-2 text-white/90">
           <p>
             <b>Invoice No:</b> {purchaseDetails[0]?.invoiceNo || "N/A"}
@@ -274,7 +321,6 @@ const SupplierDetail = () => {
               <th className="px-2 py-1">Batch No</th>
               <th className="px-2 py-1">Expiry</th>
               <th className="px-2 py-1">Total</th>
-              <th className="px-2 py-1">Return Qty</th>
               <th className="px-2 py-1">Action</th>
             </tr>
           </thead>
@@ -292,20 +338,10 @@ const SupplierDetail = () => {
                     : "-"}
                 </td>
                 <td className="px-4 py-2">{product.lineTotal}</td>
-                <td className="px-4 py-2">
-                  <input
-                    type="text"
-                    className="px-2 py-1 w-16 font-semibold rounded-full bg-[#acc5b0ff] text-primary-50 outline-none text-[10px]"
-                    placeholder="Qty"
-                    value={returnQuantities[product.id] || ""}
-                    onChange={(e) =>
-                      handleReturnQuantityChange(product.id, e.target.value)
-                    }
-                  />
-                </td>
+
                 <td className="px-4 py-2">
                   <button
-                    onClick={() => handleReturn(product)}
+                    onClick={() => openReturnModal(product)}
                     className="text-xs px-2 py-1 bg-hf-50 text-white rounded-full"
                   >
                     Return
@@ -555,6 +591,59 @@ const SupplierDetail = () => {
                 className="px-4 py-2 bg-[#4F7942] text-white rounded hover:bg-hf-100"
               >
                 Add Purchase
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showReturnModal && selectedProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-20">
+          <div className="bg-db-50 p-6 rounded-md w-full max-w-md">
+            <h2 className="text-xl text-primary-50 font-semibold mb-4">
+              Return Product
+            </h2>
+            <p className="text-sm text-white mb-4">
+              Returning <b>{selectedProduct.medicineName}</b>
+            </p>
+
+            <div className="mb-3">
+              <label className="block text-xs font-semibold text-primary-50 mb-1">
+                Quantity
+              </label>
+              <input
+                type="number"
+                value={returnQuantity}
+                onChange={(e) => setReturnQuantity(e.target.value)}
+                placeholder="Enter return quantity"
+                className="w-full border px-3 py-2 rounded text-xs"
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="block text-xs font-semibold text-primary-50 mb-1">
+                Reason
+              </label>
+              <input
+                type="text"
+                value={returnReason}
+                onChange={(e) => setReturnReason(e.target.value)}
+                placeholder="Enter reason for return"
+                className="w-full border px-3 py-2 rounded text-xs"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setShowReturnModal(false)}
+                className="px-4 py-2 bg-gray-400 text-white rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmReturn}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                Confirm Return
               </button>
             </div>
           </div>

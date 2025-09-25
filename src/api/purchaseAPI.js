@@ -66,14 +66,14 @@ export const getInventoryByPOS = async () => {
 };
 
 // purchase return
-export const addReturnPurchaseItem = async () => {
+export const returnPurchaseItem = async (id, payload) => {
   try {
-    const response = await api.get("/inventory/getInventoryByPOS");
+    const response = await api.post(`/purchase/${id}/return`,payload);
     return response.data;
   } catch (error) {
-    console.error("Error fetching POS inventory:", error);
+    console.error("Error adding Purchase Return Item:", error.message);
     throw new Error(
-      error.response?.data?.message || "Failed to fetch POS inventory"
+      error.response?.data?.message || "Failed to Add Purchase Return Item"
     );
   }
 };

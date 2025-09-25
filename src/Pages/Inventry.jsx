@@ -282,7 +282,7 @@ const Inventry = () => {
                         {product.shelf || "-"}
                       </td>
                       <td className="px-4 py-2 text-xs font-medium">
-                        {product.recordLevel || "-"}
+                        {product.reorderLevel || "-"}
                       </td>
                       <td
                         colSpan="6"
