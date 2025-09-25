@@ -270,8 +270,11 @@ export const pos = [
   },
   {
     name: 'Customers',
-    href: '/pos/customers',
+    // href: '/pos/customers',
     icon: FaUserFriends,
+     subitems: [
+      { name: "counters", href: "/pos/customer/counter" },
+    ],
   },
   {
     name: 'Forcasting',
@@ -284,6 +287,81 @@ export const pos = [
     icon: TbReportAnalytics,
   },
 ];
+export const counterIndex = [
+  {
+    name: "Ahmed Khan",
+    email: "ahmed.khan@example.com",
+    counterName: "Counter 1",
+    status: true
+  },
+  {
+    name: "Sara Ali",
+    email: "sara.ali@example.com",
+    counterName: "Counter 2",
+    status: true
+  },
+  {
+    name: "Usman Tariq",
+    email: "usman.tariq@example.com",
+    counterName: "Counter 3",
+    status: false
+  },
+  {
+    name: "Ayesha Noor",
+    email: "ayesha.noor@example.com",
+    counterName: "Counter 4",
+    status: true
+  },
+  {
+    name: "Hassan Raza",
+    email: "hassan.raza@example.com",
+    counterName: "Counter 5",
+    status: false
+  },
+  {
+    name: "Mehwish Fatima",
+    email: "mehwish.fatima@example.com",
+    counterName: "Counter 6",
+    status: true
+  },
+  {
+    name: "Ali Haider",
+    email: "ali.haider@example.com",
+    counterName: "Counter 7",
+    status: false
+  },
+  {
+    name: "Zara Malik",
+    email: "zara.malik@example.com",
+    counterName: "Counter 8",
+    status: true
+  },
+  {
+    name: "Bilal Ahmad",
+    email: "bilal.ahmad@example.com",
+    counterName: "Counter 9",
+    status: false
+  },
+  {
+    name: "Laiba Shah",
+    email: "laiba.shah@example.com",
+    counterName: "Counter 10",
+    status: true
+  }
+];
+
+
+// src/constants/itemIndex.js
+
+export const itemIndex = [
+  { item: "Paracetamol", price: 20, quantity: 50 },
+  { item: "Ibuprofen", price: 35, quantity: 30 },
+  { item: "Cough Syrup", price: 120, quantity: 15 },
+  { item: "Antibiotic Cream", price: 80, quantity: 20 },
+  { item: "Multivitamins", price: 150, quantity: 25 }
+];
+
+
 
 export const salesData = [
   { day: 'Mon', sales: 400 },

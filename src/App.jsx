@@ -26,6 +26,9 @@ import RequireLogin from "./utils/RequireLogin";
 import PurchaseReturnDetail from "./Pages/PurchaseReturnDetail";
 import Sales from "./Pages/Sales";
 import SalesReturn from "./Pages/SalesReturn";
+import Counters from "./Pages/Counters";
+import CounterDetail from "./Pages/CounterDetail";
+import SaleDetail from "./Pages/CounterSaleDetail";
 const HomeLayout = () => (
   <>
     <Navbar />
@@ -97,16 +100,17 @@ const App = () => {
           <Route path="purchase/purchaseReturn" element={<PurchaseReturen />} />
           <Route path="sales/sales" element={<Sales />} />
           <Route path="sales/salesReturn" element={<SalesReturn />} />
-          <Route path="customers" element={<Customer />} />
+          <Route path="customer/counter" element={<Counters />} />
           <Route path="reports" element={<Reports />} />
           <Route path="settings" element={<Settings />} />
           <Route path="posPage" element={<PosPage />} />
 
           {/* Dynamic route under POS layout  */}
-          <Route path="purchase/:id" element={<SupplierDetail />} /> 
+          <Route path="purchase/supplier/:supplierName" element={<SupplierDetail />} />
           <Route path="purchase-return/supplier/:supplierName" element={<PurchaseReturnDetail />} />
+          <Route path="counter-detail/name/:name" element={<CounterDetail />} />
+          <Route path="/pos/sale-detail/:name/:date" element={<SaleDetail />} />
         </Route>
-
       </Routes>
     </>
   );
