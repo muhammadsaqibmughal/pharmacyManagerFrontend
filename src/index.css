@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 html, body {
-  background: aliceblue;
+  background: #f0f8ff;
   color: #1c1c21;
   overflow: auto;
   scroll-behavior: smooth;
@@ -21,11 +21,13 @@ html, body {
     --color-Secondary-50: #757575;
     --color-sucess-50: #4CAF50;
     --color-warning-50: #D32F2F;
-
+    --color-light-50: #f0f8ff;
+    --color-dark-50: #1c1c21;
     --color-hf-50: #0D47A1;
-    --color-bg-50: #4F7942;
+    --color-bg-50: #298AAA;
     --color-db-50: #F5F5F5;
-    --color-selected-50: #4CBB17;
+    --color-search-50: #96d1d2;
+    --color-selected-50:  #006992;
     --color-black-50: #1c1c21;
     --color-black-100: #0e0e10;
     --color-black-200: #282732;
@@ -66,6 +68,10 @@ html, body {
   .animation-wordSlider {
     animation: wordSlider 10s infinite cubic-bezier(0.71, 0.03, 0.34, 1);
   }
+}
+
+.table-Main {
+    @apply overflow-y-auto mt-2 rounded-xl border backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]
 }
 
 .card {

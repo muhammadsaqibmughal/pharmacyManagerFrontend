@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { addPurchase, getPurchase } from "../api/purchaseAPI";
 import { getSupplier } from "../api/supplierAPI";
+import { useTheme } from "../theme-support/ThemeContext";
 
 const ITEM_PER_PAGE = 5;
 
 const Purchase = () => {
+  const { theme } = useTheme();
+
   const [purchaseData, setPurchaseData] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [newPurchase, setNewPurchase] = useState({
@@ -140,22 +143,31 @@ const Purchase = () => {
   };
 
   return (
-    <div className="mt-8 p-10">
+    <div
+      className={`mt-8 p-10 ${
+        theme === "dark" ? "bg-dark-50" : " bg-light-50"
+      }`}
+    >
+      {" "}
       {/* Header */}
       <div className="flex justify-between max-md:flex-col max-md:gap-2 max-md:justify-center items-center mb-4">
-        <h2 className="text-2xl text-primary-50 max-md:text-xl font-bold">
+        <h2
+          className={`text-2xl ${
+            theme === "dark" ? "text-white/90" : " text-primary-50"
+          }  font-bold`}
+        >
+          {" "}
           Purchase Data
         </h2>
         <button
           onClick={() => setShowModal(true)}
-          className="bg-[#4F7942] text-white max-md:text-sm px-4 py-1 h-10 rounded-full hover:bg-hf-100"
+          className="bg-bg-50 hover:bg-selected-50 cursor-pointer text-white px-4 py-1 h-10 rounded-full hover:bg-hf-100"
         >
           Add New Purchase
         </button>
       </div>
-
       {/* Search */}
-      <div className="mb-4 bg-[#acc5b0ff] rounded-full">
+      <div className="mb-4 bg-search-50 rounded-full">
         <input
           type="text"
           placeholder="Search by supplier name..."
@@ -164,19 +176,35 @@ const Purchase = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-
       {/* Table */}
-      <div className="overflow-y-auto mt-2 rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg shadow-lg">
-        <table className="w-full table-auto text-primary-50">
-          <thead className="text-xs text-left uppercase bg-bg-50 text-white/80">
-            <tr>
-              <th className="px-4 py-2 border-b">Supplier</th>
-              <th className="px-4 py-2 border-b">Contact</th>
-              <th className="px-4 py-2 border-b">Invoice No</th>
-              <th className="px-4 py-2 border-b">Purchase Date</th>
-              <th className="px-4 py-2 border-b">Total Amount</th>
-              <th className="px-4 py-2 border-b">Discount</th>
-              <th className="px-4 py-2 border-b">Tax</th>
+      <div
+        className={`table-Main  ${
+          theme === "dark"
+            ? " border-white/10 bg-white/10"
+            : " border-black/10 bg-white/60"
+        }`}
+      >
+        {" "}
+        <table
+          className={`w-full table-auto ${
+            theme === "dark" ? "text-light-50" : " text-primary-50"
+          }`}
+        >
+          {" "}
+          <thead className="text-sm text-left h-11 uppercase bg-bg-50 text-white/80">
+            <tr
+              className={`border-b ${
+                theme === "dark" ? " border-white/20" : " border-black/20"
+              }`}
+            >
+              {" "}
+              <th className="px-4 py-2 ">Supplier</th>
+              <th className="px-4 py-2 ">Contact</th>
+              <th className="px-4 py-2 ">Invoice No</th>
+              <th className="px-4 py-2 ">Purchase Date</th>
+              <th className="px-4 py-2 ">Total Amount</th>
+              <th className="px-4 py-2 ">Discount</th>
+              <th className="px-4 py-2 ">Tax</th>
             </tr>
           </thead>
           <tbody>
@@ -184,28 +212,37 @@ const Purchase = () => {
               paginatedProducts.map((purchase, idx) => (
                 <tr
                   key={idx}
-                  className="hover:bg-white/10 transition-all duration-200"
+                  className={` px-4 py-2 text-xs font-medium border-b ${
+                    theme === "dark" ? " border-white/40" : " border-black/50"
+                  }`}
                 >
-                  <td className="px-4 py-2 border-b">
+                  <td className="px-4 py-2 text-xs font-medium">
                     <Link
-                      to={`/pos/purchase/${purchase.id}`} 
-                      className="text-blue-300 hover:text-blue-500 hover:underline"
+                      to={`/pos/purchase/${purchase.id}`}
+                      className="text-blue-500 hover:text-blue-700 hover:underline"
                     >
                       {getSupplierName(purchase.supplier)}{" "}
-                     
                     </Link>
                   </td>
 
-                  <td className="px-4 py-2 border-b">
+                  <td className="px-4 py-2 text-xs font-medium">
                     {getSupplierContact(purchase.supplier)}
                   </td>
-                  <td className="px-4 py-2 border-b">{purchase.invoiceNo}</td>
-                  <td className="px-4 py-2 border-b">
+                  <td className="px-4 py-2 text-xs font-medium">
+                    {purchase.invoiceNo}
+                  </td>
+                  <td className="px-4 py-2 text-xs font-medium">
                     {new Date(purchase.purchaseDate).toLocaleDateString()}
                   </td>
-                  <td className="px-4 py-2 border-b">{purchase.totalAmount}</td>
-                  <td className="px-4 py-2 border-b">{purchase.discount}</td>
-                  <td className="px-4 py-2 border-b">{purchase.tax}</td>
+                  <td className="px-4 py-2 text-xs font-medium">
+                    {purchase.totalAmount}
+                  </td>
+                  <td className="px-4 py-2 text-xs font-medium">
+                    {purchase.discount}
+                  </td>
+                  <td className="px-4 py-2 text-xs font-medium">
+                    {purchase.tax}
+                  </td>
                 </tr>
               ))
             ) : (
@@ -217,11 +254,17 @@ const Purchase = () => {
             )}
           </tbody>
         </table>
-
         {/* Pagination */}
-        <div className="flex justify-between items-center px-4 py-3 bg-white/10 border-t">
+        <div
+          className={`flex justify-between items-center px-4 py-3  border-t ${
+            theme === "dark"
+              ? "bg-white/20 border-white/20"
+              : "bg-white/10 border-white/20"
+          }`}
+        >
+          {" "}
           <button
-            className="px-4 py-1 bg-[#4F7942] text-white rounded-full disabled:opacity-50"
+            className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
           >
@@ -231,7 +274,7 @@ const Purchase = () => {
             Page {currentPage} of {totalPages}
           </span>
           <button
-            className="px-4 py-1 bg-[#4F7942] text-white rounded-full disabled:opacity-50"
+            className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
             onClick={() =>
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }
@@ -241,12 +284,22 @@ const Purchase = () => {
           </button>
         </div>
       </div>
-
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-10">
-          <div className="rounded-xl p-6 w-full max-w-lg border border-white/20 bg-white/10 backdrop-blur-lg shadow-lg">
-            <h2 className="text-xl text-white/90 font-semibold mb-4">
+          <div
+            className={`rounded-xl p-5 border ${
+              theme === "dark"
+                ? "border-white/20 bg-white/10"
+                : "border-white/40 bg-white/90"
+            }   backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]`}
+          >
+            <h2
+              className={`text-xl font-semibold mb-4 ${
+                theme === "dark" ? "text-light-50" : "text-primary-50"
+              }`}
+            >
+              {" "}
               Add New Purchase
             </h2>
             <div className="grid grid-cols-2 gap-4">
@@ -254,11 +307,15 @@ const Purchase = () => {
                 name="supplierId"
                 value={newPurchase.supplierId}
                 onChange={handleChange}
-                className="px-3 py-2 rounded-full text-xs bg-white/5 text-white/90 border"
+                className={`border-1 text-xs  font-semibold px-3 py-2 rounded-full w-full ${
+                  theme === "dark"
+                    ? "border-gray-300 text-white/90"
+                    : "border-black/40 text-primary-50"
+                }`}
               >
                 <option value="">Select Supplier</option>
                 {suppliers.map((s) => (
-                  <option key={s.id} value={s.id}>
+                  <option key={s.id} value={s.id} className="text-primary-50">
                     {s.name}
                   </option>
                 ))}
@@ -277,7 +334,11 @@ const Purchase = () => {
                   placeholder={field}
                   value={newPurchase[field]}
                   onChange={handleChange}
-                  className="px-3 py-2 rounded-full text-xs bg-white/5 text-white/90 border"
+                  className={`border-1 text-xs  font-semibold px-3 py-2 rounded-full w-full ${
+                    theme === "dark"
+                      ? "border-gray-300 text-white/90"
+                      : "border-black/40 text-primary-50"
+                  }`}
                 />
               ))}
             </div>
