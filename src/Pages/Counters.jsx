@@ -2,12 +2,13 @@ import { useState } from "react";
 import { counterIndex } from "../constants";
 import Card, { CardContent } from "../components/Card";
 import { Link } from "react-router-dom";
-import { createCounter } from "../api/counterAPI";
+import { createCounter, getCounterList } from "../api/counterAPI";
+import { useEffect } from "react";
 
 const ITEM_PER_PAGE = 5;
 
 const Counter = () => {
-  const [counterData, setCounterData] = useState(counterIndex);
+  const [counterData, setCounterData] = useState([]);
   const [newCounter, setNewCounter] = useState({
     name: "",
     email: "",
@@ -20,7 +21,7 @@ const Counter = () => {
   // ****** Filter Data ****
   const filteredItems = counterData.filter((product) => {
     const term = searchTerm.toLowerCase();
-    return product.name.toLowerCase().includes(term);
+    return (product.counterName || "").toLowerCase().includes(term);
   });
 
   // *********** Pagination **********
@@ -30,6 +31,19 @@ const Counter = () => {
     currentPage * ITEM_PER_PAGE
   );
 
+  const fetchCounters = async () => {
+    try {
+      const response = await getCounterList();
+      setCounterData(Array.isArray(response.data) ? response.data : []);
+    } catch (err) {
+      console.log("something wrong in fetchin couters");
+    }
+  };
+
+  useEffect(() => {
+    fetchCounters();
+  }, []);
+
   // ************* handle Adding New Counter **********
   const handleAddCounter = async () => {
     setCounterData([newCounter, ...counterData]);
@@ -37,6 +51,7 @@ const Counter = () => {
       const response = await createCounter(newCounter);
       if (response.status == "success") {
         alert("created counter");
+        fetchCounters();
         setShowModal(false);
         resetForm();
       }
@@ -48,6 +63,7 @@ const Counter = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewCounter({ ...newCounter, [name]: value });
+    console.log(counterData);
   };
 
   // *********** Clear Form Fields *************
@@ -118,11 +134,11 @@ const Counter = () => {
                     )}`}
                     className="text-blue-300 hover:text-blue-500 hover:underline"
                   >
-                    {product.name}
+                    {product.staffUsers[0].name}
                   </Link>
                 </td>
                 <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
-                  {product.email}
+                  {product.staffUsers[0].email}
                 </td>
                 <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
                   {product.counterName || "N/A"}
