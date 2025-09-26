@@ -14,7 +14,7 @@ export const createCounter = async (data) => {
 };
 export const getCounterList = async () => {
   try {
-    const response = await api.get("/counter/get-counter");
+    const response = await api.get("/counter/get-counters");
     return response.data;
   } catch (error) {
     console.error("Error getting counter list:", error);
