@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { addPackage, getPackage } from "../api/packageAPI";
 import { getProduct } from "../api/productsApi";
 import { useTheme } from "../theme-support/ThemeContext";
+import { FaSpinner } from "react-icons/fa";
 
 const packageTypeOptions = [
   "Strip",
@@ -340,7 +341,9 @@ const AllPackages = () => {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-4">Loading packages...</div>
+        <div className="flex items-center justify-center py-4">
+          <FaSpinner className="animate-spin text-blue-500 text-5xl" />
+        </div>
       ) : (
         <>
           <div

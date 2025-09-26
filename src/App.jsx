@@ -29,6 +29,7 @@ import SalesReturn from "./Pages/SalesReturn";
 import Counters from "./Pages/Counters";
 import CounterDetail from "./Pages/CounterDetail";
 import SaleDetail from "./Pages/CounterSaleDetail";
+import OnlyCounter from "./Pages/OnlyCounter"
 const HomeLayout = () => (
   <>
     <Navbar />
@@ -60,6 +61,8 @@ const App = () => {
         <Route path="/" element={<HomeLayout />} />
         <Route path="/signup" element={<SignUpLayout />} />
         <Route path="/verify-email" element={<OtpVerification />} />
+        <Route path="/onlyCounter" element={<OnlyCounter />} />
+
 
         {/* Protected Routes: Only logged-in users can access */}
         <Route

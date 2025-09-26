@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Card, { CardContent } from "../components/Card";
+import { FaSpinner } from "react-icons/fa";
 import { getProduct, addProduct } from "../api/productsApi";
 import { useTheme } from "../theme-support/ThemeContext";
 
@@ -168,88 +168,96 @@ const AllProduct = () => {
         />
       </div>
       {/* Product Table */}
-      <div
-        className={`table-Main  ${
-          theme === "dark"
-            ? " border-white/10 bg-white/10"
-            : " border-black/10 bg-white/60"
-        }`}
-      >
-        <table
-          className={`w-full table-auto ${
-            theme === "dark" ? "text-light-50" : " text-primary-50"
-          }`}
-        >
-          <thead className="text-sm text-left uppercase bg-bg-50 text-white/80">
-            <tr
-              className={`border-b ${
-                theme === "dark" ? " border-white/20" : " border-black/20"
+      {isLoading ? (
+        <div className="flex items-center justify-center py-4">
+          <FaSpinner className="animate-spin text-blue-500 text-5xl" />
+        </div>
+      ) : (
+        <>
+          <div
+            className={`table-Main  ${
+              theme === "dark"
+                ? " border-white/10 bg-white/10"
+                : " border-black/10 bg-white/60"
+            }`}
+          >
+            <table
+              className={`w-full table-auto ${
+                theme === "dark" ? "text-light-50" : " text-primary-50"
               }`}
             >
-              <th className="px-4 py-3">Brand Name</th>
-              <th className="px-4 py-3">Generic Name</th>
-              <th className="px-4 py-3">Manufacturer</th>
-              <th className="px-4 py-3">Barcode</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedProducts.map((product) => (
-              <tr
-                key={product.id || product.barcode || product.brandName}
-                className={` px-4 py-2 text-xs font-medium border-b ${
-                  theme === "dark" ? " border-white/40" : " border-black/50"
-                }`}
-              >
-                <td className="px-4 py-2 text-xs font-medium">
-                  {product.brandName}
-                </td>
-                <td className="px-4 py-2 text-xs font-medium">
-                  {product.genericName}
-                </td>
-                <td className="px-4 py-2 text-xs font-medium">
-                  {product.manufacturer}
-                </td>
-                <td className="px-4 py-2 text-xs font-medium">
-                  {product.barcode}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+              <thead className="text-sm text-left uppercase bg-bg-50 text-white/80">
+                <tr
+                  className={`border-b ${
+                    theme === "dark" ? " border-white/20" : " border-black/20"
+                  }`}
+                >
+                  <th className="px-4 py-3">Brand Name</th>
+                  <th className="px-4 py-3">Generic Name</th>
+                  <th className="px-4 py-3">Manufacturer</th>
+                  <th className="px-4 py-3">Barcode</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedProducts.map((product) => (
+                  <tr
+                    key={product.id || product.barcode || product.brandName}
+                    className={` px-4 py-2 text-xs font-medium border-b ${
+                      theme === "dark" ? " border-white/40" : " border-black/50"
+                    }`}
+                  >
+                    <td className="px-4 py-2 text-xs font-medium">
+                      {product.brandName}
+                    </td>
+                    <td className="px-4 py-2 text-xs font-medium">
+                      {product.genericName}
+                    </td>
+                    <td className="px-4 py-2 text-xs font-medium">
+                      {product.manufacturer}
+                    </td>
+                    <td className="px-4 py-2 text-xs font-medium">
+                      {product.barcode}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
 
-        {/* Pagination */}
-        <div
-          className={`flex justify-between items-center px-4 py-3  border-t ${
-            theme === "dark"
-              ? "bg-white/20 border-white/20"
-              : "bg-white/10 border-white/20"
-          }`}
-        >
-          <button
-            className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </button>
-          <span
-            className={`text-sm text-center ${
-              theme === "dark" ? "text-light-50" : "text-primary-50"
-            } `}
-          >
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </button>
-        </div>
-      </div>
+            {/* Pagination */}
+            <div
+              className={`flex justify-between items-center px-4 py-3  border-t ${
+                theme === "dark"
+                  ? "bg-white/20 border-white/20"
+                  : "bg-white/10 border-white/20"
+              }`}
+            >
+              <button
+                className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </button>
+              <span
+                className={`text-sm text-center ${
+                  theme === "dark" ? "text-light-50" : "text-primary-50"
+                } `}
+              >
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </>
+      )}
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-10">

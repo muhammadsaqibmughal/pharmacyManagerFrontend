@@ -144,6 +144,7 @@ export const footerImages = [
   }
 
 ]
+
  
 
 export const fields = [
@@ -1037,3 +1038,130 @@ export const purchases = [
     lineTotal: "180"
   }
 ];
+
+
+
+export const items = [
+  {
+    itemName: "Paracetamol 500mg",
+    quantity: 120,
+    shelfNo: "A1",
+    price: 2.5,
+  },
+  {
+    itemName: "Ibuprofen 200mg",
+    quantity: 80,
+    shelfNo: "A2",
+    price: 3.0,
+  },
+  {
+    itemName: "Amoxicillin 250mg",
+    quantity: 45,
+    shelfNo: "B1",
+    price: 5.0,
+  },
+  {
+    itemName: "Cetirizine 10mg",
+    quantity: 150,
+    shelfNo: "B2",
+    price: 1.75,
+  },
+  {
+    itemName: "Azithromycin 500mg",
+    quantity: 30,
+    shelfNo: "B3",
+    price: 7.2,
+  },
+  {
+    itemName: "Cough Syrup (100ml)",
+    quantity: 60,
+    shelfNo: "C1",
+    price: 4.0,
+  },
+  {
+    itemName: "Vitamin C 1000mg",
+    quantity: 100,
+    shelfNo: "C2",
+    price: 2.2,
+  },
+  {
+    itemName: "Loratadine 10mg",
+    quantity: 90,
+    shelfNo: "D1",
+    price: 2.8,
+  },
+  {
+    itemName: "Metformin 500mg",
+    quantity: 70,
+    shelfNo: "D2",
+    price: 6.0,
+  },
+  {
+    itemName: "Insulin Injection",
+    quantity: 20,
+    shelfNo: "D3",
+    price: 25.0,
+  },
+  {
+    itemName: "Omeprazole 20mg",
+    quantity: 110,
+    shelfNo: "E1",
+    price: 3.5,
+  },
+  {
+    itemName: "Antiseptic Cream",
+    quantity: 35,
+    shelfNo: "E2",
+    price: 6.8,
+  },
+  {
+    itemName: "Pain Relief Spray",
+    quantity: 50,
+    shelfNo: "F1",
+    price: 8.5,
+  },
+  {
+    itemName: "Multivitamin Tablets",
+    quantity: 200,
+    shelfNo: "F2",
+    price: 4.5,
+  },
+  {
+    itemName: "Hydrocortisone Cream",
+    quantity: 40,
+    shelfNo: "F3",
+    price: 3.25,
+  },
+  {
+    itemName: "Antacid Tablets",
+    quantity: 100,
+    shelfNo: "G1",
+    price: 1.9,
+  },
+  {
+    itemName: "Oral Rehydration Salts (ORS)",
+    quantity: 75,
+    shelfNo: "G2",
+    price: 1.5,
+  },
+  {
+    itemName: "Bandages (5-pack)",
+    quantity: 60,
+    shelfNo: "G3",
+    price: 2.0,
+  },
+  {
+    itemName: "Digital Thermometer",
+    quantity: 25,
+    shelfNo: "H1",
+    price: 12.0,
+  },
+  {
+    itemName: "Pulse Oximeter",
+    quantity: 15,
+    shelfNo: "H2",
+    price: 18.0,
+  },
+];
+
+
