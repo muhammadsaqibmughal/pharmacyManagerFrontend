@@ -306,151 +306,167 @@ const AllPackages = () => {
   );
 
   return (
-    <div
-      className={`mt-8 p-10 ${
-        theme === "dark" ? "bg-dark-50" : " bg-light-50"
-      }`}
-    >
-      <div className="flex justify-between items-center mb-4">
-        <h2
-          className={`text-2xl ${
-            theme === "dark" ? "text-white/90" : " text-primary-50"
-          }  font-bold`}
+    <>
+      {/* Table and Header Section */}
+      
+        <div
+          className={`mt-8 p-10  ${
+            theme === "dark" ? "bg-dark-50" : " bg-light-50"
+          }`}
         >
-          All Packages
-        </h2>
-        <button
-          onClick={() => {
-            setShowModal(true);
-            setErrorMsg("");
-          }}
-          className="bg-bg-50 hover:bg-selected-50 cursor-pointer text-white px-4 py-1 h-10 rounded-full hover:bg-hf-100"
-        >
-          Add Package
-        </button>
-      </div>
-
-      <div className="mb-4 bg-search-50 rounded-full">
-        <input
-          type="text"
-          placeholder="Search by medicine or package type..."
-          className="px-4 py-2 w-full outline-none font-semibold text-primary-50  text-sm"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-
-      {isLoading ? (
-        <div className="flex items-center justify-center py-4">
-          <FaSpinner className="animate-spin text-blue-500 text-5xl" />
-        </div>
-      ) : (
-        <>
-          <div
-            className={`table-Main  ${
-              theme === "dark"
-                ? " border-white/10 bg-white/10"
-                : " border-black/10 bg-white/60"
-            }`}
-          >
-            <table
-              className={`w-full table-auto ${
-                theme === "dark" ? "text-light-50" : " text-primary-50"
+          {/* Header */}
+          <div className="flex justify-between items-center mb-4">
+            <h2
+              className={`text-2xl font-bold ${
+                theme === "dark" ? "text-white/90" : " text-primary-50"
               }`}
             >
-              <thead className="text-sm text-left uppercase bg-bg-50 text-white/80">
-                <tr
-                  className={`border-b ${
-                    theme === "dark" ? " border-white/20" : " border-black/20"
+              All Packages
+            </h2>
+            <button
+              onClick={() => {
+                setShowModal(true);
+                setErrorMsg("");
+              }}
+              className="bg-bg-50 hover:bg-selected-50 cursor-pointer text-white px-4 py-1 h-10 rounded-full hover:bg-hf-100"
+            >
+              Add Package
+            </button>
+          </div>
+
+          {/* Search Input */}
+          <div className="mb-4 bg-search-50 rounded-full">
+            <input
+              type="text"
+              placeholder="Search by medicine or package type..."
+              className="px-4 py-2 w-full outline-none font-semibold text-primary-50 text-sm"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          {/* Data Table */}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-4">
+              <FaSpinner className="animate-spin text-blue-500 text-5xl" />
+            </div>
+          ) : (
+            <>
+              <div
+                className={`table-Main ${
+                  theme === "dark"
+                    ? "border-white/10 bg-white/10"
+                    : "border-black/10 bg-white/60"
+                }`}
+              >
+                <table
+                  className={`w-full table-auto ${
+                    theme === "dark" ? "text-light-50" : "text-primary-50"
                   }`}
                 >
-                  <th className="px-4 py-2  ">Medicine</th>
-                  <th className="px-4 py-2  ">Package Type</th>
-                  <th className="px-4 py-2 ">Units Per Pack</th>
-                  <th className="px-4 py-2  ">Unit Type</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedProducts.map((product) => (
-                  <tr
-                    key={`${product.medicineId}-${product.packageType}-${product.unitsPerPack}`}
-                    className={` px-4 py-2 text-xs font-medium border-b ${
-                      theme === "dark" ? " border-white/40" : " border-black/50"
+                  <thead className="text-sm text-left uppercase bg-bg-50 text-white/80">
+                    <tr
+                      className={
+                        theme === "dark"
+                          ? "border-b border-white/20"
+                          : "border-b border-black/20"
+                      }
+                    >
+                      <th className="px-4 py-2">Medicine</th>
+                      <th className="px-4 py-2">Package Type</th>
+                      <th className="px-4 py-2">Units Per Pack</th>
+                      <th className="px-4 py-2">Unit Type</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedProducts.map((product) => (
+                      <tr
+                        key={`${product.medicineId}-${product.packageType}-${product.unitsPerPack}`}
+                        className={
+                          theme === "dark"
+                            ? "border-b border-white/40"
+                            : "border-b border-black/50"
+                        }
+                      >
+                        <td className="px-4 py-2 text-xs font-medium">
+                          {getMedicineBrandName(product.medicineId)}
+                        </td>
+                        <td className="px-4 py-2 text-xs font-medium">
+                          {product.packageType}
+                        </td>
+                        <td className="px-4 py-2 text-xs font-medium">
+                          {product.unitsPerPack}
+                        </td>
+                        <td className="px-4 py-2 text-xs font-medium">
+                          {product.unitType}
+                        </td>
+                      </tr>
+                    ))}
+                    {paginatedProducts.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan={4}
+                          className="text-center text-xs py-4 text-gray-400"
+                        >
+                          No packages found.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+
+                {/* Pagination */}
+                <div
+                  className={`flex justify-between items-center px-4 py-3 border-t ${
+                    theme === "dark"
+                      ? "bg-white/20 border-white/20"
+                      : "bg-white/10 border-white/20"
+                  }`}
+                >
+                  <button
+                    className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </button>
+                  <span
+                    className={`text-sm ${
+                      theme === "dark" ? "text-light-50" : "text-primary-50"
                     }`}
                   >
-                    <td className="px-4 py-2 text-xs font-medium ">
-                      {getMedicineBrandName(product.medicineId)}
-                    </td>
-                    <td className="px-4 py-2 text-xs font-medium ">
-                      {product.packageType}
-                    </td>
-                    <td className="px-4 py-2 text-xs font-medium ">
-                      {product.unitsPerPack}
-                    </td>
-                    <td className="px-4 py-2 text-xs font-medium ">
-                      {product.unitType}
-                    </td>
-                  </tr>
-                ))}
-                {paginatedProducts.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={4}
-                      className="text-center text-xs py-4 text-gray-400"
-                    >
-                      No packages found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-            {/* Pagination */}
-            <div
-              className={`flex justify-between items-center px-4 py-3  border-t ${
-                theme === "dark"
-                  ? "bg-white/20 border-white/20"
-                  : "bg-white/10 border-white/20"
-              }`}
-            >
-              <button
-                className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </button>
-              <span
-                className={`text-sm text-center ${
-                  theme === "dark" ? "text-light-50" : "text-primary-50"
-                } `}
-              >
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                }
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        </>
-      )}
-      {/* </CardContent>
-      </Card> */}
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                    }
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      
 
-      {/* Modal */}
+      {/* Modal Section */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-10">
+        <div
+          className="fixed inset-0 bg-primary-50 flex justify-center items-center z-10"
+          // style={{ backgroundColor: "rgba(0, 0, 0, 0.03)" }}
+        >
           <div
             className={`rounded-xl p-5 border ${
               theme === "dark"
                 ? "border-white/20 bg-white/10"
                 : "border-white/40 bg-white/90"
-            }   backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]`}
+            } backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]`}
           >
             <h2
               className={`text-xl font-semibold mb-4 ${
@@ -475,7 +491,7 @@ const AllPackages = () => {
                 placeholder="Units Per Pack"
                 value={newProduct.unitsPerPack}
                 onChange={handleChange}
-                className={`border-1 text-xs  font-semibold px-3 py-2 rounded-full w-full ${
+                className={`border-1 text-xs font-semibold px-3 py-2 rounded-full w-full ${
                   theme === "dark"
                     ? "border-gray-300 text-white/90"
                     : "border-black/40 text-primary-50"
@@ -491,7 +507,7 @@ const AllPackages = () => {
                   setShowModal(false);
                   resetForm();
                 }}
-                className="px-4 py-2 rounded-full bg-gray-400 text-white hover:bg-white/80 hover:text-primary-50 "
+                className="px-4 py-2 rounded-full bg-gray-400 text-white hover:bg-white/80 hover:text-primary-50"
               >
                 Cancel
               </button>
@@ -507,7 +523,7 @@ const AllPackages = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
