@@ -52,6 +52,32 @@ export const getPurchaseItems = async (id) => {
   }
 };
 
+// return a purchase item
+export const returnPurchaseItem = async (id, payload) => {
+  try {
+    const response = await api.post(`/purchase/${id}/return`,payload);
+    return response.data;
+  } catch (error) {
+    console.error("Error adding Purchase Return Item:", error.message);
+    throw new Error(
+      error.response?.data?.message || "Failed to Add Purchase Return Item"
+    );
+  }
+};
+
+// get all purchase returns
+export const getPurchaseReturns= async () => {
+  try {
+    const response = await api.get(`/purchase/get-purchase-return`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching purchase return :", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch purchase returns"
+    );
+  }
+};
+
 // Get inventory for POS
 export const getInventoryByPOS = async () => {
   try {
@@ -65,15 +91,3 @@ export const getInventoryByPOS = async () => {
   }
 };
 
-// purchase return
-export const returnPurchaseItem = async (id, payload) => {
-  try {
-    const response = await api.post(`/purchase/${id}/return`,payload);
-    return response.data;
-  } catch (error) {
-    console.error("Error adding Purchase Return Item:", error.message);
-    throw new Error(
-      error.response?.data?.message || "Failed to Add Purchase Return Item"
-    );
-  }
-};
