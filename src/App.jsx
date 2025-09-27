@@ -29,8 +29,9 @@ import SalesReturn from "./Pages/SalesReturn";
 import Counters from "./Pages/Counters";
 import CounterDetail from "./Pages/CounterDetail";
 import SaleDetail from "./Pages/CounterSaleDetail";
-import OnlyCounter from "./Pages/OnlyCounter"
-import SalesDetail from "./Pages/SalesDetail"
+import OnlyCounter from "./Pages/OnlyCounter";
+import SalesDetail from "./Pages/SalesDetail";
+import ProfilePage from "./Pages/ProfilePage";
 const HomeLayout = () => (
   <>
     <Navbar />
@@ -63,7 +64,7 @@ const App = () => {
         <Route path="/signup" element={<SignUpLayout />} />
         <Route path="/verify-email" element={<OtpVerification />} />
         <Route path="/onlyCounter" element={<OnlyCounter />} />
-
+        <Route path="/profile" element={<ProfilePage />} />
 
         {/* Protected Routes: Only logged-in users can access */}
         <Route
@@ -108,6 +109,7 @@ const App = () => {
           <Route path="reports" element={<Reports />} />
           <Route path="settings" element={<Settings />} />
           <Route path="posPage" element={<PosPage />} />
+          <Route path="profile" element={<ProfilePage />} />
 
           {/* Dynamic route under POS layout  */}
           <Route path="purchase/:id" element={<SupplierDetail />} />
@@ -116,7 +118,6 @@ const App = () => {
             element={<PurchaseReturnDetail />}
           />
           <Route path="/pos/sale-detail/:id" element={<SalesDetail />} />
-
 
           <Route path="counter-detail/name/:name" element={<CounterDetail />} />
           <Route path="/pos/sale-detail/:name/:date" element={<SaleDetail />} />

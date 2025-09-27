@@ -649,12 +649,12 @@ const SupplierDetail = () => {
                       onChange={handleChange}
                       disabled={isLoading && field !== "pharmacyProductId"}
                       className={`border text-xs border-gray-300 font-semibold text-primary-50 px-3 py-2 rounded w-full ${
-                        isLoading && field !== "pharmacyProductId"
+                        (isLoading && field !== "pharmacyProductId"
                           ? "bg-gray-200 cursor-not-allowed"
                           : "",
-                            theme === "dark"
-                        ? "border-gray-300 text-white/90"
-                        : "border-black/40 text-primary-50"
+                        theme === "dark"
+                          ? "border-gray-300 text-white/90"
+                          : "border-black/40 text-primary-50")
                       }`}
                     />
                   )}

@@ -1,13 +1,17 @@
-import { FaPills, FaSyringe, FaHeartbeat, FaMortarPestle } from "react-icons/fa";
+import {
+  FaPills,
+  FaSyringe,
+  FaHeartbeat,
+  FaMortarPestle,
+} from "react-icons/fa";
 import { GiMedicines, GiHealthCapsule } from "react-icons/gi";
 import { MdLocalPharmacy } from "react-icons/md";
 import {
-
   FaCashRegister,
   FaClipboardList,
   FaExchangeAlt,
-  FaMapMarkedAlt
-} from 'react-icons/fa';
+  FaMapMarkedAlt,
+} from "react-icons/fa";
 // import { MdDashboard } from 'react-icons/md';
 // import { FiBox, FiUsers, FiBarChart2 } from 'react-icons/fi';
 // import { AiOutlineShoppingCart } from 'react-icons/ai';
@@ -20,223 +24,213 @@ import { FaBoxOpen, FaShoppingCart, FaUserFriends } from "react-icons/fa";
 import { AiOutlineBarChart } from "react-icons/ai";
 import { TbReportAnalytics } from "react-icons/tb";
 
-
 export const navLinks = [
-    {
-    name: 'Products',
-    url: '/products',
-    },
-     {
-    name: 'Services',
-    url: '/services',
-    },
-     {
-    name: 'People',
-    url: '/people',
-    },
-     {
-    name: 'Features',
-    url: '/feature',
-    },
-]
-
-
-export const words = [
-    {
-        text: "Medication",
-        icon: FaPills
-    },
-   {
-        text: "Vaccination",
-        icon: FaSyringe
-    },
-    { 
-        text: "Wellness",
-        icon: FaHeartbeat
-    },
-    {
-        text: "Pharmacy",
-        icon: MdLocalPharmacy 
-    },
-    { 
-        text: "Health", 
-        icon: GiHealthCapsule 
-    },
-    { 
-        text: "Formulations",
-        icon: FaMortarPestle 
-    },
-
-    { 
-        text: "Prescriptions",
-        icon: GiMedicines
-    },
+  {
+    name: "Products",
+    url: "/products",
+  },
+  {
+    name: "Services",
+    url: "/services",
+  },
+  {
+    name: "People",
+    url: "/people",
+  },
+  {
+    name: "Features",
+    url: "/feature",
+  },
 ];
 
+export const words = [
+  {
+    text: "Medication",
+    icon: FaPills,
+  },
+  {
+    text: "Vaccination",
+    icon: FaSyringe,
+  },
+  {
+    text: "Wellness",
+    icon: FaHeartbeat,
+  },
+  {
+    text: "Pharmacy",
+    icon: MdLocalPharmacy,
+  },
+  {
+    text: "Health",
+    icon: GiHealthCapsule,
+  },
+  {
+    text: "Formulations",
+    icon: FaMortarPestle,
+  },
+
+  {
+    text: "Prescriptions",
+    icon: GiMedicines,
+  },
+];
 
 export const expCards = [
   {
-    review: 'Managed all drug inventory, batches, and suppliers efficiently.',
-    imgPath: '/images/pharmacy1.png',
-    logoPath: '/images/pharmacyLogo1.png',
-    title: 'Inventory Management',
+    review: "Managed all drug inventory, batches, and suppliers efficiently.",
+    imgPath: "/images/pharmacy1.png",
+    logoPath: "/images/pharmacyLogo1.png",
+    title: "Inventory Management",
     responsibilities: [
-      'Tracked medicine stock levels and expiry dates.',
-      'Generated low-stock alerts automatically.',
-      'Integrated with suppliers for automatic reordering.',
+      "Tracked medicine stock levels and expiry dates.",
+      "Generated low-stock alerts automatically.",
+      "Integrated with suppliers for automatic reordering.",
     ],
     icon: FaPills,
-    iconClass: 'text-3xl text-green-400',
+    iconClass: "text-3xl text-green-400",
   },
   {
-    review: 'Handled secure and fast billing with multiple payment modes.',
-    imgPath: '/images/pharmacy2.png',
-    logoPath: '/images/pharmacyLogo2.png',
-    title: 'Billing & Payments',
+    review: "Handled secure and fast billing with multiple payment modes.",
+    imgPath: "/images/pharmacy2.png",
+    logoPath: "/images/pharmacyLogo2.png",
+    title: "Billing & Payments",
     responsibilities: [
-      'Integrated barcode scanner for quick billing.',
-      'Supported cash, card, and digital payments.',
-      'Printed customer receipts with GST and discounts.',
+      "Integrated barcode scanner for quick billing.",
+      "Supported cash, card, and digital payments.",
+      "Printed customer receipts with GST and discounts.",
     ],
     icon: FaCashRegister,
-    iconClass: 'text-3xl text-yellow-400',
+    iconClass: "text-3xl text-yellow-400",
   },
   {
-    review: 'Tracked customer purchases, invoices, and reports.',
-    imgPath: '/images/pharmacy3.png',
-    logoPath: '/images/pharmacyLogo3.png',
-    title: 'Sales Reports',
+    review: "Tracked customer purchases, invoices, and reports.",
+    imgPath: "/images/pharmacy3.png",
+    logoPath: "/images/pharmacyLogo3.png",
+    title: "Sales Reports",
     responsibilities: [
-      'Daily and monthly sales summary generation.',
-      'Exported sales reports to Excel and PDF.',
-      'Enabled data-driven decision making.',
+      "Daily and monthly sales summary generation.",
+      "Exported sales reports to Excel and PDF.",
+      "Enabled data-driven decision making.",
     ],
     icon: FaClipboardList,
-    iconClass: 'text-3xl text-blue-400',
+    iconClass: "text-3xl text-blue-400",
   },
   {
-    review: 'Uses GPS to tag customer addresses or deliver locations.',
-    imgPath: '/images/pharmacy5.png',
-    logoPath: '/images/pharmacyLogo5.png',
-    title: 'Location Services',
+    review: "Uses GPS to tag customer addresses or deliver locations.",
+    imgPath: "/images/pharmacy5.png",
+    logoPath: "/images/pharmacyLogo5.png",
+    title: "Location Services",
     responsibilities: [
-      'Prompts user to enable GPS.',
-      'Captures coordinates for deliveries.',
-      'Integrated with Google Maps API.',
+      "Prompts user to enable GPS.",
+      "Captures coordinates for deliveries.",
+      "Integrated with Google Maps API.",
     ],
     icon: FaMapMarkedAlt,
-    iconClass: 'text-3xl text-red-400',
+    iconClass: "text-3xl text-red-400",
   },
 ];
 
 export const footerImages = [
   {
-    img: '/images/fb.png'
+    img: "/images/fb.png",
   },
   {
-    img: '../images/insta.png'
+    img: "../images/insta.png",
   },
   {
-    img: './images/x.png'
+    img: "./images/x.png",
   },
   {
-    img: '../images/linkedin.png'
-  }
-
-]
-
- 
+    img: "../images/linkedin.png",
+  },
+];
 
 export const fields = [
   // personal info
   {
-    name: 'phoneNumber',
-    label: 'Phone Number',
-    placeholder: 'Enter your phone number (e.g., 03089156503)',
-    type: 'tel',
-    section: 'personal',
+    name: "phoneNumber",
+    label: "Phone Number",
+    placeholder: "Enter your phone number (e.g., 03089156503)",
+    type: "tel",
+    section: "personal",
   },
   {
-    name: 'frontId',
-    label: 'Front ID',
-    placeholder: 'Add your Front ID card Picture',
-    type: 'file',
-    section: 'personal',
+    name: "frontId",
+    label: "Front ID",
+    placeholder: "Add your Front ID card Picture",
+    type: "file",
+    section: "personal",
   },
   {
-    name: 'backId',
-    label: 'Back ID',
-    placeholder: 'Add your Back ID card Picture',
-    type: 'file',
-    section: 'personal',
+    name: "backId",
+    label: "Back ID",
+    placeholder: "Add your Back ID card Picture",
+    type: "file",
+    section: "personal",
   },
 
   // pharmacy info
   {
-    name: 'pharmacyName',
-    label: 'Pharmacy Name',
-    placeholder: 'Enter your pharmacy name',
-    type: 'text',
-    section: 'pharmacy',
+    name: "pharmacyName",
+    label: "Pharmacy Name",
+    placeholder: "Enter your pharmacy name",
+    type: "text",
+    section: "pharmacy",
   },
   {
+    name: "state",
+    label: "State",
+    placeholder: "Enter your state",
+    section: "pharmacy",
+  },
+  {
+    name: "Country",
+    label: "Country",
+    placeholder: "Enter your Country",
+    type: "text",
+    section: "pharmacy",
+  },
 
-    name: 'state',
-    label: 'State',
-    placeholder: 'Enter your state',
-    section: 'pharmacy',
+  {
+    label: "City",
+    placeholder: "Enter your city",
+    type: "text",
+    section: "pharmacy",
   },
   {
-    name:"Country",
-    label: 'Country',
-    placeholder: 'Enter your Country',
-    type: 'text',
-    section: 'pharmacy',
-  },
-
-{
-    label: 'City',
-    placeholder: 'Enter your city',
-    type: 'text',
-    section: 'pharmacy',
+    name: "address",
+    label: "Address",
+    placeholder: "Enter your address",
+    type: "text",
+    section: "pharmacy",
   },
   {
-    name: 'address',
-    label: 'Address',
-    placeholder: 'Enter your address',
-    type: 'text',
-    section: 'pharmacy',
+    name: "licenseNumber",
+    label: "License Number",
+    placeholder: "Enter your license number",
+    type: "text",
+    section: "pharmacy",
   },
   {
-    name: 'licenseNumber',
-    label: 'License Number',
-    placeholder: 'Enter your license number',
-    type: 'text',
-    section: 'pharmacy',
-  },
-  {
-    name: 'licensePicture',
-    label: 'License Picture',
-    placeholder: 'Add your License Picture',
-    type: 'file',
-    section: 'pharmacy',
+    name: "licensePicture",
+    label: "License Picture",
+    placeholder: "Add your License Picture",
+    type: "file",
+    section: "pharmacy",
   },
 ];
 
-
-
-
 export const pos = [
   {
-    name: 'Dashboard',
-    href: '/pos/dashboard',
+    name: "Dashboard",
+    href: "/pos/dashboard",
     icon: MdDashboard,
   },
   {
-    name: 'Products',
+    name: "Products",
     // href: '/pos/products',
-    icon: FaBoxOpen ,
-    subitems: [  
+    icon: FaBoxOpen,
+    subitems: [
       { name: "Add Product", href: "/pos/products/add" },
       { name: "Add Package", href: "/pos/products/package" },
       { name: "Inventory Management", href: "/pos/products/inventry" },
@@ -244,47 +238,43 @@ export const pos = [
     ],
   },
   {
-    name: 'POS',
-    href: '/pos/pos',
+    name: "POS",
+    href: "/pos/pos",
     icon: MdPointOfSale,
   },
-    {
-    name: 'Sales',
+  {
+    name: "Sales",
     // href: '/pos/products',
-    icon: AiOutlineBarChart ,
-    subitems: [  
+    icon: AiOutlineBarChart,
+    subitems: [
       { name: "Sales", href: "/pos/sales/sales" },
       { name: "Sales Return", href: "/pos/sales/salesReturn" },
     ],
-
   },
-    {
-    name: 'Purchase',
+  {
+    name: "Purchase",
     // href: '/pos/products',
-    icon: FaShoppingCart ,
+    icon: FaShoppingCart,
     subitems: [
       { name: "Supplier", href: "/pos/purchase/supplier" },
       { name: "Purchase", href: "/pos/purchase/purchase" },
-      { name: "Purchase Return", href: "/pos/purchase/purchaseReturn" }
+      { name: "Purchase Return", href: "/pos/purchase/purchaseReturn" },
     ],
-
   },
   {
-    name: 'Customers',
+    name: "Customers",
     // href: '/pos/customers',
     icon: FaUserFriends,
-     subitems: [
-      { name: "counters", href: "/pos/customer/counter" },
-    ],
+    subitems: [{ name: "counters", href: "/pos/customer/counter" }],
   },
   {
-    name: 'Forcasting',
-    href: '/pos/customers',
+    name: "Forcasting",
+    href: "/pos/customers",
     icon: MdOutlineTrendingUp,
   },
   {
-    name: 'Reports',
-    href: '/pos/reports',
+    name: "Reports",
+    href: "/pos/reports",
     icon: TbReportAnalytics,
   },
 ];
@@ -293,64 +283,63 @@ export const counterIndex = [
     name: "Ahmed Khan",
     email: "ahmed.khan@example.com",
     counterName: "Counter 1",
-    status: true
+    status: true,
   },
   {
     name: "Sara Ali",
     email: "sara.ali@example.com",
     counterName: "Counter 2",
-    status: true
+    status: true,
   },
   {
     name: "Usman Tariq",
     email: "usman.tariq@example.com",
     counterName: "Counter 3",
-    status: false
+    status: false,
   },
   {
     name: "Ayesha Noor",
     email: "ayesha.noor@example.com",
     counterName: "Counter 4",
-    status: true
+    status: true,
   },
   {
     name: "Hassan Raza",
     email: "hassan.raza@example.com",
     counterName: "Counter 5",
-    status: false
+    status: false,
   },
   {
     name: "Mehwish Fatima",
     email: "mehwish.fatima@example.com",
     counterName: "Counter 6",
-    status: true
+    status: true,
   },
   {
     name: "Ali Haider",
     email: "ali.haider@example.com",
     counterName: "Counter 7",
-    status: false
+    status: false,
   },
   {
     name: "Zara Malik",
     email: "zara.malik@example.com",
     counterName: "Counter 8",
-    status: true
+    status: true,
   },
   {
     name: "Bilal Ahmad",
     email: "bilal.ahmad@example.com",
     counterName: "Counter 9",
-    status: false
+    status: false,
   },
   {
     name: "Laiba Shah",
     email: "laiba.shah@example.com",
     counterName: "Counter 10",
-    status: true
-  }
+    status: true,
+  },
 ];
-
 
 // src/constants/itemIndex.js
 
@@ -359,71 +348,141 @@ export const itemIndex = [
   { item: "Ibuprofen", price: 35, quantity: 30 },
   { item: "Cough Syrup", price: 120, quantity: 15 },
   { item: "Antibiotic Cream", price: 80, quantity: 20 },
-  { item: "Multivitamins", price: 150, quantity: 25 }
+  { item: "Multivitamins", price: 150, quantity: 25 },
 ];
-
-
 
 export const salesData = [
-  { day: 'Mon', sales: 400 },
-  { day: 'Tue', sales: 800 },
-  { day: 'Wed', sales: 600 },
-  { day: 'Thu', sales: 1000 },
-  { day: 'Fri', sales: 700 },
-  { day: 'Sat', sales: 1200 },
-  { day: 'Sun', sales: 900 }
+  { day: "Mon", sales: 400 },
+  { day: "Tue", sales: 800 },
+  { day: "Wed", sales: 600 },
+  { day: "Thu", sales: 1000 },
+  { day: "Fri", sales: 700 },
+  { day: "Sat", sales: 1200 },
+  { day: "Sun", sales: 900 },
 ];
 
-
 export const monthlySales = [
-  { month: 'Jan', sales: 4500 },
-  { month: 'Feb', sales: 5200 },
-  { month: 'Mar', sales: 6100 },
-  { month: 'Apr', sales: 5800 },
-  { month: 'May', sales: 6700 },
-  { month: 'Jun', sales: 7100 },
-  { month: 'Jul', sales: 6800 },
-  { month: 'Aug', sales: 7300 },
-  { month: 'Sep', sales: 6400 },
-  { month: 'Oct', sales: 6900 },
-  { month: 'Nov', sales: 7500 },
-  { month: 'Dec', sales: 8000 }
+  { month: "Jan", sales: 4500 },
+  { month: "Feb", sales: 5200 },
+  { month: "Mar", sales: 6100 },
+  { month: "Apr", sales: 5800 },
+  { month: "May", sales: 6700 },
+  { month: "Jun", sales: 7100 },
+  { month: "Jul", sales: 6800 },
+  { month: "Aug", sales: 7300 },
+  { month: "Sep", sales: 6400 },
+  { month: "Oct", sales: 6900 },
+  { month: "Nov", sales: 7500 },
+  { month: "Dec", sales: 8000 },
 ];
 
 export const topProducts = [
-  { name: 'Paracetamol', category: 'Painkiller', units: 320, revenue: 2400 },
-  { name: 'Amoxicillin', category: 'Antibiotic', units: 250, revenue: 1800 },
-  { name: 'Ibuprofen', category: 'Painkiller', units: 210, revenue: 1700 },
-  { name: 'Vitamin C', category: 'Supplement', units: 190, revenue: 1500 },
-  { name: 'Vitamin C', category: 'Supplement', units: 190, revenue: 1500 },
-  { name: 'Vitamin C', category: 'Supplement', units: 190, revenue: 1500 },
-  { name: 'Vitamin C', category: 'Supplement', units: 190, revenue: 1500 },
-]
-
-
-export const nearExpiryProducts = [
-  { name: 'Aspirin', category: 'Painkiller', expiry: '2025-06-15', stock: 150 },
-  { name: 'Metformin', category: 'Diabetes', expiry: '2025-07-01', stock: 80 },
-  { name: 'Lisinopril', category: 'Hypertension', expiry: '2025-07-10', stock: 65 },
-  { name: 'Cetirizine', category: 'Antihistamine', expiry: '2025-06-20', stock: 90 },
-  { name: 'Dolo 650', category: 'Painkiller', expiry: '2025-06-25', stock: 120 },
-  { name: 'Omeprazole', category: 'Antacid', expiry: '2025-06-22', stock: 70 },
-  { name: 'Cough Syrup', category: 'Cold/Flu', expiry: '2025-06-12', stock: 60 },
-  { name: 'Zincovit', category: 'Supplement', expiry: '2025-07-05', stock: 100 },
-  { name: 'ORS Sachet', category: 'Hydration', expiry: '2025-06-18', stock: 40 },
-  { name: 'Clotrimazole', category: 'Antifungal', expiry: '2025-06-30', stock: 50 },
-  { name: 'Calpol', category: 'Painkiller', expiry: '2025-06-17', stock: 95 },
-  { name: 'Losartan', category: 'Hypertension', expiry: '2025-07-02', stock: 55 },
-  { name: 'Pantoprazole', category: 'Antacid', expiry: '2025-06-28', stock: 75 },
-  { name: 'Azithromycin', category: 'Antibiotic', expiry: '2025-07-07', stock: 30 },
-  { name: 'Becosules', category: 'Supplement', expiry: '2025-06-19', stock: 110 },
-  { name: 'Thyronorm', category: 'Hormone', expiry: '2025-06-23', stock: 100 },
-  { name: 'Dexamethasone', category: 'Steroid', expiry: '2025-06-21', stock: 45 },
-  { name: 'Hydrocortisone Cream', category: 'Topical', expiry: '2025-06-26', stock: 60 },
-  { name: 'Multivitamin Syrup', category: 'Supplement', expiry: '2025-07-04', stock: 85 },
-  { name: 'Iron Tablets', category: 'Supplement', expiry: '2025-06-29', stock: 90 }
+  { name: "Paracetamol", category: "Painkiller", units: 320, revenue: 2400 },
+  { name: "Amoxicillin", category: "Antibiotic", units: 250, revenue: 1800 },
+  { name: "Ibuprofen", category: "Painkiller", units: 210, revenue: 1700 },
+  { name: "Vitamin C", category: "Supplement", units: 190, revenue: 1500 },
+  { name: "Vitamin C", category: "Supplement", units: 190, revenue: 1500 },
+  { name: "Vitamin C", category: "Supplement", units: 190, revenue: 1500 },
+  { name: "Vitamin C", category: "Supplement", units: 190, revenue: 1500 },
 ];
 
+export const nearExpiryProducts = [
+  { name: "Aspirin", category: "Painkiller", expiry: "2025-06-15", stock: 150 },
+  { name: "Metformin", category: "Diabetes", expiry: "2025-07-01", stock: 80 },
+  {
+    name: "Lisinopril",
+    category: "Hypertension",
+    expiry: "2025-07-10",
+    stock: 65,
+  },
+  {
+    name: "Cetirizine",
+    category: "Antihistamine",
+    expiry: "2025-06-20",
+    stock: 90,
+  },
+  {
+    name: "Dolo 650",
+    category: "Painkiller",
+    expiry: "2025-06-25",
+    stock: 120,
+  },
+  { name: "Omeprazole", category: "Antacid", expiry: "2025-06-22", stock: 70 },
+  {
+    name: "Cough Syrup",
+    category: "Cold/Flu",
+    expiry: "2025-06-12",
+    stock: 60,
+  },
+  {
+    name: "Zincovit",
+    category: "Supplement",
+    expiry: "2025-07-05",
+    stock: 100,
+  },
+  {
+    name: "ORS Sachet",
+    category: "Hydration",
+    expiry: "2025-06-18",
+    stock: 40,
+  },
+  {
+    name: "Clotrimazole",
+    category: "Antifungal",
+    expiry: "2025-06-30",
+    stock: 50,
+  },
+  { name: "Calpol", category: "Painkiller", expiry: "2025-06-17", stock: 95 },
+  {
+    name: "Losartan",
+    category: "Hypertension",
+    expiry: "2025-07-02",
+    stock: 55,
+  },
+  {
+    name: "Pantoprazole",
+    category: "Antacid",
+    expiry: "2025-06-28",
+    stock: 75,
+  },
+  {
+    name: "Azithromycin",
+    category: "Antibiotic",
+    expiry: "2025-07-07",
+    stock: 30,
+  },
+  {
+    name: "Becosules",
+    category: "Supplement",
+    expiry: "2025-06-19",
+    stock: 110,
+  },
+  { name: "Thyronorm", category: "Hormone", expiry: "2025-06-23", stock: 100 },
+  {
+    name: "Dexamethasone",
+    category: "Steroid",
+    expiry: "2025-06-21",
+    stock: 45,
+  },
+  {
+    name: "Hydrocortisone Cream",
+    category: "Topical",
+    expiry: "2025-06-26",
+    stock: 60,
+  },
+  {
+    name: "Multivitamin Syrup",
+    category: "Supplement",
+    expiry: "2025-07-04",
+    stock: 85,
+  },
+  {
+    name: "Iron Tablets",
+    category: "Supplement",
+    expiry: "2025-06-29",
+    stock: 90,
+  },
+];
 
 export const demandingProducts = [
   { product: "Paracetamol", sales: 600 },
@@ -434,7 +493,6 @@ export const demandingProducts = [
   { product: "Metformin", sales: 660 },
   { product: "Atorvastatin", sales: 400 },
   { product: "Omeprazole", sales: 620 },
-
 ];
 
 export const barColors = [
@@ -447,86 +505,81 @@ export const barColors = [
   "#EC4899", // Pink
 ];
 
-
-
-
-// products page dummy data 
+// products page dummy data
 export const initialData = [
   {
     id: 1,
-    brandName: 'Paracetamol ',
-    genericName: 'Paracetamol',
-    strength: '500mg',
-    dosageForm: 'Tablet',
-    manufacturer: 'ABC Pharma',
-    barcode: '1234567890'
+    brandName: "Paracetamol ",
+    genericName: "Paracetamol",
+    strength: "500mg",
+    dosageForm: "Tablet",
+    manufacturer: "ABC Pharma",
+    barcode: "1234567890",
   },
   {
     id: 2,
-    brandName: 'Ibuprofen ',
-    genericName: 'Ibuprofen',
-    strength: '200mg',
-    dosageForm: 'Tablet',
-    manufacturer: 'HealthMed',
-    barcode: '2345678901'
+    brandName: "Ibuprofen ",
+    genericName: "Ibuprofen",
+    strength: "200mg",
+    dosageForm: "Tablet",
+    manufacturer: "HealthMed",
+    barcode: "2345678901",
   },
   {
     id: 3,
-    brandName: 'Cetirizine ',
-    genericName: 'Cetirizine',
-    strength: '10mg',
-    dosageForm: 'Tablet',
-    manufacturer: 'AllergyRelief Co.',
-    barcode: '3456789012'
+    brandName: "Cetirizine ",
+    genericName: "Cetirizine",
+    strength: "10mg",
+    dosageForm: "Tablet",
+    manufacturer: "AllergyRelief Co.",
+    barcode: "3456789012",
   },
   {
     id: 4,
-    brandName: 'Amoxicillin ',
-    genericName: 'Amoxicillin',
-    strength: '250mg',
-    dosageForm: 'Capsule',
-    manufacturer: 'Antibiotic Inc.',
-    barcode: '4567890123'
+    brandName: "Amoxicillin ",
+    genericName: "Amoxicillin",
+    strength: "250mg",
+    dosageForm: "Capsule",
+    manufacturer: "Antibiotic Inc.",
+    barcode: "4567890123",
   },
   {
     id: 5,
-    brandName: 'Panadol',
-    genericName: 'Paracetamol',
-    strength: '500mg',
-    dosageForm: 'Tablet',
-    manufacturer: 'GSK',
-    barcode: '5678901234'
+    brandName: "Panadol",
+    genericName: "Paracetamol",
+    strength: "500mg",
+    dosageForm: "Tablet",
+    manufacturer: "GSK",
+    barcode: "5678901234",
   },
   {
     id: 6,
-    brandName: 'Advil',
-    genericName: 'Ibuprofen',
-    strength: '200mg',
-    dosageForm: 'Tablet',
-    manufacturer: 'Pfizer',
-    barcode: '6789012345'
+    brandName: "Advil",
+    genericName: "Ibuprofen",
+    strength: "200mg",
+    dosageForm: "Tablet",
+    manufacturer: "Pfizer",
+    barcode: "6789012345",
   },
   {
     id: 7,
-    brandName: 'Zyrtec',
-    genericName: 'Cetirizine',
-    strength: '10mg',
-    dosageForm: 'Tablet',
-    manufacturer: 'UCB Pharma',
-    barcode: '7890123456'
+    brandName: "Zyrtec",
+    genericName: "Cetirizine",
+    strength: "10mg",
+    dosageForm: "Tablet",
+    manufacturer: "UCB Pharma",
+    barcode: "7890123456",
   },
   {
     id: 8,
-    brandName: 'Augmentin',
-    genericName: 'Amoxicillin + Clavulanic Acid',
-    strength: '625mg',
-    dosageForm: 'Tablet',
-    manufacturer: 'GSK',
-    barcode: '8901234567'
-  }
+    brandName: "Augmentin",
+    genericName: "Amoxicillin + Clavulanic Acid",
+    strength: "625mg",
+    dosageForm: "Tablet",
+    manufacturer: "GSK",
+    barcode: "8901234567",
+  },
 ];
-
-
 
 export const packageData = [
   {
@@ -535,7 +588,7 @@ export const packageData = [
     unitsPerPack: "10",
     unitType: "Tablet",
     packsPerBox: "20",
-    barcode: "1234567890"
+    barcode: "1234567890",
   },
   {
     medicine: "Ibuprofen",
@@ -543,7 +596,7 @@ export const packageData = [
     unitsPerPack: "10",
     unitType: "Tablet",
     packsPerBox: "20",
-    barcode: "2345678901"
+    barcode: "2345678901",
   },
   {
     medicine: "Cetirizine",
@@ -551,7 +604,7 @@ export const packageData = [
     unitsPerPack: "10",
     unitType: "Tablet",
     packsPerBox: "10",
-    barcode: "3456789012"
+    barcode: "3456789012",
   },
   {
     medicine: "Amoxicillin",
@@ -559,7 +612,7 @@ export const packageData = [
     unitsPerPack: "12",
     unitType: "Capsule",
     packsPerBox: "15",
-    barcode: "4567890123"
+    barcode: "4567890123",
   },
   {
     medicine: "Panadol",
@@ -567,7 +620,7 @@ export const packageData = [
     unitsPerPack: "20",
     unitType: "Tablet",
     packsPerBox: "10",
-    barcode: "5678901234"
+    barcode: "5678901234",
   },
   {
     medicine: "Advil",
@@ -575,7 +628,7 @@ export const packageData = [
     unitsPerPack: "30",
     unitType: "Tablet",
     packsPerBox: "6",
-    barcode: "6789012345"
+    barcode: "6789012345",
   },
   {
     medicine: "Zyrtec",
@@ -583,7 +636,7 @@ export const packageData = [
     unitsPerPack: "10",
     unitType: "Tablet",
     packsPerBox: "10",
-    barcode: "7890123456"
+    barcode: "7890123456",
   },
   {
     medicine: "Augmentin",
@@ -591,7 +644,7 @@ export const packageData = [
     unitsPerPack: "14",
     unitType: "Tablet",
     packsPerBox: "8",
-    barcode: "8901234567"
+    barcode: "8901234567",
   },
   {
     medicine: "Metformin",
@@ -599,7 +652,7 @@ export const packageData = [
     unitsPerPack: "10",
     unitType: "Tablet",
     packsPerBox: "25",
-    barcode: "9012345678"
+    barcode: "9012345678",
   },
   {
     medicine: "Ciprofloxacin",
@@ -607,11 +660,9 @@ export const packageData = [
     unitsPerPack: "10",
     unitType: "Tablet",
     packsPerBox: "12",
-    barcode: "0123456789"
-  }
+    barcode: "0123456789",
+  },
 ];
-
-
 
 export const pharmacyStockData = [
   {
@@ -756,7 +807,6 @@ export const pharmacyStockData = [
   },
 ];
 
-
 // index.js
 export const users = [
   {
@@ -764,73 +814,72 @@ export const users = [
     email: "ahmad.raza@example.com",
     phone: "+92 300 1234567",
     address: "Street 12, G-10, Islamabad, Pakistan",
-    supplier: "MedLife Pharmaceuticals"
+    supplier: "MedLife Pharmaceuticals",
   },
   {
     name: "Sara Khan",
     email: "sara.khan@example.com",
     phone: "+92 301 7654321",
     address: "House 5, DHA Phase 5, Lahore, Pakistan",
-    supplier: "PharmaZone Ltd."
+    supplier: "PharmaZone Ltd.",
   },
   {
     name: "Ali Haider",
     email: "ali.haider@example.com",
     phone: "+92 302 1112233",
     address: "Block B, North Nazimabad, Karachi, Pakistan",
-    supplier: "WellCare Distributors"
+    supplier: "WellCare Distributors",
   },
   {
     name: "Hina Malik",
     email: "hina.malik@example.com",
     phone: "+92 303 4445566",
     address: "Faisal Town, Multan, Pakistan",
-    supplier: "NovaMed Suppliers"
+    supplier: "NovaMed Suppliers",
   },
   {
     name: "Zain Ul Abideen",
     email: "zain.abideen@example.com",
     phone: "+92 304 9876543",
     address: "Satellite Town, Rawalpindi, Pakistan",
-    supplier: "Sunrise Pharma"
+    supplier: "Sunrise Pharma",
   },
   {
     name: "Mehwish Tariq",
     email: "mehwish.tariq@example.com",
     phone: "+92 305 6789123",
     address: "Model Town, Gujranwala, Pakistan",
-    supplier: "LifeLine Distributors"
+    supplier: "LifeLine Distributors",
   },
   {
     name: "Usman Bashir",
     email: "usman.bashir@example.com",
     phone: "+92 306 3456789",
     address: "University Road, Peshawar, Pakistan",
-    supplier: "Medico Pvt Ltd"
+    supplier: "Medico Pvt Ltd",
   },
   {
     name: "Sana Javed",
     email: "sana.javed@example.com",
     phone: "+92 307 2345678",
     address: "Gulberg, Lahore, Pakistan",
-    supplier: "HealWell Corporation"
+    supplier: "HealWell Corporation",
   },
   {
     name: "Hamza Qureshi",
     email: "hamza.qureshi@example.com",
     phone: "+92 308 1122334",
     address: "Johar Town, Lahore, Pakistan",
-    supplier: "CureLine Supplies"
+    supplier: "CureLine Supplies",
   },
   {
     name: "Marium Akbar",
     email: "marium.akbar@example.com",
     phone: "+92 309 5566778",
     address: "Blue Area, Islamabad, Pakistan",
-    supplier: "Global Health Traders"
-  }
+    supplier: "Global Health Traders",
+  },
 ];
-
 
 export const purchaseDataa = [
   {
@@ -838,7 +887,7 @@ export const purchaseDataa = [
     supplier: "MedLife Pharmaceuticals",
     invoiceNo: "INV-1001",
     purchaseDate: new Date("2025-09-01"),
-    totalAmount: 1250.50,
+    totalAmount: 1250.5,
     discount: 50.0,
     tax: 100.0,
   },
@@ -847,7 +896,7 @@ export const purchaseDataa = [
     supplier: "PharmaZone Ltd.",
     invoiceNo: "INV-1002",
     purchaseDate: new Date("2025-09-03"),
-    totalAmount: 980.00,
+    totalAmount: 980.0,
     discount: 20.0,
     tax: 70.0,
   },
@@ -865,7 +914,7 @@ export const purchaseDataa = [
     supplier: "NovaMed Suppliers",
     invoiceNo: "INV-1004",
     purchaseDate: new Date("2025-09-06"),
-    totalAmount: 1340.10,
+    totalAmount: 1340.1,
     discount: 40.0,
     tax: 90.0,
   },
@@ -874,7 +923,7 @@ export const purchaseDataa = [
     supplier: "Sunrise Pharma",
     invoiceNo: "INV-1005",
     purchaseDate: new Date("2025-09-08"),
-    totalAmount: 1120.00,
+    totalAmount: 1120.0,
     discount: 0.0,
     tax: 80.0,
   },
@@ -892,7 +941,7 @@ export const purchaseDataa = [
     supplier: "Medico Pvt Ltd",
     invoiceNo: "INV-1007",
     purchaseDate: new Date("2025-09-10"),
-    totalAmount: 1435.00,
+    totalAmount: 1435.0,
     discount: 25.0,
     tax: 110.0,
   },
@@ -901,7 +950,7 @@ export const purchaseDataa = [
     supplier: "HealWell Corporation",
     invoiceNo: "INV-1008",
     purchaseDate: new Date("2025-09-12"),
-    totalAmount: 890.00,
+    totalAmount: 890.0,
     discount: 10.0,
     tax: 60.0,
   },
@@ -910,21 +959,20 @@ export const purchaseDataa = [
     supplier: "CureLine Supplies",
     invoiceNo: "INV-1009",
     purchaseDate: new Date("2025-09-14"),
-    totalAmount: 1650.90,
+    totalAmount: 1650.9,
     discount: 30.0,
-    tax: 120.90,
+    tax: 120.9,
   },
   {
     purchaseID: "P-010",
     supplier: "Global Health Traders",
     invoiceNo: "INV-1010",
     purchaseDate: new Date("2025-09-16"),
-    totalAmount: 1980.00,
+    totalAmount: 1980.0,
     discount: 50.0,
     tax: 150.0,
   },
 ];
-
 
 export const purchases = [
   {
@@ -936,7 +984,7 @@ export const purchases = [
     expiryDate: "2026-01-15",
     discount: "5",
     discountPayment: "12.5",
-    lineTotal: "237.5"
+    lineTotal: "237.5",
   },
   {
     productName: "Ibuprofen 200mg",
@@ -947,7 +995,7 @@ export const purchases = [
     expiryDate: "2026-03-20",
     discount: "10",
     discountPayment: "60",
-    lineTotal: "540"
+    lineTotal: "540",
   },
   {
     productName: "Cough Syrup 100ml",
@@ -958,7 +1006,7 @@ export const purchases = [
     expiryDate: "2025-12-01",
     discount: "8",
     discountPayment: "80",
-    lineTotal: "920"
+    lineTotal: "920",
   },
   {
     productName: "Vitamin C 1000mg",
@@ -969,7 +1017,7 @@ export const purchases = [
     expiryDate: "2026-05-10",
     discount: "7",
     discountPayment: "52.5",
-    lineTotal: "697.5"
+    lineTotal: "697.5",
   },
   {
     productName: "Azithromycin 250mg",
@@ -980,7 +1028,7 @@ export const purchases = [
     expiryDate: "2025-10-10",
     discount: "6",
     discountPayment: "48",
-    lineTotal: "752"
+    lineTotal: "752",
   },
   {
     productName: "Amoxicillin 500mg",
@@ -991,7 +1039,7 @@ export const purchases = [
     expiryDate: "2026-08-15",
     discount: "5",
     discountPayment: "24",
-    lineTotal: "456"
+    lineTotal: "456",
   },
   {
     productName: "Multivitamin Syrup",
@@ -1002,7 +1050,7 @@ export const purchases = [
     expiryDate: "2025-11-25",
     discount: "9",
     discountPayment: "97.2",
-    lineTotal: "982.8"
+    lineTotal: "982.8",
   },
   {
     productName: "Loratadine 10mg",
@@ -1013,7 +1061,7 @@ export const purchases = [
     expiryDate: "2026-06-30",
     discount: "4",
     discountPayment: "12.6",
-    lineTotal: "295.4"
+    lineTotal: "295.4",
   },
   {
     productName: "Calcium + D3",
@@ -1024,7 +1072,7 @@ export const purchases = [
     expiryDate: "2026-02-10",
     discount: "5",
     discountPayment: "21",
-    lineTotal: "399"
+    lineTotal: "399",
   },
   {
     productName: "ORS Sachets",
@@ -1035,11 +1083,9 @@ export const purchases = [
     expiryDate: "2025-12-20",
     discount: "10",
     discountPayment: "20",
-    lineTotal: "180"
-  }
+    lineTotal: "180",
+  },
 ];
-
-
 
 export const items = [
   {
@@ -1164,7 +1210,6 @@ export const items = [
   },
 ];
 
-
 // constants/index.js
 
 export const productList = [
@@ -1239,8 +1284,6 @@ function getDaysLeft(expiryDate) {
   return diffDays > 0 ? diffDays : 0;
 }
 
-
-
 // Sample products (at least 5)
 export const products = [
   { name: "Paracetamol", quantity: 2, discount: 5, price: 120 },
@@ -1308,7 +1351,12 @@ export const invoices = [
     paymentMode: "Easypaisa",
     items: [
       { itemName: "Face Mask Pack", price: 97, quantity: 5, subtotal: 485 },
-      { itemName: "Pain Relief Gel", price: 121.25, quantity: 4, subtotal: 485 },
+      {
+        itemName: "Pain Relief Gel",
+        price: 121.25,
+        quantity: 4,
+        subtotal: 485,
+      },
     ],
   },
 ];

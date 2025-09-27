@@ -49,7 +49,9 @@ const SignUp = () => {
       {/* Right Side */}
       <div className="flex w-1/2 max-md:w-full justify-center items-center">
         <div className="backdrop-blur-xl  bg-white/10 border border-white/20  shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] rounded-2xl flex flex-col justify-center mb-70 items-center w-4/5 max-md:w-11/12 gap-3 p-10 transition-all duration-500">
-          <h1 className="text-center text-white text-3xl font-bold">PharmaConnect +</h1>
+          <h1 className="text-center text-white text-3xl font-bold">
+            PharmaConnect +
+          </h1>
           <p className="text-gray-200 text-xs text-center">
             {isLogin
               ? "Please login to continue your session!"
@@ -78,7 +80,9 @@ const SignUp = () => {
                     onChange={loginFormik.handleChange}
                   />
                   {loginFormik.touched.email && loginFormik.errors.email && (
-                    <div className="text-red-400 text-xs">{loginFormik.errors.email}</div>
+                    <div className="text-red-400 text-xs">
+                      {loginFormik.errors.email}
+                    </div>
                   )}
 
                   <div className="relative">
@@ -95,15 +99,24 @@ const SignUp = () => {
                       className="absolute top-3 right-3 text-gray-300 cursor-pointer"
                       onClick={() => setShowPasswordLogin((prev) => !prev)}
                     >
-                      {showPasswordLogin ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+                      {showPasswordLogin ? (
+                        <AiOutlineEyeInvisible />
+                      ) : (
+                        <AiOutlineEye />
+                      )}
                     </span>
                   </div>
-                  {loginFormik.touched.password && loginFormik.errors.password && (
-                    <div className="text-red-400 text-xs">{loginFormik.errors.password}</div>
-                  )}
+                  {loginFormik.touched.password &&
+                    loginFormik.errors.password && (
+                      <div className="text-red-400 text-xs">
+                        {loginFormik.errors.password}
+                      </div>
+                    )}
 
                   {formErrorLogin && (
-                    <div className="text-red-400 text-sm text-center">{formErrorLogin}</div>
+                    <div className="text-red-400 text-sm text-center">
+                      {formErrorLogin}
+                    </div>
                   )}
                 </div>
 
@@ -158,9 +171,12 @@ const SignUp = () => {
                     value={registerFormik.values.name}
                     onChange={registerFormik.handleChange}
                   />
-                  {registerFormik.touched.name && registerFormik.errors.name && (
-                    <div className="text-red-400 text-xs">{registerFormik.errors.name}</div>
-                  )}
+                  {registerFormik.touched.name &&
+                    registerFormik.errors.name && (
+                      <div className="text-red-400 text-xs">
+                        {registerFormik.errors.name}
+                      </div>
+                    )}
 
                   <input
                     type="email"
@@ -171,9 +187,12 @@ const SignUp = () => {
                     value={registerFormik.values.email}
                     onChange={registerFormik.handleChange}
                   />
-                  {registerFormik.touched.email && registerFormik.errors.email && (
-                    <div className="text-red-400 text-xs">{registerFormik.errors.email}</div>
-                  )}
+                  {registerFormik.touched.email &&
+                    registerFormik.errors.email && (
+                      <div className="text-red-400 text-xs">
+                        {registerFormik.errors.email}
+                      </div>
+                    )}
 
                   <div className="relative">
                     <input
@@ -189,15 +208,24 @@ const SignUp = () => {
                       className="absolute top-3 right-3 text-gray-300 cursor-pointer"
                       onClick={() => setShowPasswordRegister((prev) => !prev)}
                     >
-                      {showPasswordRegister ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+                      {showPasswordRegister ? (
+                        <AiOutlineEyeInvisible />
+                      ) : (
+                        <AiOutlineEye />
+                      )}
                     </span>
                   </div>
-                  {registerFormik.touched.password && registerFormik.errors.password && (
-                    <div className="text-red-400 text-xs">{registerFormik.errors.password}</div>
-                  )}
+                  {registerFormik.touched.password &&
+                    registerFormik.errors.password && (
+                      <div className="text-red-400 text-xs">
+                        {registerFormik.errors.password}
+                      </div>
+                    )}
 
                   {formErrorRegister && (
-                    <div className="text-red-400 text-sm text-center">{formErrorRegister}</div>
+                    <div className="text-red-400 text-sm text-center">
+                      {formErrorRegister}
+                    </div>
                   )}
                 </div>
 

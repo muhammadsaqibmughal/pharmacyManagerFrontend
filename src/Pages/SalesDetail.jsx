@@ -61,7 +61,9 @@ const SalesDetail = () => {
       <div className="w-full flex justify-center items-center">
         <h1
           className={`text-2xl font-bold w-50 border-2 border-primary-50 text-center  ${
-            theme === "dark" ? "border-white/90 text-light-50" : " border-primary-50  text-primary-50"
+            theme === "dark"
+              ? "border-white/90 text-light-50"
+              : " border-primary-50  text-primary-50"
           }`}
         >
           Sale Details
@@ -76,7 +78,7 @@ const SalesDetail = () => {
           <p>
             <strong>Invoice No:</strong> {invoice.invoiceNo}
           </p>
-      
+
           <p>
             <strong>Counter Name:</strong> {invoice.counterName}
           </p>

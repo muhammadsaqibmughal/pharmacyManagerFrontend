@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useTheme } from "../theme-support/ThemeContext";
 import { items, invoices } from "../constants"; // Assuming `invoices` is an array of past sales
 import { FaExpand } from "react-icons/fa";
+import { FaUserCircle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const OnlyCounter = () => {
   const { theme, toggleTheme } = useTheme();
@@ -18,6 +20,16 @@ const OnlyCounter = () => {
 
   const [invoiceSearch, setInvoiceSearch] = useState("");
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+
+  const navigate = useNavigate();
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [showDropdown, setShowDropdown] = useState(false);
+  const userName = "John Doe"; // Replace with dynamic username if needed
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const handleEscape = (e) => {
@@ -97,13 +109,6 @@ const OnlyCounter = () => {
     setReturnCart([]); // Optional: clear it if you want
   };
 
-  const handleSwitchToProduct = () => {
-    setProductPage(true);
-  };
-  const handleSwitchToInvoice = () => {
-    setProductPage(false);
-  };
-
   const handleReturnItem = (index) => {
     const returnItem = { ...cart[index], isReturn: true };
 
@@ -123,12 +128,13 @@ const OnlyCounter = () => {
     >
       {/* Top Bar */}
       <div
-        className={`w-full flex items-end border-b justify-end p-2 gap-2 ${
+        className={`w-full flex items-center justify-between border-b p-2 gap-4 ${
           theme === "dark"
             ? "border-white/90 bg-dark-50"
             : "border-black/90 bg-light-50"
         }`}
       >
+        {/* Left: Theme Toggle */}
         <label className="inline-flex items-center rounded p-2 cursor-pointer">
           <input
             type="checkbox"
@@ -147,7 +153,50 @@ const OnlyCounter = () => {
             <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-300 peer-checked:translate-x-5" />
           </div>
         </label>
-        <div className="mb-1">
+
+        {/* Center: Current Time */}
+        <div
+          className={`text-sm font-medium ${
+            theme === "dark" ? "text-white/80" : "text-black"
+          }`}
+        >
+          {currentTime.toLocaleTimeString()}
+        </div>
+
+        {/* Right: Fullscreen + User Dropdown */}
+        <div className="flex items-center gap-4 relative">
+          {/* User Profile Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowDropdown(!showDropdown)}
+              className="flex items-center gap-2 bg-gray-700 hover:bg-gray-800 text-white px-3 py-1 rounded-full"
+            >
+              <FaUserCircle className="text-lg" />
+              <span className="text-sm font-semibold">{userName}</span>
+            </button>
+
+            {/* Dropdown */}
+            {showDropdown && (
+              <div
+                className="absolute right-0 top-full mt-2 w-40 bg-white shadow-lg rounded-md z-50"
+                onMouseLeave={() => setShowDropdown(false)}
+              >
+                <button
+                  onClick={() => navigate("/profile")}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                >
+                  Profile
+                </button>
+                <button
+                  onClick={() => navigate("/logout")}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+          {/* Fullscreen Button */}
           <button
             onClick={() => {
               const el = document.documentElement;
@@ -169,11 +218,11 @@ const OnlyCounter = () => {
       <div className="flex w-full p-5 max-md:flex-col gap-5">
         {/* Left Side */}
         {!isPrinting && (
-          <div className="w-4/6 max-md:w-full">
+          <div className="w-4/6 mt-2 max-md:w-full">
             {isCounter ? (
               // Sale Mode
               <>
-                <div className="flex mb-4 bg-search-50 w-full rounded-full">
+                <div className="flex  bg-search-50 w-full rounded-full">
                   <input
                     type="text"
                     placeholder="Search by name..."
@@ -305,7 +354,7 @@ const OnlyCounter = () => {
         )}
 
         {/* RIGHT Side: POS Table */}
-        <div className="w-full flex flex-col gap-4">
+        <div className="w-full flex flex-col gap-1">
           <div className="flex items-center justify-end gap-2">
             <button
               onClick={handleSwitchToSale}
@@ -329,7 +378,7 @@ const OnlyCounter = () => {
             }`}
           >
             <table
-              className={`w-full table-auto ${
+              className={`w-full table-auto  ${
                 theme === "dark" ? "text-light-50" : "text-primary-50"
               }`}
             >
@@ -426,7 +475,7 @@ const OnlyCounter = () => {
           {!isPrinting && isCounter ? (
             <>
               {/* Discount Section */}
-              <div className="flex flex-wrap w-full items-center justify-center gap-4">
+              <div className="flex flex-wrap w-full items-center justify-center mt-10 gap-4">
                 {/* Discount Type */}
                 <div className="flex flex-col w-full md:w-2/4 items-center gap-1">
                   <label
