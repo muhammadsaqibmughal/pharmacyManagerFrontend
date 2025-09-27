@@ -1165,3 +1165,150 @@ export const items = [
 ];
 
 
+// constants/index.js
+
+export const productList = [
+  {
+    productName: "Paracetamol 500mg",
+    quantity: 50,
+    expiryDate: "2025-12-01",
+    daysLeft: getDaysLeft("2025-12-01"),
+  },
+  {
+    productName: "Ibuprofen 200mg",
+    quantity: 30,
+    expiryDate: "2025-10-15",
+    daysLeft: getDaysLeft("2025-10-15"),
+  },
+  {
+    productName: "Cough Syrup",
+    quantity: 20,
+    expiryDate: "2025-11-20",
+    daysLeft: getDaysLeft("2025-11-20"),
+  },
+  {
+    productName: "Vitamin D Tablets",
+    quantity: 40,
+    expiryDate: "2026-01-10",
+    daysLeft: getDaysLeft("2026-01-10"),
+  },
+  {
+    productName: "Antibiotic Ointment",
+    quantity: 25,
+    expiryDate: "2025-09-30",
+    daysLeft: getDaysLeft("2025-09-30"),
+  },
+  {
+    productName: "Allergy Relief Capsules",
+    quantity: 15,
+    expiryDate: "2025-12-25",
+    daysLeft: getDaysLeft("2025-12-25"),
+  },
+  {
+    productName: "Nasal Spray",
+    quantity: 10,
+    expiryDate: "2025-10-05",
+    daysLeft: getDaysLeft("2025-10-05"),
+  },
+  {
+    productName: "Oral Rehydration Salts",
+    quantity: 60,
+    expiryDate: "2026-03-01",
+    daysLeft: getDaysLeft("2026-03-01"),
+  },
+  {
+    productName: "Anti-Fungal Cream",
+    quantity: 18,
+    expiryDate: "2025-11-15",
+    daysLeft: getDaysLeft("2025-11-15"),
+  },
+  {
+    productName: "Pain Relief Gel",
+    quantity: 35,
+    expiryDate: "2026-02-01",
+    daysLeft: getDaysLeft("2026-02-01"),
+  },
+];
+
+// Utility function to calculate days left until expiry
+function getDaysLeft(expiryDate) {
+  const today = new Date();
+  const expiry = new Date(expiryDate);
+  const diffTime = expiry - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays > 0 ? diffDays : 0;
+}
+
+
+
+// Sample products (at least 5)
+export const products = [
+  { name: "Paracetamol", quantity: 2, discount: 5, price: 120 },
+  { name: "Ibuprofen", quantity: 1, discount: 10, price: 200 },
+  { name: "Cough Syrup", quantity: 3, discount: 0, price: 150 },
+  { name: "Antibiotic Capsule", quantity: 1, discount: 5, price: 500 },
+  { name: "Vitamin D Tablets", quantity: 4, discount: 15, price: 100 },
+];
+
+export const invoices = [
+  {
+    id: "INV-1001",
+    date: "2025-09-26",
+    counterName: "Counter 1",
+    invoiceNo: "INV-1001",
+    totalAmount: 1200,
+    paymentMode: "Cash",
+    items: [
+      { itemName: "Paracetamol", price: 100, quantity: 5, subtotal: 500 },
+      { itemName: "Vitamin C", price: 70, quantity: 2, subtotal: 140 },
+      { itemName: "Cough Syrup", price: 140, quantity: 4, subtotal: 560 },
+    ],
+  },
+  {
+    id: "INV-1002",
+    date: "2025-09-25",
+    counterName: "Counter 2",
+    invoiceNo: "INV-1002",
+    totalAmount: 850,
+    paymentMode: "Credit Card",
+    items: [
+      { itemName: "Ibuprofen", price: 85, quantity: 5, subtotal: 425 },
+      { itemName: "Glucose D", price: 85, quantity: 5, subtotal: 425 },
+    ],
+  },
+  {
+    id: "INV-1003",
+    date: "2025-09-24",
+    counterName: "Counter 3",
+    invoiceNo: "INV-1003",
+    totalAmount: 1580,
+    paymentMode: "Bank Transfer",
+    items: [
+      { itemName: "Thermometer", price: 450, quantity: 2, subtotal: 900 },
+      { itemName: "Zinc Tablets", price: 170, quantity: 4, subtotal: 680 },
+    ],
+  },
+  {
+    id: "INV-1004",
+    date: "2025-09-23",
+    counterName: "Counter 4",
+    invoiceNo: "INV-1004",
+    totalAmount: 430,
+    paymentMode: "JazzCash",
+    items: [
+      { itemName: "Hand Sanitizer", price: 215, quantity: 2, subtotal: 430 },
+    ],
+  },
+  {
+    id: "INV-1005",
+    date: "2025-09-22",
+    counterName: "Counter 5",
+    invoiceNo: "INV-1005",
+    totalAmount: 970,
+    paymentMode: "Easypaisa",
+    items: [
+      { itemName: "Face Mask Pack", price: 97, quantity: 5, subtotal: 485 },
+      { itemName: "Pain Relief Gel", price: 121.25, quantity: 4, subtotal: 485 },
+    ],
+  },
+];

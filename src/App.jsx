@@ -30,6 +30,7 @@ import Counters from "./Pages/Counters";
 import CounterDetail from "./Pages/CounterDetail";
 import SaleDetail from "./Pages/CounterSaleDetail";
 import OnlyCounter from "./Pages/OnlyCounter"
+import SalesDetail from "./Pages/SalesDetail"
 const HomeLayout = () => (
   <>
     <Navbar />
@@ -114,6 +115,8 @@ const App = () => {
             path="purchase-return/:id"
             element={<PurchaseReturnDetail />}
           />
+          <Route path="/pos/sale-detail/:id" element={<SalesDetail />} />
+
 
           <Route path="counter-detail/name/:name" element={<CounterDetail />} />
           <Route path="/pos/sale-detail/:name/:date" element={<SaleDetail />} />
