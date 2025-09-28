@@ -1,7 +1,10 @@
 import { Navigate } from "react-router-dom";
 import { getCookie } from "./getCookie";
 
-const ProtectedRoute = ({ children }) => {
+const RoleRedirect = () => {
+  const is_auth = getCookie("is_auth");
+  const role = getCookie("userRole");
+
   let user = null;
   try {
     user = JSON.parse(localStorage.getItem("user"));
@@ -9,11 +12,8 @@ const ProtectedRoute = ({ children }) => {
     user = null;
   }
 
-  const is_auth = getCookie("is_auth");
-  const role = getCookie("userRole");
-  console.log(is_auth);
 
-  if (!user ) return <Navigate to="/signup" replace />;
+  if (!is_auth || !user) return <Navigate to="/signup" replace />;
 
 
   if (!user.isRegistered) return <Navigate to="/form" replace />;
@@ -21,10 +21,9 @@ const ProtectedRoute = ({ children }) => {
 
   if (!user.isApproved) return <Navigate to="/pending-approval" replace />;
 
-
-  if (role === "staff") return <Navigate to="/onlyCounter" replace />;
-
-  return children;
+  return role === "staff" 
+    ? <Navigate to="/onlyCounter" replace /> 
+    : <Navigate to="/pos/dashboard" replace />;
 };
 
-export default ProtectedRoute;
+export default RoleRedirect;

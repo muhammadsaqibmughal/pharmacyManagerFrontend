@@ -23,3 +23,15 @@ export const getCounterList = async () => {
     );
   }
 };
+
+export const getCounter = async () => {
+  try {
+    const response = await api.get("/counter/get-counter");
+    return response.data;
+  } catch (error) {
+    console.error("Error getting counter :", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to get counter"
+    );
+  }
+};

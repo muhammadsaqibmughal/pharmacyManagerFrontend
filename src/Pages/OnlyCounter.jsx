@@ -1,36 +1,74 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "../theme-support/ThemeContext";
-import { items, invoices } from "../constants"; // Assuming `invoices` is an array of past sales
-import { FaExpand } from "react-icons/fa";
-import { FaUserCircle } from "react-icons/fa";
+import { FaExpand, FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { getPOSItems, addSale } from "../api/posAPI";
+import { getCounter } from "../api/counterAPI";
 
 const OnlyCounter = () => {
   const { theme, toggleTheme } = useTheme();
 
-  const [isCounter, setIsCounter] = useState(true); // true = Sale, false = Return
+  const [isCounter, setIsCounter] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [itemsData] = useState(items);
+  const [itemsData, setItemsData] = useState([]);
+  const [salesData, setSalesData] = useState([]);
   const [cart, setCart] = useState([]);
   const [discountType, setDiscountType] = useState("fixed");
   const [discountValue, setDiscountValue] = useState(0);
   const [isPrinting, setIsPrinting] = useState(false);
-  const [productPage, setProductPage] = useState(false);
   const [returnCart, setReturnCart] = useState([]);
 
   const [invoiceSearch, setInvoiceSearch] = useState("");
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [counterId, setCounterId] = useState("");
 
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showDropdown, setShowDropdown] = useState(false);
-  const userName = "John Doe"; // Replace with dynamic username if needed
+  const userName = "John Doe";
 
+  // Update time every second
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
+
+  const fetchItems = async () => {
+    const counterRes = await getCounter();
+    if (counterRes.status === "success") {
+      setCounterId(counterRes.data.assignedCounterId);
+    }
+    const response = await getPOSItems();
+    if (response?.status === "success" && Array.isArray(response.data)) {
+      const normalized = response.data.map((p) => ({
+        pharmacyProductId: p.pharmacyProductId,
+        medicineId: p.medicineId,
+        itemName: `${p.brandName} (${p.genericName})`,
+        brandName: p.brandName,
+        genericName: p.genericName,
+        barcode: p.barcode,
+        manufacturer: p.manufacturer,
+        packaging: p.packaging,
+        shelf: p.shelf || "-",
+        quantity: p.totalQuantity ?? 0,
+        unitType: p.unitType,
+        unitsPerPack: p.unitsPerPack,
+        sellingPrice: p.sellingPrice ?? 0, 
+        costPrice: p.costPrice ?? 0, 
+      }));
+      setItemsData(normalized);
+      console.log("Normalized POS Items:", normalized);
+    } else {
+      setItemsData([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+  // Escape exits fullscreen
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape" && document.fullscreenElement) {
@@ -41,22 +79,25 @@ const OnlyCounter = () => {
     return () => document.removeEventListener("keydown", handleEscape);
   }, []);
 
-  const filteredItems = itemsData.filter((product) =>
-    product.itemName.toLowerCase().includes(searchTerm.toLowerCase())
+  //  Safe filters
+  const filteredItems = itemsData.filter((p) =>
+    (p?.itemName || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const filteredInvoices = invoices?.filter((inv) =>
-    inv.invoiceNo.toLowerCase().includes(invoiceSearch.toLowerCase())
+  const filteredInvoices = salesData.filter((inv) =>
+    (inv?.id || "").toLowerCase().includes(invoiceSearch.toLowerCase())
   );
 
+  // Add item to cart
   const handleAddToCart = (product) => {
-    const exists = cart.find((item) => item.itemName === product.itemName);
+    const exists = cart.find((i) => i.pharmacyProductId === product.pharmacyProductId);
+
     if (exists) {
       setCart(
-        cart.map((item) =>
-          item.itemName === product.itemName
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
+        cart.map((i) =>
+          i.pharmacyProductId === product.pharmacyProductId
+            ? { ...i, quantity: i.quantity + 1 }
+            : i
         )
       );
     } else {
@@ -64,6 +105,7 @@ const OnlyCounter = () => {
     }
   };
 
+  // Cart updates
   const handleQuantityChange = (index, delta) => {
     const updatedCart = [...cart];
     const newQty = updatedCart[index].quantity + delta;
@@ -84,9 +126,12 @@ const OnlyCounter = () => {
     setCart(updatedCart);
   };
 
+  // Totals
   const totalAmount = cart.reduce((acc, item) => {
-    const subtotal = item.price * item.quantity - (item.discount || 0);
-    return acc + (item.isReturn ? -subtotal : subtotal); // Negative for returns
+    const subtotal =
+      (item.sellingPrice || 0) * (item.quantity || 0) - (item.discount || 0);
+
+    return acc + (item.isReturn ? -subtotal : subtotal);
   }, 0);
 
   const discountedTotal =
@@ -94,30 +139,65 @@ const OnlyCounter = () => {
       ? totalAmount - (totalAmount * discountValue) / 100
       : totalAmount - discountValue;
 
+  // Switch modes
   const handleSwitchToReturn = () => {
     setIsCounter(false);
     setSelectedInvoice(null);
     setInvoiceSearch("");
   };
+
   const handleSwitchToSale = () => {
     setIsCounter(true);
-
-    // Merge returned items and start sale
-    const mergedCart = [...returnCart]; // Existing return items
-
-    setCart(mergedCart);
-    setReturnCart([]); // Optional: clear it if you want
+    setCart([...returnCart]);
+    setReturnCart([]);
   };
 
+  // Mark return
   const handleReturnItem = (index) => {
     const returnItem = { ...cart[index], isReturn: true };
-
-    // Only add if not already in returnCart
-    if (!returnCart.find((item) => item.itemName === returnItem.itemName)) {
+    if (!returnCart.find((i) => i.itemName === returnItem.itemName)) {
       setReturnCart([...returnCart, returnItem]);
     }
-
     alert("Marked for return");
+  };
+
+  // Save sale
+  const handleSave = async (print = false) => {
+    try {
+      const payload = {
+        counterId: counterId,
+        totalAmount: discountedTotal,
+        paymentMode: "cash", 
+        totalDiscount:
+          discountType === "percentage"
+            ? (totalAmount * discountValue) / 100
+            : discountValue,
+        items: cart.map((item) => ({
+          pharmacyProductId: item.pharmacyProductId, 
+          quantity: item.quantity,
+          price: item.sellingPrice,
+          discount: item.discount || 0,
+        })),
+      };
+      console.log(payload);
+      const res = await addSale(payload);
+      if (res?.status === "success") {
+        alert("Invoice saved!");
+        setCart([]);
+        if (print) {
+          setIsPrinting(true);
+          setTimeout(() => {
+            window.print();
+            setTimeout(() => setIsPrinting(false), 500);
+          }, 300);
+        }
+      } else {
+        alert("Failed to save invoice!");
+      }
+    } catch (err) {
+      console.error("Save error:", err);
+      alert("Error saving invoice");
+    }
   };
 
   return (
@@ -126,7 +206,7 @@ const OnlyCounter = () => {
         theme === "dark" ? "bg-dark-50" : "bg-light-50"
       }`}
     >
-      {/* Top Bar */}
+      {/* ✅ Top Bar */}
       <div
         className={`w-full flex items-center justify-between border-b p-2 gap-4 ${
           theme === "dark"
@@ -134,7 +214,7 @@ const OnlyCounter = () => {
             : "border-black/90 bg-light-50"
         }`}
       >
-        {/* Left: Theme Toggle */}
+        {/* Theme toggle */}
         <label className="inline-flex items-center rounded p-2 cursor-pointer">
           <input
             type="checkbox"
@@ -149,12 +229,12 @@ const OnlyCounter = () => {
           >
             {theme === "dark" ? "Dark" : "Light"} Mode
           </span>
-          <div className="w-11 ml-3 h-6 bg-gray-900 peer-focus:outline-none peer-focus:ring-1 peer-focus:ring-white/60 rounded-full peer dark:bg-gray-600 peer-checked:bg-green-400 relative transition-colors duration-300">
+          <div className="w-11 ml-3 h-6 bg-gray-900 rounded-full relative transition-colors duration-300 peer-checked:bg-green-400">
             <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-300 peer-checked:translate-x-5" />
           </div>
         </label>
 
-        {/* Center: Current Time */}
+        {/* Current time */}
         <div
           className={`text-sm font-medium ${
             theme === "dark" ? "text-white/80" : "text-black"
@@ -163,9 +243,8 @@ const OnlyCounter = () => {
           {currentTime.toLocaleTimeString()}
         </div>
 
-        {/* Right: Fullscreen + User Dropdown */}
+        {/* User & fullscreen */}
         <div className="flex items-center gap-4 relative">
-          {/* User Profile Dropdown */}
           <div className="relative">
             <button
               onClick={() => setShowDropdown(!showDropdown)}
@@ -174,8 +253,6 @@ const OnlyCounter = () => {
               <FaUserCircle className="text-lg" />
               <span className="text-sm font-semibold">{userName}</span>
             </button>
-
-            {/* Dropdown */}
             {showDropdown && (
               <div
                 className="absolute right-0 top-full mt-2 w-40 bg-white shadow-lg rounded-md z-50"
@@ -196,15 +273,11 @@ const OnlyCounter = () => {
               </div>
             )}
           </div>
-          {/* Fullscreen Button */}
           <button
             onClick={() => {
               const el = document.documentElement;
-              if (!document.fullscreenElement) {
-                el.requestFullscreen().catch((err) => console.error(err));
-              } else {
-                document.exitFullscreen();
-              }
+              if (!document.fullscreenElement) el.requestFullscreen();
+              else document.exitFullscreen();
             }}
             className="text-lg bg-gray-700 hover:bg-gray-800 text-white p-2 rounded-full shadow"
             title="Toggle Fullscreen"
@@ -214,15 +287,15 @@ const OnlyCounter = () => {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* ✅ Main Content */}
       <div className="flex w-full p-5 max-md:flex-col gap-5">
         {/* Left Side */}
         {!isPrinting && (
           <div className="w-4/6 mt-2 max-md:w-full">
             {isCounter ? (
-              // Sale Mode
               <>
-                <div className="flex  bg-search-50 w-full rounded-full">
+                {/* Items Search */}
+                <div className="flex bg-search-50 w-full rounded-full">
                   <input
                     type="text"
                     placeholder="Search by name..."
@@ -231,6 +304,7 @@ const OnlyCounter = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
+                {/* Items Table */}
                 <div
                   className={`table-Main h-110 overflow-y-auto ${
                     theme === "dark"
@@ -244,13 +318,7 @@ const OnlyCounter = () => {
                     }`}
                   >
                     <thead className="sticky top-0 z-10 text-sm text-left uppercase h-11 bg-bg-50 text-white/80">
-                      <tr
-                        className={`border-b ${
-                          theme === "dark"
-                            ? "border-white/20"
-                            : "border-black/20"
-                        }`}
-                      >
+                      <tr>
                         <th className="px-4 py-2">Item Name</th>
                         <th className="px-4 py-2">Quantity</th>
                         <th className="px-4 py-2">Shelf</th>
@@ -258,25 +326,21 @@ const OnlyCounter = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredItems.map((product, idx) => (
+                      {filteredItems.map((p, idx) => (
                         <tr
                           key={idx}
-                          onClick={() => handleAddToCart(product)}
+                          onClick={() => handleAddToCart(p)}
                           className={`cursor-pointer ${
                             theme === "dark"
                               ? "hover:bg-white/20"
                               : "hover:bg-black/20"
-                          } px-4 py-2 text-xs font-medium border-b ${
-                            theme === "dark"
-                              ? "border-white/40"
-                              : "border-black/50"
-                          }`}
+                          } px-4 py-2 text-xs font-medium border-b`}
                         >
-                          <td className="px-4 py-2">{product.itemName}</td>
-                          <td className="px-4 py-2">{product.quantity}</td>
-                          <td className="px-4 py-2">{product.shelfNo}</td>
+                          <td className="px-4 py-2">{p?.itemName || "N/A"}</td>
+                          <td className="px-4 py-2">{p?.quantity ?? 0}</td>
+                          <td className="px-4 py-2">{p?.shelf || "-"}</td>
                           <td className="px-4 py-2">
-                            {product.price.toFixed(2)}
+                            {(p?.sellingPrice || 0).toFixed(2)}
                           </td>
                         </tr>
                       ))}
@@ -285,8 +349,8 @@ const OnlyCounter = () => {
                 </div>
               </>
             ) : (
-              // Return Mode
               <>
+                {/* Invoice Search */}
                 <input
                   type="text"
                   className="px-4 py-2 w-full rounded-full outline-none font-semibold text-primary-50 text-sm bg-search-50"
@@ -294,6 +358,7 @@ const OnlyCounter = () => {
                   value={invoiceSearch}
                   onChange={(e) => setInvoiceSearch(e.target.value)}
                 />
+                {/* Invoices Table */}
                 <div
                   className={`table-Main h-110 overflow-y-auto ${
                     theme === "dark"
@@ -307,27 +372,21 @@ const OnlyCounter = () => {
                     }`}
                   >
                     <thead className="sticky top-0 z-10 text-sm text-left uppercase h-11 bg-bg-50 text-white/80">
-                      <tr
-                        className={`border-b ${
-                          theme === "dark"
-                            ? "border-white/20"
-                            : "border-black/20"
-                        }`}
-                      >
-                        <th className="px-4 py-2">Item No</th>
+                      <tr>
+                        <th className="px-4 py-2">Invoice No</th>
                         <th className="px-4 py-2">Date</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredInvoices?.map((inv, idx) => (
+                      {filteredInvoices.map((inv, idx) => (
                         <tr
                           key={idx}
                           onClick={() => {
                             setSelectedInvoice(inv);
                             setCart(
-                              inv.items.map((item) => ({
-                                ...item,
-                                discount: 0, // Add if not present
+                              (inv?.items || []).map((i) => ({
+                                ...i,
+                                discount: 0,
                               }))
                             );
                           }}
@@ -335,14 +394,14 @@ const OnlyCounter = () => {
                             theme === "dark"
                               ? "hover:bg-white/20"
                               : "hover:bg-black/20"
-                          } px-4 py-2 text-xs font-medium border-b ${
-                            theme === "dark"
-                              ? "border-white/40"
-                              : "border-black/50"
-                          }`}
+                          } px-4 py-2 text-xs font-medium border-b`}
                         >
-                          <td className="px-4 py-2">{inv.invoiceNo}</td>
-                          <td className="px-4 py-2">{inv.date}</td>
+                          <td className="px-4 py-2">{inv?.id || "N/A"}</td>
+                          <td className="px-4 py-2">
+                            {inv?.createdAt
+                              ? new Date(inv.createdAt).toLocaleDateString()
+                              : "-"}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -352,8 +411,7 @@ const OnlyCounter = () => {
             )}
           </div>
         )}
-
-        {/* RIGHT Side: POS Table */}
+        {/* Right Side */}
         <div className="w-full flex flex-col gap-1">
           <div className="flex items-center justify-end gap-2">
             <button
@@ -370,6 +428,7 @@ const OnlyCounter = () => {
             </button>
           </div>
 
+          {/* POS table */}
           <div
             className={`overflow-x-auto table-Main rounded-md ${
               theme === "dark"
@@ -378,16 +437,12 @@ const OnlyCounter = () => {
             }`}
           >
             <table
-              className={`w-full table-auto  ${
+              className={`w-full table-auto ${
                 theme === "dark" ? "text-light-50" : "text-primary-50"
               }`}
             >
               <thead className="text-xs text-left h-11 uppercase bg-bg-50 text-white/80">
-                <tr
-                  className={`border-b ${
-                    theme === "dark" ? "border-white/20" : "border-black/20"
-                  }`}
-                >
+                <tr>
                   <th className="px-4 py-2">Product</th>
                   <th className="px-4 py-2">Price</th>
                   <th className="px-4 py-2">Quantity</th>
@@ -407,10 +462,11 @@ const OnlyCounter = () => {
                     } ${item.isReturn ? "bg-red-200" : ""}`}
                   >
                     <td className="px-4 text-[9px] py-2">{item.itemName}</td>
-                    <td className="px-4 py-2">{item.price.toFixed(2)}</td>
+                    <td className="px-4 py-2">
+                      {item.sellingPrice.toFixed(2)}
+                    </td>
                     <td className="px-4 py-2">
                       <div className="flex items-center gap-2">
-                        {" "}
                         {!isPrinting && (
                           <button
                             onClick={() => handleQuantityChange(idx, -1)}
@@ -418,8 +474,8 @@ const OnlyCounter = () => {
                           >
                             -
                           </button>
-                        )}{" "}
-                        <span>{item.quantity}</span>{" "}
+                        )}
+                        <span>{item.quantity}</span>
                         {!isPrinting && (
                           <button
                             onClick={() => handleQuantityChange(idx, 1)}
@@ -427,7 +483,7 @@ const OnlyCounter = () => {
                           >
                             +
                           </button>
-                        )}{" "}
+                        )}
                       </div>
                     </td>
                     {isCounter && (
@@ -445,7 +501,7 @@ const OnlyCounter = () => {
                     )}
                     <td className="px-4 py-2 text-center">
                       {(
-                        item.price * item.quantity -
+                        item.sellingPrice * item.quantity -
                         (item.discount || 0)
                       ).toFixed(2)}
                     </td>
@@ -472,11 +528,10 @@ const OnlyCounter = () => {
             </table>
           </div>
 
-          {!isPrinting && isCounter ? (
+          {!isPrinting && isCounter && (
             <>
-              {/* Discount Section */}
+              {/* Discount controls */}
               <div className="flex flex-wrap w-full items-center justify-center mt-10 gap-4">
-                {/* Discount Type */}
                 <div className="flex flex-col w-full md:w-2/4 items-center gap-1">
                   <label
                     htmlFor="discountType"
@@ -503,8 +558,6 @@ const OnlyCounter = () => {
                     <option value="percentage">Percentage</option>
                   </select>
                 </div>
-
-                {/* Discount Value */}
                 <div className="flex flex-col w-full md:w-2/4 items-center gap-1">
                   <label
                     htmlFor="discountValue"
@@ -530,26 +583,20 @@ const OnlyCounter = () => {
                 </div>
               </div>
 
-              {/* Totals & Buttons */}
+              {/* Totals */}
               <div className="flex flex-col gap-5 justify-center items-center mt-4 mb-10">
                 <span className="flex justify-center w-80 items-center text-center rounded-full text-sm font-semibold p-2 bg-bg-50 text-white/80">
                   Net Total: {discountedTotal.toFixed(2)}
                 </span>
                 <div className="flex justify-center gap-4">
                   <button
-                    onClick={() => alert("Invoice saved!")}
+                    onClick={() => handleSave(false)}
                     className="bg-blue-500 hover:bg-blue-600 text-white font-semibold text-sm py-2 px-4 rounded-full"
                   >
                     Save
                   </button>
                   <button
-                    onClick={() => {
-                      setIsPrinting(true);
-                      setTimeout(() => {
-                        window.print();
-                        setTimeout(() => setIsPrinting(false), 500);
-                      }, 300);
-                    }}
+                    onClick={() => handleSave(true)}
                     className="bg-green-500 hover:bg-green-600 text-white font-semibold text-sm py-2 px-4 rounded-full"
                   >
                     Save & Print
@@ -557,7 +604,7 @@ const OnlyCounter = () => {
                 </div>
               </div>
             </>
-          ) : null}
+          )}
         </div>
       </div>
     </div>
