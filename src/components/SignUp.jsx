@@ -4,6 +4,8 @@ import useLoginFormik from "../formik/useLoginFormik";
 import useRegisterFormik from "../formik/useRegisterFormik";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { useTheme } from "../theme-support/ThemeContext";
+import { FaSpinner } from "react-icons/fa";
+
 
 const SignUp = () => {
   const { theme } = useTheme();
@@ -24,8 +26,8 @@ const SignUp = () => {
 
   if (loading) {
     return (
-      <div className="w-full h-screen flex items-center justify-center bg-db-50">
-        <p className="text-lg text-primary-50">Logging in...</p>
+      <div className={`flex items-center w-full min-h-screen justify-center py-4 ${theme === "dark" ? "bg-dark-50" : "bg-light-50"} `}> 
+        <FaSpinner className="animate-spin text-blue-500 text-8xl" />
       </div>
     );
   }

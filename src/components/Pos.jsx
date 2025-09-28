@@ -4,11 +4,15 @@ import PosLink from "./PosLink";
 import { pos } from "../constants";
 import { gsap } from "gsap";
 import { Link } from "react-router-dom";
-import { useTheme } from "../theme-support/ThemeContext"; // 👈 import
+import { useTheme } from "../theme-support/ThemeContext";
+import { useNavigate } from "react-router-dom";
+import { FiLogOut } from "react-icons/fi";
 
 const Pos = () => {
-  const { theme, toggleTheme } = useTheme(); // 👈 use hook
-  const [activeIndex, setActiveIndex] = useState(null); // 👈 Add this state
+  const navigate = useNavigate();
+
+  const { theme, toggleTheme } = useTheme();
+  const [activeIndex, setActiveIndex] = useState(null);
 
   const [isOpen, setIsOpen] = useState(false);
   const [openSubMenuIndex, setOpenSubMenuIndex] = useState(null);
@@ -33,6 +37,24 @@ const Pos = () => {
 
   const toggleSubMenu = (index) => {
     setOpenSubMenuIndex(openSubMenuIndex === index ? null : index);
+  };
+
+  const handleLogout = () => {
+    // Clear local storage
+    localStorage.clear();
+
+    // Optionally clear session storage
+    sessionStorage.clear();
+
+    // Delete all cookies
+    document.cookie.split(";").forEach((cookie) => {
+      const eqPos = cookie.indexOf("=");
+      const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+    });
+
+    // Navigate to login or any route
+    navigate("/signup");
   };
 
   return (
@@ -109,9 +131,9 @@ const Pos = () => {
                 isOpen={isOpen}
                 name={link.name}
                 href={link.href}
-                isActive={activeIndex === index} 
+                isActive={activeIndex === index}
                 onClick={() => {
-                  setActiveIndex(index); 
+                  setActiveIndex(index);
                   if (link.subitems) toggleSubMenu(index);
                 }}
               >
@@ -147,6 +169,17 @@ const Pos = () => {
               )}
             </div>
           ))}
+      <div className="cursor-pointer text-xs font-semibold tracking-wide w-full text-white flex justify-start  items-center  gap-8 p-2 rounded-md hover:bg-selected-50 transition-all">
+  <div className={`${isOpen ? "ml-5" : "ml-[7px]"} gap-6 flex`}>
+    <FiLogOut className="text-white w-5 h-5 " />
+  
+  {isOpen && (
+    <button onClick={handleLogout} className="text-white">
+      Logout
+    </button>
+  )}
+  </div>
+</div>
         </div>
       </nav>
 
