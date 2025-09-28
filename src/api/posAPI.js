@@ -15,40 +15,27 @@ export const getPOSItems = async () => {
 export const addSale = async (data) => {
   try {
     const response = await api.post("/sales/add-sale", data, {
-      responseType: "blob", // Expect PDF response
+      responseType: "arraybuffer",
     });
 
-    // Check if the response is a PDF
-    const contentType = response.headers["content-type"];
-    if (contentType === "application/pdf") {
-      const blob = new Blob([response.data], { type: "application/pdf" });
-      const url = window.URL.createObjectURL(blob);
+    const contentType = response.headers["content-type"] || "";
 
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `receipt-${Date.now()}.pdf`; // you can dynamically set name
-      a.click();
-
-      window.URL.revokeObjectURL(url); // Clean up
-    } else {
-      throw new Error("Unexpected response type.");
+    if (contentType.includes("application/pdf")) {
+      return {
+        status: "success",
+        type: "pdf",
+        data: response.data,
+      };
     }
 
-    return { status: "success" }; // you can return more if needed
+    if (contentType.includes("application/json")) {
+      const decoder = new TextDecoder("utf-8");
+      const jsonString = decoder.decode(new Uint8Array(response.data));
+      return JSON.parse(jsonString);
+    }
+
+    throw new Error("Unsupported response type");
   } catch (error) {
-    console.error("❌ Error creating sale:", error);
-
-    // Try to extract backend error message
-    if (error.response?.data instanceof Blob) {
-      const errorText = await error.response.data.text();
-      try {
-        const parsed = JSON.parse(errorText);
-        throw new Error(parsed.message || "Sale failed.");
-      } catch {
-        throw new Error(errorText || "Sale failed.");
-      }
-    }
-
-    throw new Error(error.response?.data?.message || "Failed to create sale.");
+    console.log(error.message);
   }
 };

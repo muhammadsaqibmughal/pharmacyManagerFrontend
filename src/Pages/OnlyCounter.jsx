@@ -33,7 +33,6 @@ const OnlyCounter = () => {
     return () => clearInterval(timer);
   }, []);
 
-
   const fetchItems = async () => {
     const counterRes = await getCounter();
     if (counterRes.status === "success") {
@@ -54,8 +53,8 @@ const OnlyCounter = () => {
         quantity: p.totalQuantity ?? 0,
         unitType: p.unitType,
         unitsPerPack: p.unitsPerPack,
-        sellingPrice: p.sellingPrice ?? 0, 
-        costPrice: p.costPrice ?? 0, 
+        sellingPrice: p.sellingPrice ?? 0,
+        costPrice: p.costPrice ?? 0,
       }));
       setItemsData(normalized);
       console.log("Normalized POS Items:", normalized);
@@ -90,7 +89,9 @@ const OnlyCounter = () => {
 
   // Add item to cart
   const handleAddToCart = (product) => {
-    const exists = cart.find((i) => i.pharmacyProductId === product.pharmacyProductId);
+    const exists = cart.find(
+      (i) => i.pharmacyProductId === product.pharmacyProductId
+    );
 
     if (exists) {
       setCart(
@@ -161,30 +162,58 @@ const OnlyCounter = () => {
     alert("Marked for return");
   };
 
+
   // Save sale
   const handleSave = async (print = false) => {
     try {
       const payload = {
-        counterId: counterId,
+        counterId,
         totalAmount: discountedTotal,
-        paymentMode: "cash", 
+        paymentMode: "cash",
         totalDiscount:
           discountType === "percentage"
             ? (totalAmount * discountValue) / 100
             : discountValue,
         items: cart.map((item) => ({
-          pharmacyProductId: item.pharmacyProductId, 
+          pharmacyProductId: item.pharmacyProductId,
           quantity: item.quantity,
           price: item.sellingPrice,
           discount: item.discount || 0,
         })),
       };
-      console.log(payload);
+
+      console.log(" Payload:", payload);
       const res = await addSale(payload);
-      if (res?.status === "success") {
-        alert("Invoice saved!");
+
+      if (res?.status === "success" || res?.type === "pdf") {
+
         setCart([]);
-        if (print) {
+        await fetchItems();
+
+        if (print && res?.type === "pdf" && res.data) {
+          const blob = new Blob([res.data], { type: "application/pdf" });
+          const url = window.URL.createObjectURL(blob);
+
+          // Open PDF in a new tab/window
+          const printWindow = window.open(url);
+
+          if (printWindow) {
+            printWindow.focus();
+            printWindow.onload = () => {
+              printWindow.print();
+            };
+
+            setTimeout(() => {
+              try {
+                printWindow.print();
+              } catch (e) {
+                console.warn("Print fallback failed:", e);
+              }
+            }, 3000);
+          } else {
+            alert("Popup blocked! Please allow popups to print the receipt.");
+          }
+        } else if (print) {
           setIsPrinting(true);
           setTimeout(() => {
             window.print();
@@ -195,7 +224,7 @@ const OnlyCounter = () => {
         alert("Failed to save invoice!");
       }
     } catch (err) {
-      console.error("Save error:", err);
+      console.error(" Save error:", err);
       alert("Error saving invoice");
     }
   };
@@ -206,7 +235,7 @@ const OnlyCounter = () => {
         theme === "dark" ? "bg-dark-50" : "bg-light-50"
       }`}
     >
-      {/* ✅ Top Bar */}
+      {/*  Top Bar */}
       <div
         className={`w-full flex items-center justify-between border-b p-2 gap-4 ${
           theme === "dark"
@@ -287,7 +316,7 @@ const OnlyCounter = () => {
         </div>
       </div>
 
-      {/* ✅ Main Content */}
+      {/*  Main Content */}
       <div className="flex w-full p-5 max-md:flex-col gap-5">
         {/* Left Side */}
         {!isPrinting && (
