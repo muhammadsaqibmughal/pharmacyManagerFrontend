@@ -62,9 +62,10 @@ const App = () => {
   return (
     <Routes>
       {/* 🔐 Auto-redirect based on login & role */}
-      <Route path="/" element={<RoleRedirect />} />
+      <Route path="/" element={<HomeLayout />} />
 
       {/* 🔓 Public Routes */}
+      <Route path="/" element={<SignUpLayout />} />
       <Route path="/signup" element={<SignUpLayout />} />
       <Route path="/verify-email" element={<OtpVerification />} />
       <Route path="/onlyCounter" element={<OnlyCounter />} />
@@ -88,7 +89,6 @@ const App = () => {
         }
       />
 
- 
       <Route
         path="/pos"
         element={

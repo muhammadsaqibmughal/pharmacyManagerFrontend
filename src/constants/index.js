@@ -262,7 +262,7 @@ export const pos = [
     ],
   },
   {
-    name: "Customers",
+    name: "Staff",
     // href: '/pos/customers',
     icon: FaUserFriends,
     subitems: [{ name: "counters", href: "/pos/customer/counter" }],
@@ -275,6 +275,11 @@ export const pos = [
   {
     name: "Reports",
     href: "/pos/reports",
+    icon: TbReportAnalytics,
+  },
+  {
+    name: "Logout",
+    // href: "/pos/reports",
     icon: TbReportAnalytics,
   },
 ];

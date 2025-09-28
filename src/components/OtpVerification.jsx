@@ -2,8 +2,11 @@ import React, { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useOtpFormik } from "../formik/useOtpFormik";
+import { useTheme } from "../theme-support/ThemeContext";
 
 const OtpVerification = () => {
+  const { theme } = useTheme();
+
   const location = useLocation();
   const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
@@ -69,9 +72,19 @@ const OtpVerification = () => {
   }, [email, navigate]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black-50 p-5">
-          <div className="rounded-xl p-10 border border-white/20 bg-white/10 backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
-        <h2 className="text-3xl text-center font-semibold mb-4 text-white">Verify OTP</h2>
+    <div
+      className={`flex min-h-screen items-center justify-center  p-5  ${
+        theme === "dark" ? "bg-dark-50" : "bg-light-50"
+      } `}
+    >
+      <div className="rounded-xl p-10 border border-white/20 bg-white/10 backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
+        <h2
+          className={`text-3xl text-center font-semibold mb-4  ${
+            theme === "dark" ? "text-white/90" : " text-primary-50"
+          }  `}
+        >
+          Verify OTP
+        </h2>
         <p className="text-gray-300 text-sm text-center mb-6">
           Enter the 6-digit OTP sent to <br />
           <span className="text-purple-400 font-semibold">{email}</span>
@@ -91,13 +104,19 @@ const OtpVerification = () => {
                 value={digit}
                 onChange={(e) => handleChange(e.target.value, index)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
-                className="w-12 h-12 text-center text-white text-xl rounded-md border border-white/20 bg-white/10 backdrop-blur-sm focus:outline-none focus:border-purple-400"
+                className={`w-12 h-12 text-center text-white text-xl  ${
+                  theme === "dark"
+                    ? "text-white/90  bg-white/10 border-white/20"
+                    : "text-primary-50 bg-black/10 border-black/20"
+                }   rounded-md border border-white/20 bg-white/10 backdrop-blur-sm focus:outline-none focus:border-purple-400`}
               />
             ))}
           </div>
 
           {serverMessage && (
-            <p className="text-yellow-400 text-sm text-center">{serverMessage}</p>
+            <p className="text-yellow-400 text-sm text-center">
+              {serverMessage}
+            </p>
           )}
           {formik.errors.otp && formik.touched.otp && (
             <p className="text-red-400 text-sm text-center">

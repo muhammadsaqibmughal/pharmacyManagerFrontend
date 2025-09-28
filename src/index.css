@@ -202,11 +202,11 @@ body {
 }
 
 .timeline {
-  @apply absolute  z-30 h-[110%]  top-0 w-14 md:w-28 bg-db-50;
+  @apply absolute  z-30 h-[110%]  top-0 w-14 md:w-28 ;
 }
 
 .timeline-logo {
-  @apply md:size-15 max-sm:size-12 size-10 flex-none mt-2 rounded-full flex justify-center items-center md:-translate-y-7 border-2 border-[#4F7942] bg-db-50;
+  @apply md:size-15 max-sm:size-12 size-10 flex-none mt-2 rounded-full flex justify-center items-center md:-translate-y-7 border-2 border-bg-50 ;
 }
 
 .exp-card-wrapper {

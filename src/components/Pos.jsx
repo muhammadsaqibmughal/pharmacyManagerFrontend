@@ -8,6 +8,7 @@ import { useTheme } from "../theme-support/ThemeContext"; // 👈 import
 
 const Pos = () => {
   const { theme, toggleTheme } = useTheme(); // 👈 use hook
+  const [activeIndex, setActiveIndex] = useState(null); // 👈 Add this state
 
   const [isOpen, setIsOpen] = useState(false);
   const [openSubMenuIndex, setOpenSubMenuIndex] = useState(null);
@@ -107,8 +108,12 @@ const Pos = () => {
               <PosLink
                 isOpen={isOpen}
                 name={link.name}
-                onClick={() => (link.subitems ? toggleSubMenu(index) : null)}
                 href={link.href}
+                isActive={activeIndex === index} 
+                onClick={() => {
+                  setActiveIndex(index); 
+                  if (link.subitems) toggleSubMenu(index);
+                }}
               >
                 <link.icon className="min-w-8 w-8 size-5 text-white" />
               </PosLink>
@@ -116,23 +121,23 @@ const Pos = () => {
               {/* Submenu */}
               {link.subitems && (
                 <ul
-                  className={`transition-all  duration-300 ${
+                  className={`transition-all duration-300 ${
                     openSubMenuIndex === index
                       ? "opacity-100 max-h-40"
                       : "opacity-0 max-h-0 overflow-hidden"
                   } ${
                     isOpen
-                      ? "w-full  "
+                      ? "w-full"
                       : "absolute left-[13rem] bg-bg-50 rounded-md p-2 z-20"
-                  } flex justify-center  items-center  flex-col gap-1`}
+                  } flex justify-center items-center flex-col gap-1`}
                 >
                   {link.subitems.map((subItem, subIndex) => (
-                    <li key={subIndex} className="w-full px-1 ">
+                    <li key={subIndex} className="w-full px-1">
                       <Link
                         to={subItem.href}
-                        className="block text-sm hover:bg-selected-50 w-full   rounded-lg p-2 cursor-pointer text-white"
+                        className="block text-sm hover:bg-selected-50 w-full rounded-lg p-2 cursor-pointer text-white"
                       >
-                        <span className="ml-15  text-[11px]">
+                        <span className="ml-15 text-[11px]">
                           {subItem.name}
                         </span>
                       </Link>

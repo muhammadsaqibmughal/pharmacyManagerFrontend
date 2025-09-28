@@ -7,7 +7,8 @@ import * as Yup from 'yup';
 import { supabase } from "../utils/supabaseClient";
 import { pharmacyRegistration } from '../api/pharmacyApi';
 import { useNavigate } from 'react-router-dom';
-import { div } from 'motion/react-client';
+import { useTheme } from "../theme-support/ThemeContext";
+
 
 // File upload helper function for Supabase
 const uploadFileToSupabase = async (file, pathPrefix) => {
@@ -31,6 +32,7 @@ const uploadFileToSupabase = async (file, pathPrefix) => {
 
 const FormPage = () => {
   const navigate = useNavigate();
+  const { theme } = useTheme();
 
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
@@ -177,7 +179,7 @@ const FormPage = () => {
   });
 
   return (
-  <div className="w-full min-h-screen bg-black-50 px-20 max-md:px-10 py-10 ">
+  <div className={`w-full min-h-screen ${theme === "dark" ? "bg-dark-50 text-white/90" : "bg-light-50 text-primary-50"} px-20 max-md:px-10 py-10 `}>
 
       {/* ✅ FORM STARTS HERE */}
       <form
@@ -219,7 +221,7 @@ const FormPage = () => {
                 <input
                   type={field.type}
                   placeholder={field.placeholder}
-                  className="text-xs text-white bg-white/10 backdrop-blur-sm border border-white/20 p-2 rounded-xl outline-none"
+                  className={`text-xs ${theme === "dark" ? "text-white/90  bg-white/10 border-white/20" : "text-primary-50 bg-black/10 border-black/20"}  backdrop-blur-sm border  p-2 rounded-xl outline-none`}
                   name={field.name}
                   onChange={(event) => {
                     if (field.type === "file") {
@@ -246,7 +248,7 @@ const FormPage = () => {
             <div className="flex flex-col gap-1 w-1/3 max-xl:w-1/2 max-lg:w-90 max-md:w-full p-2 max-sm:w-4/5">
               <label className="labels text-Secondary-50 font-semibold">Country</label>
               <select
-                className="text-xs text-white bg-white/10 backdrop-blur-sm border border-white/20 p-2 rounded-xl outline-none"
+                  className={`text-xs ${theme === "dark" ? "text-white/90  bg-white/10 border-white/20" : "text-primary-50 bg-black/10 border-black/20"}  backdrop-blur-sm border  p-2 rounded-xl outline-none`}
                 value={selectedCountry}
                 onChange={(e) => {
                   setSelectedCountry(e.target.value);
@@ -267,7 +269,7 @@ const FormPage = () => {
             <div className="flex flex-col gap-1 w-1/3 max-xl:w-1/2 max-lg:w-90 max-md:w-full p-2 max-sm:w-4/5">
               <label className="labels text-Secondary-50 font-semibold">State</label>
               <select
-                className="text-xs text-white bg-white/10 backdrop-blur-sm border border-white/20 p-2 rounded-xl outline-none"
+                  className={`text-xs ${theme === "dark" ? "text-white/90  bg-white/10 border-white/20" : "text-primary-50 bg-black/10 border-black/20"}  backdrop-blur-sm border  p-2 rounded-xl outline-none`}
                 value={selectedState}
                 onChange={(e) => setSelectedState(e.target.value)}
                 disabled={!selectedCountry}
@@ -285,7 +287,7 @@ const FormPage = () => {
             <div className="flex flex-col gap-1 w-1/3 max-xl:w-1/2 max-lg:w-90 max-md:w-full p-2 max-sm:w-4/5">
               <label className="labels text-Secondary-50 font-semibold">City</label>
              <select
-                className="text-xs text-white bg-white/10 backdrop-blur-sm border border-white/20 p-2 rounded-xl outline-none"
+                  className={`text-xs ${theme === "dark" ? "text-white/90  bg-white/10 border-white/20" : "text-primary-50 bg-black/10 border-black/20"}  backdrop-blur-sm border  p-2 rounded-xl outline-none`}
                 value={selectedCity}
                 onChange={(e) => {
                   setSelectedCity(e.target.value);
@@ -312,7 +314,7 @@ const FormPage = () => {
                 type='text'
                 value={location}
                 placeholder='Get Location'
-                className="text-xs text-white bg-white/10 ml-4 backdrop-blur-sm border border-white/20 p-2 rounded-xl outline-none"
+                  className={`text-xs ${theme === "dark" ? "text-white/90  bg-white/10 border-white/20" : "text-primary-50 bg-black/10 border-black/20"}  backdrop-blur-sm border  p-2 rounded-xl outline-none`}
                 {...formik.getFieldProps('location')}
               />
             </div>

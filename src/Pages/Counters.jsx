@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { counterIndex } from "../constants";
-import Card, { CardContent } from "../components/Card";
 import { Link } from "react-router-dom";
 import { createCounter, getCounterList } from "../api/counterAPI";
 import { useEffect } from "react";
+import { useTheme } from "../theme-support/ThemeContext";
 
 const ITEM_PER_PAGE = 5;
 
 const Counter = () => {
+  const { theme } = useTheme();
+
   const [counterData, setCounterData] = useState([]);
   const [newCounter, setNewCounter] = useState({
     name: "",
@@ -76,24 +77,33 @@ const Counter = () => {
   };
 
   return (
-    <div className="mt-8 p-10">
+    <div
+      className={`mt-8 p-10 ${
+        theme === "dark" ? "bg-dark-50" : " bg-light-50"
+      }`}
+    >
+      {" "}
       {/* *********** TOP ************ */}
       <div className="flex justify-between max-md:flex-col max-md:gap-2 max-md:justify-center items-center mb-4">
-        <h2 className="text-2xl text-white/90 max-md:text-xl font-bold">
+        <h2
+          className={`text-2xl ${
+            theme === "dark" ? "text-white/90" : " text-primary-50"
+          }  font-bold`}
+        >
+          {" "}
           All Counter
         </h2>
         <div className="space-x-2 max-md:flex">
           <button
             onClick={() => setShowModal(true)}
-            className="bg-[#4F7942] text-white max-md:text-sm px-4 py-1 h-10 rounded-full hover:bg-hf-100"
+            className="bg-bg-50 hover:bg-selected-50 cursor-pointer text-white px-4 py-1 h-10 rounded-full hover:bg-hf-100"
           >
             Add New Counter
           </button>
         </div>
       </div>
-
       {/* ********* Search Bar ********** */}
-      <div className="mb-4 bg-[#acc5b0ff] rounded-full">
+      <div className="mb-4 bg-search-50 rounded-full">
         <input
           type="text"
           placeholder="Search by counter name..."
@@ -102,32 +112,41 @@ const Counter = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-
       {/* ************ Table ************** */}
-      <div className="overflow-y-auto mt-2 rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
-        <table className="w-full table-auto text-white">
-          <thead className="text-xs text-left uppercase bg-bg-50 text-white/80">
-            <tr>
-              <th className="px-4 py-2 border-b border-white/10">Name</th>
-              <th className="px-4 py-2 border-b border-white/10">Email</th>
-              <th className="px-4 py-2 border-b border-white/10">
-                Counter Name
-              </th>
-              <th className="px-4 py-2 border-b border-white/10">
-                Active Status
-              </th>
-              <th className="px-4 py-2 border-b border-white/10">
-                Has Printer
-              </th>
+      <div
+        className={`table-Main  ${
+          theme === "dark"
+            ? " border-white/10 bg-white/10"
+            : " border-black/10 bg-white/60"
+        }`}
+      >
+        <table
+          className={`w-full table-auto ${
+            theme === "dark" ? "text-light-50" : " text-primary-50"
+          }`}
+        >
+          <thead className="text-sm text-left uppercase bg-bg-50 text-white/80">
+            <tr
+              className={`border-b ${
+                theme === "dark" ? " border-white/20" : " border-black/20"
+              }`}
+            >
+              <th className="px-4 py-2 ">Name</th>
+              <th className="px-4 py-2 ">Email</th>
+              <th className="px-4 py-2 ">Counter Name</th>
+              <th className="px-4 py-2 ">Active Status</th>
+              <th className="px-4 py-2 ">Has Printer</th>
             </tr>
           </thead>
           <tbody>
             {paginatedProducts.map((product, idx) => (
               <tr
                 key={idx}
-                className="hover:bg-white/10 transition-all duration-200"
+                className={` px-4 py-2 text-xs font-medium border-b ${
+                  theme === "dark" ? " border-white/40" : " border-black/50"
+                }`}
               >
-                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
+                <td className="px-4 py-2 text-xs font-medium">
                   <Link
                     to={`/pos/counter-detail/name/${encodeURIComponent(
                       product.name
@@ -137,13 +156,13 @@ const Counter = () => {
                     {product.staffUsers[0].name}
                   </Link>
                 </td>
-                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
+                <td className="px-4 py-2 text-xs font-medium">
                   {product.staffUsers[0].email}
                 </td>
-                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
+                <td className="px-4 py-2 text-xs font-medium">
                   {product.counterName || "N/A"}
                 </td>
-                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
+                <td className="px-4 py-2 text-xs font-medium">
                   <span
                     className={`px-3 py-1 rounded-full text-white text-[11px] font-semibold ${
                       product.status ? "bg-green-500" : "bg-red-500"
@@ -152,7 +171,7 @@ const Counter = () => {
                     {product.status ? "Active" : "Inactive"}
                   </span>
                 </td>
-                <td className="px-4 py-2 text-xs font-medium border-b border-white/10">
+                <td className="px-4 py-2 text-xs font-medium">
                   <span
                     className={`px-3 py-1 rounded-full text-white text-[11px] font-semibold ${
                       product.hasPrinter ? "bg-green-500" : "bg-red-500"
@@ -167,9 +186,16 @@ const Counter = () => {
         </table>
 
         {/* Pagination */}
-        <div className="flex justify-between items-center px-4 py-3 bg-white/10 border-t border-white/10">
+        <div
+          className={`flex justify-between items-center px-4 py-3  border-t ${
+            theme === "dark"
+              ? "bg-white/20 border-white/20"
+              : "bg-white/10 border-white/20"
+          }`}
+        >
+          {" "}
           <button
-            className="px-4 py-1 bg-[#4F7942] text-white rounded-full disabled:opacity-50"
+            className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
           >
@@ -179,7 +205,7 @@ const Counter = () => {
             Page {currentPage} of {totalPages}
           </span>
           <button
-            className="px-4 py-1 bg-[#4F7942] text-white rounded-full disabled:opacity-50"
+            className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
             onClick={() =>
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }
@@ -189,12 +215,22 @@ const Counter = () => {
           </button>
         </div>
       </div>
-
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-10">
-          <div className="rounded-xl p-6 w-full max-w-lg border border-white/20 bg-white/10 backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
-            <h2 className="text-xl text-white/90 font-semibold mb-4">
+          <div
+            className={`rounded-xl p-5 border ${
+              theme === "dark"
+                ? "border-white/20 bg-white/10"
+                : "border-white/40 bg-white/90"
+            }   backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]`}
+          >
+            <h2
+              className={`text-xl font-semibold mb-4 ${
+                theme === "dark" ? "text-light-50" : "text-primary-50"
+              }`}
+            >
+              {" "}
               Add New Counter
             </h2>
             <div className="grid grid-cols-1 gap-4">
@@ -206,7 +242,11 @@ const Counter = () => {
                     placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
                     value={newCounter[field]}
                     onChange={handleChange}
-                    className="border-1 text-xs border-gray-300 font-semibold text-white/90 px-3 py-2 rounded-full w-full bg-white/5 backdrop-blur-sm"
+                    className={`border-1 text-xs  font-semibold px-3 py-2 rounded-full w-full ${
+                      theme === "dark"
+                        ? "border-gray-300 text-white/90"
+                        : "border-black/40 text-primary-50"
+                    }`}
                   />
                 </div>
               ))}
@@ -222,7 +262,11 @@ const Counter = () => {
                       hasPrinter: e.target.value === "true",
                     })
                   }
-                  className="border-1 text-xs border-gray-300 font-semibold text-white/90 px-3 py-2 rounded-full w-full bg-white/5 backdrop-blur-sm"
+                  className={`border-1 text-xs  font-semibold px-3 py-2 rounded-full w-full ${
+                    theme === "dark"
+                      ? "border-gray-300 text-white/90"
+                      : "border-black/40 text-primary-50"
+                  }`}
                 >
                   <option value="false">No Printer</option>
                   <option value="true">Has Printer</option>
