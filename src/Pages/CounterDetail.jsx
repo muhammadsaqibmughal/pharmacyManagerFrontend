@@ -4,9 +4,24 @@ import { counterIndex } from "../constants"; // adjust path if needed
 
 // Dummy sales data per counter
 const dummySales = [
-  { counterName: "Counter 1", date: "2025-09-21", name: "Ahmed Khan", email: "ahmed.khan@example.com" },
-  { counterName: "Counter 1", date: "2025-09-22", name: "Ahmed Khan", email: "ahmed.khan@example.com" },
-  { counterName: "Counter 1", date: "2025-09-23", name: "Ahmed Khan", email: "ahmed.khan@example.com" },
+  {
+    counterName: "Counter 1",
+    date: "2025-09-21",
+    name: "Ahmed Khan",
+    email: "ahmed.khan@example.com",
+  },
+  {
+    counterName: "Counter 1",
+    date: "2025-09-22",
+    name: "Ahmed Khan",
+    email: "ahmed.khan@example.com",
+  },
+  {
+    counterName: "Counter 1",
+    date: "2025-09-23",
+    name: "Ahmed Khan",
+    email: "ahmed.khan@example.com",
+  },
 ];
 
 const ITEM_PER_PAGE = 5;
@@ -39,18 +54,29 @@ const CounterDetail = () => {
   );
 
   return (
-    <div className="p-10">
+    <div
+      className={`mt-8 p-10 ${
+        theme === "dark" ? "bg-dark-50" : " bg-light-50"
+      }`}
+    >
       <div className="flex justify-between gap-2 items-center mb-2">
-        <div className="rounded-full px-4 py-2 bg-[#4F7942]">
-          <Link to="/pos/customer/counter" className="text-sm text-white">← Back</Link>
+        <div className="bg-bg-50 hover:bg-selected-50 cursor-pointer text-white px-4 py-2 h-10 rounded-full hover:bg-hf-100">
+          <Link to="/pos/purchase/purchase" className="text-sm text-primary-50">
+            ← Back
+          </Link>
         </div>
       </div>
-      <h2 className="text-2xl text-white font-semibold mb-6">
+      <h2
+        className={`text-2xl ${
+          theme === "dark" ? "text-white/90" : " text-primary-50"
+        }  font-bold`}
+      >
+        {" "}
         Datewise Sales for {counter.counterName}
       </h2>
 
       {/* Search Input */}
-      <div className="mb-4 bg-[#acc5b0ff] rounded-full">
+      <div className="mb-4 bg-search-50 rounded-full">
         <input
           type="date"
           placeholder="Search by date (e.g. 2025-09-22)"
@@ -61,40 +87,65 @@ const CounterDetail = () => {
       </div>
 
       {/* Table */}
-      <div className="overflow-y-auto mt-2 rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
-        <table className="w-full table-auto text-white text-sm">
-          <thead className="text-left text-xs uppercase bg-bg-50 h-10 text-white/80">
-            <tr>
-              <th className="px-4 py-2 border-b border-white/10">Date</th>
-              <th className="px-4 py-2 border-b border-white/10">Name</th>
-              <th className="px-4 py-2 border-b border-white/10">Email</th>
+      <div
+        className={`table-Main  ${
+          theme === "dark"
+            ? " border-white/10 bg-white/10"
+            : " border-black/10 bg-white/60"
+        }`}
+      >
+        <table
+          className={`w-full table-auto ${
+            theme === "dark" ? "text-light-50" : " text-primary-50"
+          }`}
+        >
+          <thead className="text-sm text-left uppercase bg-bg-50 text-white/80">
+            <tr
+              className={`border-b ${
+                theme === "dark" ? " border-white/20" : " border-black/20"
+              }`}
+            >
+              {" "}
+              <th className="px-4 py-2 ">Date</th>
+              <th className="px-4 py-2 ">Name</th>
+              <th className="px-4 py-2 ">Email</th>
             </tr>
           </thead>
           <tbody>
             {paginatedProducts.map((sale, idx) => (
               <tr
                 key={idx}
-                className="hover:bg-white/10 transition-all duration-200"
+                className={` px-4 py-2 text-xs font-medium border-b ${
+                  theme === "dark" ? " border-white/40" : " border-black/50"
+                }`}
               >
-                <td className="px-4 py-2 border-b border-white/10 font-medium">
+                <td className="px-4 py-2 text-xs font-medium">
                   <Link
-                    to={`/pos/sale-detail/${encodeURIComponent(sale.name)}/${encodeURIComponent(sale.date)}`}
+                    to={`/pos/sale-detail/${encodeURIComponent(
+                      sale.name
+                    )}/${encodeURIComponent(sale.date)}`}
                     className="text-blue-300 hover:text-blue-500 hover:underline"
                   >
                     {sale.date}
                   </Link>
                 </td>
-                <td className="px-4 py-2 border-b border-white/10">{sale.name}</td>
-                <td className="px-4 py-2 border-b border-white/10">{sale.email}</td>
+                <td className="px-4 py-2 text-xs font-medium">{sale.name}</td>
+                <td className="px-4 py-2 text-xs font-medium">{sale.email}</td>
               </tr>
             ))}
           </tbody>
         </table>
 
         {/* Pagination */}
-        <div className="flex justify-between items-center px-4 py-3 bg-white/10 border-t border-white/10">
+        <div
+          className={`flex justify-between items-center px-4 py-3  border-t ${
+            theme === "dark"
+              ? "bg-white/20 border-white/20"
+              : "bg-white/10 border-white/20"
+          }`}
+        >
           <button
-            className="px-4 py-1 bg-[#4F7942] text-white rounded-full disabled:opacity-50"
+            className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
           >
@@ -104,8 +155,10 @@ const CounterDetail = () => {
             Page {currentPage} of {totalPages}
           </span>
           <button
-            className="px-4 py-1 bg-[#4F7942] text-white rounded-full disabled:opacity-50"
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
             disabled={currentPage === totalPages}
           >
             Next
