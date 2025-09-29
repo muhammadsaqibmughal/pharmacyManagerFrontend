@@ -25,6 +25,7 @@ const Supplier = () => {
       try {
         const response = await getSupplier();
         setSupplierData(Array.isArray(response.data) ? response.data : []);
+        console.log("supplier",response )
       } catch (e) {
         console.log(e);
       }
