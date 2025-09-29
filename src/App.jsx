@@ -64,7 +64,7 @@ const App = () => {
       <Route path="/signup" element={<SignUpLayout />} />
       <Route path="/verify-email" element={<OtpVerification />} />
 
-      {/* Staff-only Routes */}
+      {/* Staff-only Routes: Staff can ONLY access these */}
       <Route
         path="/onlyCounter"
         element={
@@ -82,11 +82,11 @@ const App = () => {
         }
       />
 
-      {/* Authenticated, but not necessarily approved */}
+      {/* Authenticated routes — restrict staff from accessing except above */}
       <Route
         path="/form"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute redirectStaff={true}>
             <FormLayout />
           </ProtectedRoute>
         }
@@ -94,13 +94,13 @@ const App = () => {
       <Route
         path="/pending-approval"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute redirectStaff={true}>
             <PendingApproval />
           </ProtectedRoute>
         }
       />
 
-      {/* Protected POS System - redirect staff users away */}
+      {/* Protected POS System & subroutes: Staff redirected away */}
       <Route
         path="/pos"
         element={
