@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { counterIndex } from "../constants"; // adjust path if needed
+import { useTheme } from "../theme-support/ThemeContext";
 
 // Dummy sales data per counter
 const dummySales = [
@@ -27,6 +28,7 @@ const dummySales = [
 const ITEM_PER_PAGE = 5;
 
 const CounterDetail = () => {
+  const { theme } = useTheme();
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 

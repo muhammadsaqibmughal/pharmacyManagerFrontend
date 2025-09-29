@@ -18,24 +18,38 @@ export const addSale = async (data) => {
       responseType: "arraybuffer",
     });
 
-    const contentType = response.headers["content-type"] || "";
+    const file = new Blob([response.data], { type: "application/pdf" });
+    const fileURL = URL.createObjectURL(file);
 
-    if (contentType.includes("application/pdf")) {
-      return {
-        status: "success",
-        type: "pdf",
-        data: response.data,
-      };
-    }
-
-    if (contentType.includes("application/json")) {
-      const decoder = new TextDecoder("utf-8");
-      const jsonString = decoder.decode(new Uint8Array(response.data));
-      return JSON.parse(jsonString);
-    }
-
-    throw new Error("Unsupported response type");
+    return {
+      status: "success",
+      type: "pdf",
+      data: fileURL, // <-- return blob URL instead of raw bytes
+    };
   } catch (error) {
     console.log(error.message);
+    return { status: "error", message: error.message };
+  }
+};
+
+export const returnSale = async (data) => {
+  try {
+    const response = await api.post("/sales/return-sale", data);
+
+    return response.data;
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+export const getSales = async () => {
+  try {
+    const response = await api.get("/sales/get-sales");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching pharmacy sales:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch pharmacy sales"
+    );
   }
 };

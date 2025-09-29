@@ -1,13 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTheme } from "../theme-support/ThemeContext";
 import { FaExpand, FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { getPOSItems, addSale } from "../api/posAPI";
+import { getPOSItems, addSale, getSales, returnSale } from "../api/posAPI";
 import { getCounter } from "../api/counterAPI";
 
 const OnlyCounter = () => {
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
 
+  const [selectedReturnItems, setSelectedReturnItems] = useState([]);
+  const [selectedReturnDetails, setSelectedReturnDetails] = useState([]);
   const [isCounter, setIsCounter] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [itemsData, setItemsData] = useState([]);
@@ -16,22 +19,24 @@ const OnlyCounter = () => {
   const [discountType, setDiscountType] = useState("fixed");
   const [discountValue, setDiscountValue] = useState(0);
   const [isPrinting, setIsPrinting] = useState(false);
-  const [returnCart, setReturnCart] = useState([]);
-
   const [invoiceSearch, setInvoiceSearch] = useState("");
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [counterId, setCounterId] = useState("");
-
-  const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showDropdown, setShowDropdown] = useState(false);
-  const userName = "John Doe";
+  const userName = "Ahmad Raza";
 
-  // Update time every second
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  const fetchSales = async () => {
+    const salesRes = await getSales();
+    if (salesRes.status === "success" && Array.isArray(salesRes.data)) {
+      setSalesData(salesRes.data);
+    }
+  };
 
   const fetchItems = async () => {
     const counterRes = await getCounter();
@@ -57,7 +62,6 @@ const OnlyCounter = () => {
         costPrice: p.costPrice ?? 0,
       }));
       setItemsData(normalized);
-      console.log("Normalized POS Items:", normalized);
     } else {
       setItemsData([]);
     }
@@ -65,9 +69,9 @@ const OnlyCounter = () => {
 
   useEffect(() => {
     fetchItems();
+    fetchSales();
   }, []);
 
-  // Escape exits fullscreen
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape" && document.fullscreenElement) {
@@ -78,21 +82,25 @@ const OnlyCounter = () => {
     return () => document.removeEventListener("keydown", handleEscape);
   }, []);
 
-  //  Safe filters
-  const filteredItems = itemsData.filter((p) =>
-    (p?.itemName || "").toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredItems = useMemo(() => {
+    return itemsData.filter((p) =>
+      (p?.itemName || "").toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [itemsData, searchTerm]);
 
-  const filteredInvoices = salesData.filter((inv) =>
-    (inv?.id || "").toLowerCase().includes(invoiceSearch.toLowerCase())
-  );
+  const filteredInvoices = useMemo(() => {
+    return salesData.filter((inv) =>
+      (inv?.invoiceNo || "")
+        .toString()
+        .toLowerCase()
+        .includes(invoiceSearch.toLowerCase())
+    );
+  }, [salesData, invoiceSearch]);
 
-  // Add item to cart
   const handleAddToCart = (product) => {
     const exists = cart.find(
       (i) => i.pharmacyProductId === product.pharmacyProductId
     );
-
     if (exists) {
       setCart(
         cart.map((i) =>
@@ -106,14 +114,6 @@ const OnlyCounter = () => {
     }
   };
 
-  // Cart updates
-  const handleQuantityChange = (index, delta) => {
-    const updatedCart = [...cart];
-    const newQty = updatedCart[index].quantity + delta;
-    if (newQty < 1) return;
-    updatedCart[index].quantity = newQty;
-    setCart(updatedCart);
-  };
 
   const handleDiscountChange = (index, value) => {
     const updatedCart = [...cart];
@@ -127,12 +127,111 @@ const OnlyCounter = () => {
     setCart(updatedCart);
   };
 
-  // Totals
+  const handleSwitchToReturn = () => {
+    setIsCounter(false);
+    setCart([]);
+    setSelectedReturnItems([]);
+    setSelectedInvoice(null);
+    setInvoiceSearch("");
+  };
+
+  const handleSwitchToSale = () => {
+    setIsCounter(true);
+    setCart([]);
+    setSelectedReturnItems([]);
+    setSelectedInvoice(null);
+    setInvoiceSearch("");
+  };
+
+  const handleInvoiceSelect = (inv) => {
+    setSelectedInvoice(inv);
+    const updatedItems = (inv?.items || []).map((i) => ({
+      ...i,
+      itemName: i.pharmacyProduct?.medicine?.brandName || "N/A",
+      quantity: i.quantity,
+      sellingPrice: i.price || i.sellingPrice || 0,
+      discount: 0,
+    }));
+    setCart(updatedItems);
+    setSelectedReturnItems([]);
+  };
+
+  const handleLogout = () => {
+
+  localStorage.clear();
+  const cookies = document.cookie.split(";");
+  cookies.forEach((cookie) => {
+    const eqPos = cookie.indexOf("=");
+    const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;`;
+  });
+
+  // Redirect to signup page
+  navigate("/signup");
+};
+
+
+  const toggleReturnSelection = (item) => {
+    setSelectedReturnItems((prev) =>
+      prev.includes(item.id)
+        ? prev.filter((id) => id !== item.id)
+        : [...prev, item.id]
+    );
+
+    setSelectedReturnDetails((prev) => {
+      const exists = prev.find((i) => i.id === item.id);
+      if (exists) {
+        return prev.filter((i) => i.id !== item.id);
+      } else {
+        return [...prev, item];
+      }
+    });
+  };
+
+  const handleSaveReturn = async () => {
+    if (!selectedInvoice) {
+      alert("Please select an invoice first.");
+      return;
+    }
+
+    if (selectedReturnDetails.length === 0) {
+      alert("Please select at least one item to return.");
+      return;
+    }
+    const totalAmount = selectedReturnDetails.reduce((acc, item) => {
+      const subtotal = item.price * item.quantity - (item.discount || 0);
+      return acc + subtotal;
+    }, 0);
+
+    const payload = {
+      saleId: selectedInvoice.id, 
+      totalAmount, 
+      returnItems: selectedReturnDetails.map((item) => ({
+        saleItemId: item.id,
+        quantity: item.quantity,
+        price: item.price,
+        discount: item.discount || 0,
+      })),
+    };
+
+    console.log("Return Payload:", payload);
+
+    const res = await returnSale(payload);
+
+    if (res?.status === "success") {
+      alert("Return successful!");
+      fetchSales();
+      fetchItems();
+      handleSwitchToSale();
+    } else {
+      alert("Failed to process return.");
+    }
+  };
+
   const totalAmount = cart.reduce((acc, item) => {
     const subtotal =
       (item.sellingPrice || 0) * (item.quantity || 0) - (item.discount || 0);
-
-    return acc + (item.isReturn ? -subtotal : subtotal);
+    return acc + subtotal;
   }, 0);
 
   const discountedTotal =
@@ -140,92 +239,39 @@ const OnlyCounter = () => {
       ? totalAmount - (totalAmount * discountValue) / 100
       : totalAmount - discountValue;
 
-  // Switch modes
-  const handleSwitchToReturn = () => {
-    setIsCounter(false);
-    setSelectedInvoice(null);
-    setInvoiceSearch("");
-  };
-
-  const handleSwitchToSale = () => {
-    setIsCounter(true);
-    setCart([...returnCart]);
-    setReturnCart([]);
-  };
-
-  // Mark return
-  const handleReturnItem = (index) => {
-    const returnItem = { ...cart[index], isReturn: true };
-    if (!returnCart.find((i) => i.itemName === returnItem.itemName)) {
-      setReturnCart([...returnCart, returnItem]);
-    }
-    alert("Marked for return");
-  };
-
-
-  // Save sale
   const handleSave = async (print = false) => {
-    try {
-      const payload = {
-        counterId,
-        totalAmount: discountedTotal,
-        paymentMode: "cash",
-        totalDiscount:
-          discountType === "percentage"
-            ? (totalAmount * discountValue) / 100
-            : discountValue,
-        items: cart.map((item) => ({
-          pharmacyProductId: item.pharmacyProductId,
-          quantity: item.quantity,
-          price: item.sellingPrice,
-          discount: item.discount || 0,
-        })),
-      };
+    const payload = {
+      counterId,
+      totalAmount: discountedTotal,
+      paymentMode: "cash",
+      totalDiscount:
+        discountType === "percentage"
+          ? (totalAmount * discountValue) / 100
+          : discountValue,
+      items: cart.map((item) => ({
+        pharmacyProductId: item.pharmacyProductId,
+        quantity: item.quantity,
+        price: item.sellingPrice,
+        discount: item.discount || 0,
+      })),
+    };
 
-      console.log(" Payload:", payload);
-      const res = await addSale(payload);
+    const res = await addSale(payload);
+    if (res?.status === "success") {
+      alert("Sale successful!");
+      setCart([]);
+      fetchItems();
 
-      if (res?.status === "success" || res?.type === "pdf") {
-
-        setCart([]);
-        await fetchItems();
-
-        if (print && res?.type === "pdf" && res.data) {
-          const blob = new Blob([res.data], { type: "application/pdf" });
-          const url = window.URL.createObjectURL(blob);
-
-          // Open PDF in a new tab/window
-          const printWindow = window.open(url);
-
-          if (printWindow) {
-            printWindow.focus();
-            printWindow.onload = () => {
-              printWindow.print();
-            };
-
-            setTimeout(() => {
-              try {
-                printWindow.print();
-              } catch (e) {
-                console.warn("Print fallback failed:", e);
-              }
-            }, 3000);
-          } else {
-            alert("Popup blocked! Please allow popups to print the receipt.");
-          }
-        } else if (print) {
-          setIsPrinting(true);
-          setTimeout(() => {
-            window.print();
-            setTimeout(() => setIsPrinting(false), 500);
-          }, 300);
+      if (print && res.type === "pdf") {
+        const win = window.open(res.data);
+        if (win) {
+          win.addEventListener("load", () => {
+            win.print();
+          });
         }
-      } else {
-        alert("Failed to save invoice!");
       }
-    } catch (err) {
-      console.error(" Save error:", err);
-      alert("Error saving invoice");
+    } else {
+      alert("Failed to save sale.");
     }
   };
 
@@ -294,7 +340,7 @@ const OnlyCounter = () => {
                   Profile
                 </button>
                 <button
-                  onClick={() => navigate("/logout")}
+                  onClick={ handleLogout}
                   className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
                 >
                   Logout
@@ -315,12 +361,11 @@ const OnlyCounter = () => {
           </button>
         </div>
       </div>
-
       {/*  Main Content */}
       <div className="flex w-full p-5 max-md:flex-col gap-5">
         {/* Left Side */}
         {!isPrinting && (
-          <div className="w-4/6 mt-2 max-md:w-full">
+          <div className="w-6/6 mt-2 max-md:w-full">
             {isCounter ? (
               <>
                 {/* Items Search */}
@@ -410,25 +455,19 @@ const OnlyCounter = () => {
                       {filteredInvoices.map((inv, idx) => (
                         <tr
                           key={idx}
-                          onClick={() => {
-                            setSelectedInvoice(inv);
-                            setCart(
-                              (inv?.items || []).map((i) => ({
-                                ...i,
-                                discount: 0,
-                              }))
-                            );
-                          }}
+                          onClick={() => handleInvoiceSelect(inv)}
                           className={`cursor-pointer ${
                             theme === "dark"
                               ? "hover:bg-white/20"
                               : "hover:bg-black/20"
                           } px-4 py-2 text-xs font-medium border-b`}
                         >
-                          <td className="px-4 py-2">{inv?.id || "N/A"}</td>
                           <td className="px-4 py-2">
-                            {inv?.createdAt
-                              ? new Date(inv.createdAt).toLocaleDateString()
+                            {inv?.invoiceNo || "N/A"}
+                          </td>
+                          <td className="px-4 py-2">
+                            {inv?.saleDate
+                              ? new Date(inv.saleDate).toLocaleDateString()
                               : "-"}
                           </td>
                         </tr>
@@ -440,6 +479,7 @@ const OnlyCounter = () => {
             )}
           </div>
         )}
+
         {/* Right Side */}
         <div className="w-full flex flex-col gap-1">
           <div className="flex items-center justify-end gap-2">
@@ -456,7 +496,6 @@ const OnlyCounter = () => {
               Return
             </button>
           </div>
-
           {/* POS table */}
           <div
             className={`overflow-x-auto table-Main rounded-md ${
@@ -488,33 +527,15 @@ const OnlyCounter = () => {
                       theme === "dark"
                         ? "border-white/40 hover:bg-white/10"
                         : "border-black/50 hover:bg-gray-100"
-                    } ${item.isReturn ? "bg-red-200" : ""}`}
+                    }`}
                   >
-                    <td className="px-4 text-[9px] py-2">{item.itemName}</td>
-                    <td className="px-4 py-2">
-                      {item.sellingPrice.toFixed(2)}
+                    <td className="px-4 text-[9px] py-2">
+                      {item.itemName || item.brandName || "N/A"}
                     </td>
                     <td className="px-4 py-2">
-                      <div className="flex items-center gap-2">
-                        {!isPrinting && (
-                          <button
-                            onClick={() => handleQuantityChange(idx, -1)}
-                            className="w-6 h-6 text-xs rounded-full bg-red-400 text-white"
-                          >
-                            -
-                          </button>
-                        )}
-                        <span>{item.quantity}</span>
-                        {!isPrinting && (
-                          <button
-                            onClick={() => handleQuantityChange(idx, 1)}
-                            className="w-6 h-6 text-xs rounded-full bg-green-400 text-white"
-                          >
-                            +
-                          </button>
-                        )}
-                      </div>
+                      {Number(item.sellingPrice ?? item.price ?? 0).toFixed(2)}
                     </td>
+                    <td className="px-4 py-2">{item.quantity}</td>
                     {isCounter && (
                       <td className="px-4 py-2">
                         <input
@@ -530,7 +551,7 @@ const OnlyCounter = () => {
                     )}
                     <td className="px-4 py-2 text-center">
                       {(
-                        item.sellingPrice * item.quantity -
+                        (item.sellingPrice ?? item.price ?? 0) * item.quantity -
                         (item.discount || 0)
                       ).toFixed(2)}
                     </td>
@@ -543,18 +564,27 @@ const OnlyCounter = () => {
                           ✕
                         </button>
                       ) : (
-                        <button
-                          onClick={() => handleReturnItem(idx)}
-                          className="text-blue-500 hover:text-blue-700 text-sm"
-                        >
-                          Return
-                        </button>
+                        <input
+                          type="checkbox"
+                          checked={selectedReturnItems.includes(item.id)}
+                          onChange={() => toggleReturnSelection(item)}
+                        />
                       )}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            {!isCounter && selectedInvoice && (
+              <div className="mt-4 text-center">
+                <button
+                  onClick={handleSaveReturn}
+                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                >
+                  Return Selected
+                </button>
+              </div>
+            )}
           </div>
 
           {!isPrinting && isCounter && (

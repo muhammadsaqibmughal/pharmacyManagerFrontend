@@ -1,10 +1,12 @@
 import { useParams, Link } from "react-router-dom";
 import { useState } from "react";
 import { counterIndex, itemIndex } from "../constants";
+import { useTheme } from "../theme-support/ThemeContext";
 
 const ITEM_PER_PAGE = 10;
 
 const CounterSaleDetail = () => {
+  const { theme } = useTheme();
   const { name, date } = useParams();
   const decodedName = decodeURIComponent(name);
   const decodedDate = decodeURIComponent(date);

@@ -16,6 +16,7 @@
     "axios": "^1.10.0",
     "class-variance-authority": "^0.7.1",
     "country-state-city": "^3.2.1",
+    "dayjs": "^1.11.18",
     "formik": "^2.4.6",
     "js-cookie": "^3.0.5",
     "motion": "^12.23.15",
@@ -27,6 +28,7 @@
     "recharts": "^2.15.3",
     "tailwind-variants": "^1.0.0",
     "tailwindcss": "^4.1.8",
+    "use-debounce": "^10.0.6",
     "yup": "^1.6.1"
   },
   "devDependencies": {

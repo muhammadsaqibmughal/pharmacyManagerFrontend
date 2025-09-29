@@ -151,7 +151,6 @@ const Counter = () => {
                     to={`/pos/counter-detail/name/${encodeURIComponent(
                       product.name
                     )}`}
-                    className="text-blue-300 hover:text-blue-500 hover:underline"
                   >
                     {product.staffUsers[0].name}
                   </Link>
