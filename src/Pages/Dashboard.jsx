@@ -1,9 +1,11 @@
-import React from 'react';
+import React from "react";
 import { useState } from "react";
-import Card, { CardContent } from '../components/Card';
+import Card, { CardContent } from "../components/Card";
+import { useTheme } from "../theme-support/ThemeContext";
+
 import {
-   Area,
-   AreaChart,
+  Area,
+  AreaChart,
   BarChart,
   Bar,
   XAxis,
@@ -13,25 +15,29 @@ import {
   LineChart,
   Line,
   CartesianGrid,
-Cell,
-    Legend,
-} from 'recharts';
+  Cell,
+  Legend,
+} from "recharts";
 
-
-import {salesData , monthlySales , demandingProducts, topProducts ,barColors, nearExpiryProducts} from '../constants/index.js'
-
+import {
+  salesData,
+  monthlySales,
+  demandingProducts,
+  topProducts,
+  barColors,
+  nearExpiryProducts,
+} from "../constants/index.js";
 
 const ITEMS_PER_PAGE = 5;
 const Dashboard = () => {
-
-
+  const { theme } = useTheme();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [currentPage2, setCurrentPage2] = useState(1);
 
   // Calculate total pages
   const totalPages = Math.ceil(nearExpiryProducts.length / ITEMS_PER_PAGE);
-  const totalPages2 = Math.ceil(topProducts.length / ITEMS_PER_PAGE)
+  const totalPages2 = Math.ceil(topProducts.length / ITEMS_PER_PAGE);
 
   // Get items for current page
   const paginatedProducts = nearExpiryProducts.slice(
@@ -39,97 +45,153 @@ const Dashboard = () => {
     currentPage * ITEMS_PER_PAGE
   );
 
-    const paginatedProducts2 = topProducts.slice(
+  const paginatedProducts2 = topProducts.slice(
     (currentPage2 - 1) * ITEMS_PER_PAGE,
     currentPage2 * ITEMS_PER_PAGE
   );
 
-
   return (
-    <div className="p-6 w-full overflow-hidden text-primary-50 min-h-screen">
-      <h1 className="text-2xl text-primary-50 font-semibold mb-6">Pharmacy Dashboard</h1>
+    <div
+      className={` p-10 ${theme === "dark" ? "bg-dark-50" : " bg-light-50"}`}
+    >
+      <h1
+        className={`text-2xl ${
+          theme === "dark" ? "text-white/90" : " text-primary-50"
+        }  font-bold`}
+      >
+        Pharmacy Dashboard
+      </h1>
 
-      {/* Key Metrics */}
-      <div className="grid p-5  grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-        <Card   className=' bg-[#cfe9c0] shadow-none '>
-          <CardContent >
-            <h2 className="text-lg font-medium text-primary-50">Total Sales</h2>
+      <div
+        className={`rounded-xl mt-5 p-5 border ${
+          theme === "dark"
+            ? "border-white/20 bg-white/10"
+            : "border-white/40 bg-white/90"
+        }   backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]`}
+      >
+        <div className="grid p-5  grid-cols-1 sm:grid-cols-3 gap-6 ">
+          <div
+            className={`bg-[#cfe9c0] rounded-xl  backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] p-5`}
+          >
+            <h2
+              className={`text-xl font-semibold mb-4 ${
+                theme === "dark" ? "text-primary-50" : "text-primary-50"
+              }`}
+            >
+              Total Sales
+            </h2>
             <p className="text-2xl font-bold">2,500</p>
-          </CardContent>
-        </Card>
+          </div>
 
-        <Card className='bg-[#d2d7ee] shadow-2xl '>
-          <CardContent>
-            <h2 className="text-lg font-medium text-primary-50">Total Products</h2>
+          <div
+            className={`bg-[#d2d7ee] rounded-xl backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] p-5`}
+          >
+            <h2
+              className={`text-xl font-semibold mb-4 ${
+                theme === "dark" ? "text-primary-50" : "text-primary-50"
+              }`}
+            >
+              Total Products
+            </h2>
             <p className="text-2xl font-bold">3,800</p>
-          </CardContent>
-        </Card>
-
-        <Card className='bg-[#e8d9c5] shadow-2xl '>
-          <CardContent>
-            <h2 className="text-lg font-medium text-primary-500">Customer Visits</h2>
-            <p className="text-2xl font-bold">1,340</p>
-          </CardContent>
-        </Card>
+          </div>
+          <div
+            className={`bg-[#e8d9c5] rounded-xl backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] p-5`}
+          >
+            <h2
+              className={`text-xl font-semibold mb-4 ${
+                theme === "dark" ? "text-primary-50" : "text-primary-50"
+              }`}
+            >
+              Customer Visites
+            </h2>
+            <p className="text-2xl font-bold">1,300</p>
+          </div>
+        </div>
       </div>
 
-
       {/* Weekly Sales Chart */}
-        <div className="flex gap-5 p-5  max-lg:flex-col">
-      <Card className="mb-8 shadow-lg  flex-2">
-        <CardContent>
-          <h2 className="text-lg font-semibold mb-4">Weekly Sales</h2>
+      <div className={`flex gap-5 mt-5 w-full max-lg:flex-col `}>
+        <div
+          className={`rounded-xl p-5 w-1/2 border ${
+            theme === "dark"
+              ? "border-white/20 bg-white/10"
+              : "border-white/40 bg-white/90"
+          }   backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]`}
+        >
+          {" "}
+          <h2
+            className={`text-xl font-semibold mb-4 ${
+              theme === "dark" ? "text-light-50" : "text-primary-50"
+            }`}
+          >
+            Weekly Sales
+          </h2>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={salesData}>
               <XAxis dataKey="day" />
-              <YAxis dataKey='sales' />
+              <YAxis dataKey="sales" />
               <Tooltip />
               <Bar dataKey="sales" radius={[4, 4, 0, 0]}>
                 {salesData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={barColors[index % barColors.length]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={barColors[index % barColors.length]}
+                  />
                 ))}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-        </CardContent>
-      </Card>
-
+        </div>
 
         {/* Monthly Line Chart */}
-        <Card className="mb-8 w-full flex-1   color-white rounded-2xl shadow-md">
-        <CardContent>
-          <h2 className="text-lg font-semibold mb-4 text-primary-50"> Monthly Sales Overview</h2>
+        <div
+          className={`rounded-xl p-5 w-1/2 border ${
+            theme === "dark"
+              ? "border-white/20 bg-white/10"
+              : "border-white/40 bg-white/90"
+          }   backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]`}
+        >
+          {" "}
+          <h2
+            className={`text-xl font-semibold mb-4 ${
+              theme === "dark" ? "text-light-50" : "text-primary-50"
+            }`}
+          >
+            {" "}
+            Monthly Sales Overview
+          </h2>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart
               data={monthlySales}
               margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
             >
               {/* Gradient Definitions */}
-              {/* <defs>
+              <defs>
                 <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#16A34A" stopOpacity={0.6} />
                   <stop offset="100%" stopColor="#16A34A" stopOpacity={0.05} />
                 </linearGradient>
-              </defs> */}
+              </defs>
 
               {/* Background Grid */}
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
 
               {/* Axis Styling */}
-              <XAxis dataKey="month" tick={{ fill: '#94a3b8', fontSize: 12 }} />
-              <YAxis tick={{ fill: '#94a3b8', fontSize: 12 }} />
+              <XAxis dataKey="month" tick={{ fill: "#94a3b8", fontSize: 12 }} />
+              <YAxis tick={{ fill: "#94a3b8", fontSize: 12 }} />
 
               {/* Tooltip Styling */}
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1e293c',
-                  borderRadius: '10px',
-                  border: '2px solid yellow',
-                  color: '#f8fafc',
+                  backgroundColor: "#1e293c",
+                  borderRadius: "10px",
+                  border: "2px solid yellow",
+                  color: "#f8fafc",
                 }}
-                labelStyle={{ color: '#f8fafc' }}
-                itemStyle={{ color: '#bbf7d0' }}
-                cursor={{ stroke: '#334155', strokeWidth: 1 }}
+                labelStyle={{ color: "#f8fafc" }}
+                itemStyle={{ color: "#bbf7d0" }}
+                cursor={{ stroke: "#334155", strokeWidth: 1 }}
               />
 
               {/* Legend */}
@@ -137,7 +199,7 @@ const Dashboard = () => {
                 verticalAlign="top"
                 height={36}
                 iconType="circle"
-                wrapperStyle={{ color: '#cbd5e1', fontSize: '14px' }}
+                wrapperStyle={{ color: "#cbd5e1", fontSize: "14px" }}
               />
 
               {/* Gradient Area fill (like shadow) */}
@@ -154,19 +216,26 @@ const Dashboard = () => {
                 dataKey="sales"
                 stroke="#16A34A"
                 strokeWidth={3}
-                dot={{ r: 5, stroke: '#16A34A', strokeWidth: 2, fill: '#fff' }}
-                activeDot={{ r: 7, stroke: '#22c55e', strokeWidth: 3, fill: '#fff' }}
+                dot={{
+                  r: 5,
+                  stroke: "#16A34A",
+                  strokeWidth: 2,
+                  fill: "#fff",
+                }}
+                activeDot={{
+                  r: 7,
+                  stroke: "#22c55e",
+                  strokeWidth: 3,
+                  fill: "#fff",
+                }}
               />
             </LineChart>
           </ResponsiveContainer>
-        </CardContent>
-        </Card>
+        </div>
       </div>
 
-
-
       {/* Demanding Products  */}
-       {/* <div className="flex min-w-72 flex-1 flex-col gap-4 rounded-xl border border-[#3d4d5c] p-6">
+      {/* <div className="flex min-w-72 flex-1 flex-col gap-4 rounded-xl border border-[#3d4d5c] p-6">
         <p className="text-white text-base font-medium">Top 20 Demanding Products</p>
         <p className="text-white text-[32px] font-bold leading-tight truncate">
           Based on Recent Sales
@@ -214,19 +283,42 @@ const Dashboard = () => {
         </div>
       </div> */}
 
-      <div  style={{ boxShadow: "4px 5px 8px 2px  rgba(0,0,0,0.3)" }} className="flex min-w-72 flex-1  flex-col gap-2 rounded-xl  p-6">
-        <p className="text-primary-50 text-base font-semibold leading-normal">Demanding Products</p>
+      <div
+        className={`rounded-xl p-5 mt-8 border ${
+          theme === "dark"
+            ? "border-white/20 bg-white/10"
+            : "border-white/40 bg-white/90"
+        }   backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]`}
+      >
+        <p
+          className={`text-md font-semibold mb-4 ${
+            theme === "dark" ? "text-light-50" : "text-primary-50"
+          }`}
+        >
+          {" "}
+          Demanding Products
+        </p>
 
         <div className="flex gap-1">
-          <p className="text-Secondary-50 text-base font-normal leading-normal">Based on Recent Sales</p>
+          <p
+            className={`text-xs font-semibold mb-4 ${
+              theme === "dark" ? "text-light-50" : "text-primary-50"
+            }`}
+          >
+            {" "}
+            Based on Recent Sales
+          </p>
         </div>
 
         <div className="flex min-h-[180px]  flex-1 flex-col gap-8 py-4">
           <ResponsiveContainer width="100%" height={150}>
-            <AreaChart data={demandingProducts} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+            <AreaChart
+              data={demandingProducts}
+              margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+            >
               <defs>
                 <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#2b3640" stopOpacity={2.8} />
+                  <stop offset="0%" stopColor="#fff" stopOpacity={2.8} />
                   <stop offset="100%" stopColor="#2b3640" stopOpacity={0} />
                 </linearGradient>
               </defs>
@@ -266,119 +358,183 @@ const Dashboard = () => {
         </div>
       </div>
 
-
-
-
-
-
-
       {/* Near Expiry Products */}
-    <div className="mt-8">
-      <Card>
-        <CardContent>
-          <h2 className="text-lg font-semibold mb-4">Products Near Expiry</h2>
-          <div className="overflow-y-auto max-h-[400px]">
-            <table className="w-full overflow-x-auto text-sm text-left text-white-700">
-              <thead className="text-xs uppercase text-white bg-bg-50">
-                <tr>
-                  <th className="py-2 px-4">Product Name</th>
-                  <th className="py-2 px-4">Category</th>
-                  <th className="py-2 px-4">Expiry Date</th>
-                  <th className="py-2 px-4">Stock</th>
+      <div
+        className={`table-Main  p-5 ${
+          theme === "dark"
+            ? " border-white/10 bg-white/10"
+            : " border-black/10 bg-white/60"
+        }`}
+      >
+        <h2
+          className={`text-md ${
+            theme === "dark" ? "text-white/90" : " text-primary-50"
+          }  font-bold`}
+        >
+          Products Near Expiry
+        </h2>
+        <div
+          className={`table-Main  ${
+            theme === "dark"
+              ? " border-white/10 bg-white/10"
+              : " border-black/10 bg-white/60"
+          }`}
+        >
+          <table
+            className={`w-full table-auto ${
+              theme === "dark" ? "text-light-50" : " text-primary-50"
+            }`}
+          >
+            <thead className="text-sm text-left uppercase h-11 bg-bg-50 text-white/80">
+              <tr
+                className={`border-b ${
+                  theme === "dark" ? " border-white/20" : " border-black/20"
+                }`}
+              >
+                <th className="py-2 px-4">Product Name</th>
+                <th className="py-2 px-4">Category</th>
+                <th className="py-2 px-4">Expiry Date</th>
+                <th className="py-2 px-4">Stock</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedProducts.map((product, idx) => (
+                <tr
+                  key={idx}
+                  className={` px-4 py-2 text-xs font-medium border-b ${
+                    theme === "dark" ? " border-white/40" : " border-black/50"
+                  }`}
+                >
+                  {" "}
+                  <td className="py-2 px-4 font-semibold">{product.name}</td>
+                  <td className="py-2 px-4 font-medium">{product.category}</td>
+                  <td className="py-2 px-4 font-medium">{product.expiry}</td>
+                  <td className="py-2 px-4 font-medium">{product.stock}</td>
                 </tr>
-              </thead>
-              <tbody  >
-                {paginatedProducts.map((product, idx) => (
-                  <tr key={idx} className="border-b">
-                    <td className="py-2 px-4 font-semibold">{product.name}</td>
-                    <td className="py-2 px-4 font-medium">{product.category}</td>
-                    <td className="py-2 px-4 font-medium">{product.expiry}</td>
-                    <td className="py-2 px-4 font-medium">{product.stock}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
+              ))}
+            </tbody>
+          </table>
           {/* Pagination Buttons */}
-          <div className="flex justify-between mt-4">
+          <div
+            className={`flex justify-between items-center px-4 py-3  border-t ${
+              theme === "dark"
+                ? "bg-white/20 border-white/20"
+                : "bg-white/10 border-white/20"
+            }`}
+          >
+            {" "}
             <button
-              className="px-4 py-1 bg-bg-50 text-white rounded disabled:opacity-50"
+              className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
             >
               Previous
             </button>
-
             <span className="text-sm text-Secondary-50">
               Page {currentPage} of {totalPages}
             </span>
-
             <button
-              className="px-4 py-1 bg-bg-50 text-white rounded disabled:opacity-50"
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
               disabled={currentPage === totalPages}
             >
               Next
             </button>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </div>
 
       {/* Popular Products Table */}
-    <div className="mt-8">
-      <Card>
-        <CardContent>
-          <h2 className="text-lg font-semibold mb-4">Products Near Expiry</h2>
-          <div className="overflow-y-auto max-h-[400px]">
-            <table className="w-full overflow-x-auto text-sm text-left text-white-700">
-              <thead className="text-xs uppercase text-white bg-bg-50">
-                <tr>
-                  <th className="py-2 px-4">Product Name</th>
-                  <th className="py-2 px-4">Category</th>
-                  <th className="py-2 px-4">Unit Sold</th>
-                  <th className="py-2 px-4">Revenue</th>
+      <div
+        className={`table-Main  p-5 ${
+          theme === "dark"
+            ? " border-white/10 bg-white/10"
+            : " border-black/10 bg-white/60"
+        }`}
+      >
+        <h2
+          className={`text-md ${
+            theme === "dark" ? "text-white/90" : " text-primary-50"
+          }  font-bold`}
+        >
+          Top Selling Peoducts
+        </h2>
+        <div
+          className={`table-Main  ${
+            theme === "dark"
+              ? " border-white/10 bg-white/10"
+              : " border-black/10 bg-white/60"
+          }`}
+        >
+          <table
+            className={`w-full table-auto ${
+              theme === "dark" ? "text-light-50" : " text-primary-50"
+            }`}
+          >
+            <thead className="text-sm text-left uppercase h-11 bg-bg-50 text-white/80">
+              <tr
+                className={`border-b ${
+                  theme === "dark" ? " border-white/20" : " border-black/20"
+                }`}
+              >
+                {" "}
+                <th className="py-2 px-4">Product Name</th>
+                <th className="py-2 px-4">Category</th>
+                <th className="py-2 px-4">Unit Sold</th>
+                <th className="py-2 px-4">Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedProducts2.map((product, idx) => (
+                <tr
+                  key={idx}
+                  className={` px-4 py-2 text-xs font-medium border-b ${
+                    theme === "dark" ? " border-white/40" : " border-black/50"
+                  }`}
+                >
+                  {" "}
+                  <td className="py-2 px-4 font-semibold">{product.name}</td>
+                  <td className="py-2 px-4 font-medium">{product.category}</td>
+                  <td className="py-2 px-4 font-medium">{product.units}</td>
+                  <td className="py-2 px-4 font-medium">{product.revenue}</td>
                 </tr>
-              </thead>
-              <tbody  >
-                {paginatedProducts2.map((product, idx) => (
-                  <tr key={idx} className="border-b">
-                    <td className="py-2 px-4 font-semibold">{product.name}</td>
-                    <td className="py-2 px-4 font-medium">{product.category}</td>
-                    <td className="py-2 px-4 font-medium">{product.units}</td>
-                    <td className="py-2 px-4 font-medium">{product.revenue}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
 
-          {/* Pagination Buttons */}
-          <div className="flex justify-between mt-4">
-            <button
-              className="px-4 py-1 bg-bg-50 text-white rounded disabled:opacity-50"
-              onClick={() => setCurrentPage2((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage2 === 1}
+            {/* Pagination Buttons */}
+            <div
+              className={`flex justify-between items-center px-4 py-3  border-t ${
+                theme === "dark"
+                  ? "bg-white/20 border-white/20"
+                  : "bg-white/10 border-white/20"
+              }`}
             >
-              Previous
-            </button>
-
-            <span className="text-sm text-Secondary-50">
-              Page {currentPage2} of {totalPages2}
-            </span>
-
-            <button
-              className="px-4 py-1 bg-bg-50 text-white rounded disabled:opacity-50"
-              onClick={() => setCurrentPage2((prev) => Math.min(prev + 1, totalPages2))}
-              disabled={currentPage2 === totalPages2}
-            >
-              Next
-            </button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+              {" "}
+              <button
+                className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
+                onClick={() => setCurrentPage2((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage2 === 1}
+              >
+                Previous
+              </button>
+              <span className="text-sm text-Secondary-50">
+                Page {currentPage2} of {totalPages2}
+              </span>
+              <button
+                className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
+                onClick={() =>
+                  setCurrentPage2((prev) => Math.min(prev + 1, totalPages2))
+                }
+                disabled={currentPage2 === totalPages2}
+              >
+                Next
+              </button>
+            </div>
+        </div>
+      </div>
     </div>
   );
 };
