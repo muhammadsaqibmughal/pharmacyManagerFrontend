@@ -18,22 +18,25 @@ export const addSale = async (data) => {
       responseType: "arraybuffer",
     });
 
+    const file = new Blob([response.data], { type: "application/pdf" });
+    const fileURL = URL.createObjectURL(file);
+
     return {
       status: "success",
       type: "pdf",
-      data: response.data,
+      data: fileURL, // <-- return blob URL instead of raw bytes
     };
   } catch (error) {
     console.log(error.message);
+    return { status: "error", message: error.message };
   }
 };
+
 export const returnSale = async (data) => {
   try {
-    const response = await api.post("/sales/return-sale", data, {
-      responseType: "arraybuffer",
-    });
+    const response = await api.post("/sales/return-sale", data);
 
-    return response.status
+    return response.data;
   } catch (error) {
     console.log(error.message);
   }
