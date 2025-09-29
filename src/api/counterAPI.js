@@ -35,3 +35,18 @@ export const getCounter = async () => {
     );
   }
 };
+
+
+export const getUser = async () => {
+  try {
+    const response = await api.get("/counter/get-user");
+    return response.data;
+  } catch (error) {
+    console.error("Error getting user :", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to get user"
+    );
+  }
+};
+
+

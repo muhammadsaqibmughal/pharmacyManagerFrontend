@@ -15,6 +15,11 @@ export const verifyEmail = async (data) => {
   return response.data;
 };
 
+export const changePassword = async (data) => {
+  const response = await api.post("/auth/change-password", data);
+  return response.data;
+};
+
 export const pharmacyRegistration = async (data) => {
   const response = await api.post("/pharmacy/register-pharmacy", data);
   console.log(response.status);

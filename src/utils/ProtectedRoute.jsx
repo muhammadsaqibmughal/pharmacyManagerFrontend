@@ -16,18 +16,21 @@ const ProtectedRoute = ({
     user = null;
   }
 
-  const is_auth = getCookie("is_auth");
+  const is_auth = getCookie("is_auth") === "true";
   const role = getCookie("userRole");
 
   if (!user || !is_auth) {
     return <Navigate to="/signup" state={{ from: location }} replace />;
   }
 
-  if (!user.isRegistered) {
+  const isRegistered = user?.isRegistered === true;
+  const isApproved = user?.isApproved === true;
+
+  if (!isRegistered) {
     return <Navigate to="/form" replace />;
   }
 
-  if (!user.isApproved) {
+  if (!isApproved) {
     return <Navigate to="/pending-approval" replace />;
   }
 
@@ -35,8 +38,13 @@ const ProtectedRoute = ({
     return <Navigate to="/onlyCounter" replace />;
   }
 
-  if (allowedRoles.length > 0 && !allowedRoles.includes(role)) {
-    return <Navigate to="/pos/dashboard" replace />;
+  if (allowedRoles.length > 0 && role && !allowedRoles.includes(role)) {
+    if (allowedRoles.length > 0 && role && !allowedRoles.includes(role)) {
+      if (role === "staff") {
+        return <Navigate to="/onlyCounter" replace />;
+      }
+      return <Navigate to="/pos/dashboard" replace />;
+    }
   }
 
   return children;
