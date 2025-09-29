@@ -277,6 +277,11 @@ export const pos = [
     href: "/pos/reports",
     icon: TbReportAnalytics,
   },
+  {
+    name: "Settings",
+    href: "/pos/settings",
+    icon: TbReportAnalytics,
+  },
  
 ];
 export const counterIndex = [
