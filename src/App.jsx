@@ -30,10 +30,11 @@ import Sales from "./Pages/Sales";
 import SalesReturn from "./Pages/SalesReturn";
 import Counters from "./Pages/Counters";
 import CounterDetail from "./Pages/CounterDetail";
-import SaleDetail from "./Pages/CounterSaleDetail";
+import CounterSaleDetail from "./Pages/CounterSaleDetail";
 import OnlyCounter from "./Pages/OnlyCounter";
 import SalesDetail from "./Pages/SalesDetail";
 import ProfilePage from "./Pages/ProfilePage";
+import SalesReturnDetails from "./Pages/SalesReturnDetails";
 
 // Route Guard
 import ProtectedRoute from "./utils/ProtectedRoute";
@@ -129,8 +130,9 @@ const App = () => {
         <Route path="purchase/:id" element={<SupplierDetail />} />
         <Route path="purchase-return/:id" element={<PurchaseReturnDetail />} />
         <Route path="sale-detail/:id" element={<SalesDetail />} />
-        <Route path="counter-detail/name/" element={<CounterDetail />} />
-        <Route path="sale-detail/:name/:date" element={<SaleDetail />} />
+        <Route path="counter-detail" element={<CounterDetail />} />
+        <Route path="counter-sale-detail" element={<CounterSaleDetail />} />
+        <Route path="sales/salesReturn/:id" element={<SalesReturnDetails />} />
       </Route>
     </Routes>
   );
