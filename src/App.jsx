@@ -61,17 +61,17 @@ const FormLayout = () => (
 const App = () => {
   return (
     <Routes>
-      {/* 🔐 Auto-redirect based on login & role */}
+      {/*  Auto-redirect based on login & role */}
       <Route path="/" element={<HomeLayout />} />
 
-      {/* 🔓 Public Routes */}
+      {/*  Public Routes */}
       <Route path="/" element={<SignUpLayout />} />
       <Route path="/signup" element={<SignUpLayout />} />
       <Route path="/verify-email" element={<OtpVerification />} />
       <Route path="/onlyCounter" element={<OnlyCounter />} />
       <Route path="/profile" element={<ProfilePage />} />
 
-      {/* 📝 Requires login but not necessarily approval */}
+      {/*  Requires login but not necessarily approval */}
       <Route
         path="/form"
         element={
@@ -111,7 +111,6 @@ const App = () => {
         <Route path="customer/counter" element={<Counters />} />
         <Route path="reports" element={<Reports />} />
         <Route path="settings" element={<Settings />} />
-        <Route path="posPage" element={<PosPage />} />
         <Route path="profile" element={<ProfilePage />} />
 
         {/* Dynamic Routes */}

@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { addPurchase, getPurchase } from "../api/purchaseAPI";
-import { getSupplier } from "../api/supplierAPI";
 import { useTheme } from "../theme-support/ThemeContext";
 import { invoices } from "../constants";
+import {getSales} from "../api/posAPI"
 
 const ITEM_PER_PAGE = 5;
 

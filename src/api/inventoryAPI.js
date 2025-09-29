@@ -39,6 +39,8 @@ export const getPharmacyProduct = async () => {
   }
 };
 
+
+
 // Get inventory by pharmacy
 export const getAllPharmacyProduct = async () => {
   try {
@@ -61,6 +63,19 @@ export const getInventoryByPOS = async () => {
     console.error("Error fetching POS inventory:", error);
     throw new Error(
       error.response?.data?.message || "Failed to fetch POS inventory"
+    );
+  }
+};
+
+// get near to expiry products
+export const getExpiry = async () => {
+  try {
+    const response = await api.get("/inventory/getExpiry");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching pharmacy expiry products:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch pharmacy expiry products"
     );
   }
 };

@@ -91,7 +91,7 @@ const Inventry = () => {
       console.log("Added:", response);
       setShowModal(false);
       setNewEntry({});
-      fetchData(); // refresh after adding
+      fetchData(); 
     } catch (error) {
       console.error("Failed to add:", error);
       alert("Failed to add. Please try again.");
