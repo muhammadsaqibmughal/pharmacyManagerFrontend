@@ -118,7 +118,9 @@ const App = () => {
         <Route path="purchase/:id" element={<SupplierDetail />} />
         <Route path="purchase-return/:id" element={<PurchaseReturnDetail />} />
         <Route path="sale-detail/:id" element={<SalesDetail />} />
-        <Route path="counter-detail/name/:name" element={<CounterDetail />} />
+        {/* <Route path="counter-detail/:id" element={<CounterDetail />} />
+         */}
+         <Route path="counter-detail/name/" element={<CounterDetail />} />
         <Route path="sale-detail/:name/:date" element={<SaleDetail />} />
       </Route>
     </Routes>

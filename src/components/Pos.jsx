@@ -169,17 +169,17 @@ const Pos = () => {
               )}
             </div>
           ))}
-      <div className="cursor-pointer text-xs font-semibold tracking-wide w-full text-white flex justify-start  items-center  gap-8 p-2 rounded-md hover:bg-selected-50 transition-all">
-  <div className={`${isOpen ? "ml-5" : "ml-[7px]"} gap-6 flex`}>
-    <FiLogOut className="text-white w-5 h-5 " />
-  
-  {isOpen && (
-    <button onClick={handleLogout} className="text-white">
-      Logout
-    </button>
-  )}
-  </div>
-</div>
+          <div onClick={handleLogout}  className="cursor-pointer text-xs font-semibold tracking-wide w-full text-white flex justify-start  items-center  gap-8 p-2 rounded-md hover:bg-selected-50 transition-all">
+            <div className={`${isOpen ? "ml-5" : "ml-[7px]"} gap-6 flex`}>
+              <FiLogOut className="text-white w-5 h-5 " />
+
+              {isOpen && (
+                <button className="text-white">
+                  Logout
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </nav>
 

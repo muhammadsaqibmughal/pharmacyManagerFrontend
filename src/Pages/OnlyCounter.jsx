@@ -1,13 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTheme } from "../theme-support/ThemeContext";
 import { FaExpand, FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { getPOSItems, addSale } from "../api/posAPI";
+import { getPOSItems, addSale, getSales, returnSale } from "../api/posAPI";
 import { getCounter } from "../api/counterAPI";
 
 const OnlyCounter = () => {
   const { theme, toggleTheme } = useTheme();
 
+  const [selectedReturnItems, setSelectedReturnItems] = useState([]);
   const [isCounter, setIsCounter] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [itemsData, setItemsData] = useState([]);
@@ -33,6 +34,15 @@ const OnlyCounter = () => {
     return () => clearInterval(timer);
   }, []);
 
+  // Fetch invoices
+  const fetchSales = async () => {
+    const salesRes = await getSales();
+    if (salesRes.status === "success" && Array.isArray(salesRes.data)) {
+      setSalesData(salesRes.data);
+    }
+  };
+
+  // Fetch items & counter
   const fetchItems = async () => {
     const counterRes = await getCounter();
     if (counterRes.status === "success") {
@@ -57,7 +67,6 @@ const OnlyCounter = () => {
         costPrice: p.costPrice ?? 0,
       }));
       setItemsData(normalized);
-      console.log("Normalized POS Items:", normalized);
     } else {
       setItemsData([]);
     }
@@ -65,6 +74,7 @@ const OnlyCounter = () => {
 
   useEffect(() => {
     fetchItems();
+    fetchSales();
   }, []);
 
   // Escape exits fullscreen
@@ -78,21 +88,28 @@ const OnlyCounter = () => {
     return () => document.removeEventListener("keydown", handleEscape);
   }, []);
 
-  //  Safe filters
-  const filteredItems = itemsData.filter((p) =>
-    (p?.itemName || "").toLowerCase().includes(searchTerm.toLowerCase())
+  // Filters
+  const filteredItems = useMemo(
+    () =>
+      itemsData.filter((p) =>
+        (p?.itemName || "").toLowerCase().includes(searchTerm.toLowerCase())
+      ),
+    [itemsData, searchTerm]
   );
 
-  const filteredInvoices = salesData.filter((inv) =>
-    (inv?.id || "").toLowerCase().includes(invoiceSearch.toLowerCase())
+  const filteredInvoices = useMemo(
+    () =>
+      salesData.filter((inv) =>
+        (inv?.id || "").toLowerCase().includes(invoiceSearch.toLowerCase())
+      ),
+    [salesData, invoiceSearch]
   );
 
-  // Add item to cart
+  // Add to cart
   const handleAddToCart = (product) => {
     const exists = cart.find(
       (i) => i.pharmacyProductId === product.pharmacyProductId
     );
-
     if (exists) {
       setCart(
         cart.map((i) =>
@@ -106,7 +123,7 @@ const OnlyCounter = () => {
     }
   };
 
-  // Cart updates
+  // Cart operations
   const handleQuantityChange = (index, delta) => {
     const updatedCart = [...cart];
     const newQty = updatedCart[index].quantity + delta;
@@ -131,7 +148,6 @@ const OnlyCounter = () => {
   const totalAmount = cart.reduce((acc, item) => {
     const subtotal =
       (item.sellingPrice || 0) * (item.quantity || 0) - (item.discount || 0);
-
     return acc + (item.isReturn ? -subtotal : subtotal);
   }, 0);
 
@@ -140,7 +156,7 @@ const OnlyCounter = () => {
       ? totalAmount - (totalAmount * discountValue) / 100
       : totalAmount - discountValue;
 
-  // Switch modes
+  // Mode switch
   const handleSwitchToReturn = () => {
     setIsCounter(false);
     setSelectedInvoice(null);
@@ -153,17 +169,51 @@ const OnlyCounter = () => {
     setReturnCart([]);
   };
 
-  // Mark return
+  // Return flow
   const handleReturnItem = (index) => {
     const returnItem = { ...cart[index], isReturn: true };
     if (!returnCart.find((i) => i.itemName === returnItem.itemName)) {
       setReturnCart([...returnCart, returnItem]);
     }
-    alert("Marked for return");
+    alert("Item marked for return");
   };
 
+  const handleSaveReturn = async () => {
+    try {
+      if (!selectedInvoice) {
+        alert("Select an invoice to return items from!");
+        return;
+      }
+      if (selectedReturnItems.length === 0) {
+        alert("No items selected for return");
+        return;
+      }
 
-  // Save sale
+      const payload = {
+        saleId: selectedInvoice.id,
+        items: selectedReturnItems.map((item) => ({
+          saleItemId: item.id,
+          quantity: item.quantity,
+        })),
+      };
+
+      const res = await returnSale(payload);
+      if (res?.status === "success") {
+        alert("Return processed successfully!");
+        setSelectedReturnItems([]);
+        setSelectedInvoice(null);
+        fetchItems();
+        fetchSales();
+      } else {
+        alert("Failed to process return");
+      }
+    } catch (err) {
+      console.error("Return save error:", err);
+      alert("Error processing return");
+    }
+  };
+
+  // Save Sale
   const handleSave = async (print = false) => {
     try {
       const payload = {
@@ -182,50 +232,39 @@ const OnlyCounter = () => {
         })),
       };
 
-      console.log(" Payload:", payload);
       const res = await addSale(payload);
 
-      if (res?.status === "success" || res?.type === "pdf") {
-
+      if (res?.status === "success") {
+        alert("Sale saved successfully!");
         setCart([]);
         await fetchItems();
 
-        if (print && res?.type === "pdf" && res.data) {
-          const blob = new Blob([res.data], { type: "application/pdf" });
-          const url = window.URL.createObjectURL(blob);
+        if (print) {
+          if (res?.type === "pdf" && res.data) {
+            const blob = new Blob([res.data], { type: "application/pdf" });
+            const url = window.URL.createObjectURL(blob);
+            const printWindow = window.open(url);
 
-          // Open PDF in a new tab/window
-          const printWindow = window.open(url);
-
-          if (printWindow) {
-            printWindow.focus();
-            printWindow.onload = () => {
-              printWindow.print();
-            };
-
-            setTimeout(() => {
-              try {
-                printWindow.print();
-              } catch (e) {
-                console.warn("Print fallback failed:", e);
-              }
-            }, 3000);
+            if (printWindow) {
+              printWindow.focus();
+              printWindow.onload = () => printWindow.print();
+            } else {
+              alert("Popup blocked! Allow popups to print receipt.");
+            }
           } else {
-            alert("Popup blocked! Please allow popups to print the receipt.");
+            setIsPrinting(true);
+            setTimeout(() => {
+              window.print();
+              setTimeout(() => setIsPrinting(false), 500);
+            }, 300);
           }
-        } else if (print) {
-          setIsPrinting(true);
-          setTimeout(() => {
-            window.print();
-            setTimeout(() => setIsPrinting(false), 500);
-          }, 300);
         }
       } else {
-        alert("Failed to save invoice!");
+        alert("Failed to save sale!");
       }
     } catch (err) {
-      console.error(" Save error:", err);
-      alert("Error saving invoice");
+      console.error("Save error:", err);
+      alert("Error saving sale");
     }
   };
 
@@ -333,7 +372,7 @@ const OnlyCounter = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                {/* Items Table */}
+                {/* Items Table */}r
                 <div
                   className={`table-Main h-110 overflow-y-auto ${
                     theme === "dark"
@@ -492,8 +531,9 @@ const OnlyCounter = () => {
                   >
                     <td className="px-4 text-[9px] py-2">{item.itemName}</td>
                     <td className="px-4 py-2">
-                      {item.sellingPrice.toFixed(2)}
+                      {Number(item.sellingPrice ?? item.price ?? 0).toFixed(2)}
                     </td>
+
                     <td className="px-4 py-2">
                       <div className="flex items-center gap-2">
                         {!isPrinting && (
