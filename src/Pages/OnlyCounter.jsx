@@ -156,6 +156,21 @@ const OnlyCounter = () => {
     setSelectedReturnItems([]);
   };
 
+  const handleLogout = () => {
+
+  localStorage.clear();
+  const cookies = document.cookie.split(";");
+  cookies.forEach((cookie) => {
+    const eqPos = cookie.indexOf("=");
+    const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;`;
+  });
+
+  // Redirect to signup page
+  navigate("/signup");
+};
+
+
   const toggleReturnSelection = (item) => {
     setSelectedReturnItems((prev) =>
       prev.includes(item.id)
@@ -267,7 +282,6 @@ const OnlyCounter = () => {
       }`}
     >
       {/*  Top Bar */}
-      {/* ...top bar code unchanged... */}
       <div
         className={`w-full flex items-center justify-between border-b p-2 gap-4 ${
           theme === "dark"
@@ -326,7 +340,7 @@ const OnlyCounter = () => {
                   Profile
                 </button>
                 <button
-                  onClick={() => navigate("/signUp")}
+                  onClick={ handleLogout}
                   className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
                 >
                   Logout
@@ -351,7 +365,7 @@ const OnlyCounter = () => {
       <div className="flex w-full p-5 max-md:flex-col gap-5">
         {/* Left Side */}
         {!isPrinting && (
-          <div className="w-4/6 mt-2 max-md:w-full">
+          <div className="w-6/6 mt-2 max-md:w-full">
             {isCounter ? (
               <>
                 {/* Items Search */}
@@ -364,7 +378,7 @@ const OnlyCounter = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                {/* Items Table */}r
+                {/* Items Table */}
                 <div
                   className={`table-Main h-110 overflow-y-auto ${
                     theme === "dark"

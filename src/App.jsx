@@ -8,7 +8,6 @@ import Footer from "./components/Footer";
 import FormPage from "./components/FormPage";
 import SignUp from "./components/SignUp";
 import OtpVerification from "./components/OtpVerification";
-import RoleRedirect from "./utils/RoleRedirect";
 
 // Pages
 import Pos from "./components/Pos";
@@ -36,9 +35,8 @@ import OnlyCounter from "./Pages/OnlyCounter";
 import SalesDetail from "./Pages/SalesDetail";
 import ProfilePage from "./Pages/ProfilePage";
 
-// Route Guards
+// Route Guard
 import ProtectedRoute from "./utils/ProtectedRoute";
-import RequireLogin from "./utils/RequireLogin";
 
 // Layouts
 const HomeLayout = () => (
@@ -61,38 +59,52 @@ const FormLayout = () => (
 const App = () => {
   return (
     <Routes>
-      {/*  Auto-redirect based on login & role */}
+      {/* Public Routes */}
       <Route path="/" element={<HomeLayout />} />
-
-      {/*  Public Routes */}
-      <Route path="/" element={<SignUpLayout />} />
       <Route path="/signup" element={<SignUpLayout />} />
       <Route path="/verify-email" element={<OtpVerification />} />
-      <Route path="/onlyCounter" element={<OnlyCounter />} />
-      <Route path="/profile" element={<ProfilePage />} />
 
-      {/*  Requires login but not necessarily approval */}
+      {/* Staff-only Routes */}
+      <Route
+        path="/onlyCounter"
+        element={
+          <ProtectedRoute allowedRoles={["staff"]}>
+            <OnlyCounter />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute allowedRoles={["staff"]}>
+            <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Authenticated, but not necessarily approved */}
       <Route
         path="/form"
         element={
-          <RequireLogin>
+          <ProtectedRoute>
             <FormLayout />
-          </RequireLogin>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/pending-approval"
         element={
-          <RequireLogin>
+          <ProtectedRoute>
             <PendingApproval />
-          </RequireLogin>
+          </ProtectedRoute>
         }
       />
 
+      {/* Protected POS System - redirect staff users away */}
       <Route
         path="/pos"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute redirectStaff={true}>
             <Pos />
           </ProtectedRoute>
         }
@@ -117,9 +129,7 @@ const App = () => {
         <Route path="purchase/:id" element={<SupplierDetail />} />
         <Route path="purchase-return/:id" element={<PurchaseReturnDetail />} />
         <Route path="sale-detail/:id" element={<SalesDetail />} />
-        {/* <Route path="counter-detail/:id" element={<CounterDetail />} />
-         */}
-         <Route path="counter-detail/name/" element={<CounterDetail />} />
+        <Route path="counter-detail/name/" element={<CounterDetail />} />
         <Route path="sale-detail/:name/:date" element={<SaleDetail />} />
       </Route>
     </Routes>
