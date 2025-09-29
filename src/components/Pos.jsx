@@ -29,7 +29,7 @@ const Pos = () => {
 
     // Animate toggle icon rotation
     gsap.to(rotateRef.current, {
-      rotate: isOpen ? 180 : 360,
+      rotate: isOpen ? 360 : 360,
       duration: 0.5,
       ease: "power2.inOut",
     });
@@ -40,21 +40,18 @@ const Pos = () => {
   };
 
   const handleLogout = () => {
-    // Clear local storage
-    localStorage.clear();
+    console.log("Logging out...");
 
-    // Optionally clear session storage
+    localStorage.clear();
     sessionStorage.clear();
 
-    // Delete all cookies
     document.cookie.split(";").forEach((cookie) => {
       const eqPos = cookie.indexOf("=");
       const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
       document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
     });
 
-    // Navigate to login or any route
-    navigate("/signup");
+    navigate("/signup"); // Change this route if needed
   };
 
   return (
@@ -72,14 +69,14 @@ const Pos = () => {
 
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="rounded-full h-10 w-10 hover:bg-selected-50 flex items-center justify-center"
+            className="rounded-full h-10 w-10 p-1 hover:bg-selected-50 flex items-center justify-center"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               strokeWidth={2}
               stroke="currentColor"
-              className="w-6 h-6  transition-transform duration-300"
+              className="w-6 h-6  transition-transform duration-300 animate"
             >
               <path
                 ref={rotateRef}
@@ -169,6 +166,7 @@ const Pos = () => {
               )}
             </div>
           ))}
+<<<<<<< HEAD
           <div onClick={handleLogout}  className="cursor-pointer text-xs font-semibold tracking-wide w-full text-white flex justify-start  items-center  gap-8 p-2 rounded-md hover:bg-selected-50 transition-all">
             <div className={`${isOpen ? "ml-5" : "ml-[7px]"} gap-6 flex`}>
               <FiLogOut className="text-white w-5 h-5 " />
@@ -178,6 +176,16 @@ const Pos = () => {
                   Logout
                 </button>
               )}
+=======
+          <div
+            onClick={handleLogout}
+            className="cursor-pointer text-xs font-semibold tracking-wide w-full text-white flex justify-start items-center gap-8 p-2 rounded-md hover:bg-selected-50 transition-all"
+          >
+            <div className={`${isOpen ? "ml-5" : "ml-[7px]"} gap-6 flex`}>
+              <FiLogOut className="text-white w-5 h-5" />
+
+              {isOpen && <button className="text-white">Logout</button>}
+>>>>>>> 3243116debd7f73ff03be6a423659d1cd87047ea
             </div>
           </div>
         </div>
