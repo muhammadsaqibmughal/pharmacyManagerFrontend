@@ -33,7 +33,7 @@ const CounterSaleDetail = () => {
     currentPage * ITEM_PER_PAGE
   );
 
-  const totalPrice = sale.reduce((sum, item) => sum + (item.price || 0), 0);
+  const totalPrice = sale.reduce((sum, item) => sum + (item.unitPrice || 0), 0);
   // const staffUser = sale[0]?.createdBy || {};
 
   return (
@@ -68,7 +68,7 @@ const CounterSaleDetail = () => {
               <tr key={idx} className={`px-4 py-2 text-xs font-medium border-b ${theme === "dark" ? "border-white/40" : "border-black/50"}`}>
                 <td className="px-4 py-2">{item?.pharmacyProduct?.medicine?.brandName || "Unknown"}</td>
                 <td className="px-4 py-2">{item.quantity || 0}</td>
-                <td className="px-4 py-2">{item.price || 0}</td>
+                <td className="px-4 py-2">{item.unitPrice || 0}</td>
               </tr>
             ))}
             <tr className="text-[11px] font-bold">

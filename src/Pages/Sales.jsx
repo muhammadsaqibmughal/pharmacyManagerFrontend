@@ -17,8 +17,11 @@ const Sales = () => {
     const fetchData = async () => {
       try {
         const salesRes = await getSales();
-        if (salesRes?.status === "success" && Array.isArray(salesRes.data)) {
-          setSalesData(salesRes.data);
+        console.log(salesRes.status);
+
+        if (salesRes?.status === 200) {
+          console.log("Sales:", salesRes.data.sales);
+          setSalesData(salesRes.data.sales);
         }
       } catch (err) {
         console.error("Failed to fetch sales data:", err);
@@ -28,23 +31,26 @@ const Sales = () => {
   }, []);
 
   // Filter sales by date or counter name
-  const filteredItems = salesData.filter((sales) => {
-    console.log(salesData);
+  const filteredItems = salesData.filter((sale) => {
     const term = searchTerm.toLowerCase();
-    const date = sales?.date?.toString().toLowerCase() || "";
-    const counterName = sales?.counterName?.toLowerCase() || "";
+
+    const date = sale.createdAt?.toLowerCase() || "";
+    const counterName = sale.posCounter?.name?.toLowerCase() || "";
+
     return date.includes(term) || counterName.includes(term);
   });
 
   const totalPages = Math.ceil(filteredItems.length / ITEM_PER_PAGE);
-  const paginatedProducts = filteredItems.slice(
+  const paginatedSales = filteredItems.slice(
     (currentPage - 1) * ITEM_PER_PAGE,
     currentPage * ITEM_PER_PAGE
   );
 
   return (
     <div
-      className={`mt-8 p-10 ${theme === "dark" ? "bg-dark-50" : "bg-light-50"}`}
+      className={`mt-8 p-10 ${
+        theme === "dark" ? "bg-dark-50" : "bg-light-50"
+      }`}
     >
       {/* Header */}
       <div className="flex justify-between max-md:flex-col max-md:gap-2 max-md:justify-center items-center mb-4">
@@ -93,28 +99,42 @@ const Sales = () => {
               <th className="px-4 py-2">Payment Mode</th>
             </tr>
           </thead>
+
           <tbody>
-            {paginatedProducts.length > 0 ? (
-              paginatedProducts.map((sales, idx) => (
+            {paginatedSales.length > 0 ? (
+              paginatedSales.map((sale, idx) => (
                 <tr
                   key={idx}
                   className={`text-xs font-medium border-b ${
                     theme === "dark" ? "border-white/40" : "border-black/50"
                   }`}
                 >
+                  {/* Date */}
                   <td className="px-4 py-2">
                     <Link
-                      state={{ sale: sales }}
-                      to={`/pos/sale-detail/${sales.id}`}
+                      state={{ sale }}
+                      to={`/pos/sale-detail/${sale.id}`}
                       className="text-blue-500 hover:text-blue-700 hover:underline"
                     >
-                      {new Date(sales.saleDate).toISOString().split("T")[0]}
+                      {new Date(sale.createdAt)
+                        .toISOString()
+                        .split("T")[0]}
                     </Link>
                   </td>
-                  <td className="px-4 py-2">{sales.counter.counterName}</td>
-                  <td className="px-4 py-2">{sales.invoiceNo}</td>
-                  <td className="px-4 py-2">{sales.totalAmount}</td>
-                  <td className="px-4 py-2">{sales.paymentMode}</td>
+
+                  {/* Counter */}
+                  <td className="px-4 py-2">
+                    {sale.posCounter?.name || "N/A"}
+                  </td>
+
+                  {/* Invoice No */}
+                  <td className="px-4 py-2">{sale.invoiceNo}</td>
+
+                  {/* Total Amount */}
+                  <td className="px-4 py-2">{sale.totalAmount}</td>
+
+                  {/* Payment Mode */}
+                  <td className="px-4 py-2">{sale.paymentMode}</td>
                 </tr>
               ))
             ) : (
@@ -142,6 +162,7 @@ const Sales = () => {
           >
             Previous
           </button>
+
           <span
             className={`text-sm text-center ${
               theme === "dark" ? "text-light-50" : "text-primary-50"
@@ -149,6 +170,7 @@ const Sales = () => {
           >
             Page {currentPage} of {totalPages}
           </span>
+
           <button
             className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
             onClick={() =>
