@@ -1,643 +1,726 @@
+// POSSystem.jsx
 import { useState, useEffect, useMemo } from "react";
 import { useTheme } from "../theme-support/ThemeContext";
-import { FaExpand, FaUserCircle } from "react-icons/fa";
+import {
+  FaExpand,
+  FaUserCircle,
+  FaPlus,
+  FaMinus,
+  FaTrash,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { getPOSItems, addSale, getSales, returnSale } from "../api/posAPI";
-import { getCounter } from "../api/counterAPI";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const OnlyCounter = () => {
   const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
   const navigate = useNavigate();
 
-  const [selectedReturnItems, setSelectedReturnItems] = useState([]);
-  const [selectedReturnDetails, setSelectedReturnDetails] = useState([]);
+  // States
   const [isCounter, setIsCounter] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [itemsData, setItemsData] = useState([]);
-  const [salesData, setSalesData] = useState([]);
-  const [cart, setCart] = useState([]);
-  const [discountType, setDiscountType] = useState("fixed");
-  const [discountValue, setDiscountValue] = useState(0);
-  const [isPrinting, setIsPrinting] = useState(false);
-  const [invoiceSearch, setInvoiceSearch] = useState("");
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
-  const [counterId, setCounterId] = useState("");
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showDropdown, setShowDropdown] = useState(false);
-  const userName = "Ahmad Raza";
+  const [searchTerm, setSearchTerm] = useState("");
+  const [invoiceSearch, setInvoiceSearch] = useState("");
+  const [cart, setCart] = useState([]);
+  const [selectedReturnItems, setSelectedReturnItems] = useState(new Set());
+  const [discountType, setDiscountType] = useState("fixed");
+  const [discountValue, setDiscountValue] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [itemsData, setItemsData] = useState([]);
+  const [invoicesData, setInvoicesData] = useState([]);
+  const [userName, setUserName] = useState("Admin");
 
-  // Clock
+  // Fetch POS Items
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const res = await getPOSItems();
+        const normalizedItems = res.data.map((item) => ({
+          ...item,
+          id: item.pharmacyProductId, // can keep this for React key
+          pharmacyProductId: item.pharmacyProductId, // ensure consistent usage
+        }));
+        setItemsData(normalizedItems);
+
+        console.log(res.data);
+        setItemsData(normalizedItems);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to fetch items");
+      }
+    };
+    fetchItems();
+  }, []);
+
+  // Fetch Sales/Invoices
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      try {
+        const res = await getSales();
+        const invoices = Array.isArray(res.data.sales) ? res.data.sales : [];
+        const normalizedInvoices = invoices.map((inv) => ({
+          ...inv,
+          id: inv.id || inv._id,
+          items: inv.items.map((item) => ({
+            ...item,
+            id: item.pharmacyProductId, // <- use pharmacyProductId here too
+            sellingPrice: item.unitPrice || 0,
+            brandName:
+              item.pharmacyProduct?.brandName ||
+              item.pharmacyProduct?.medicine?.brandName,
+          })),
+        }));
+        setInvoicesData(normalizedInvoices);
+
+        console.log(res.data);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to fetch invoices");
+        setInvoicesData([]);
+      }
+    };
+    fetchInvoices();
+  }, []);
+
+  // Update time every second
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // Fetch Counter and POS Items
-  const fetchItems = async () => {
-    try {
-      const counterRes = await getCounter();
-      console.log(
-        "getCounter API Response:",
-        counterRes.data.assignedCounter.id
-      );
-      if (counterRes.status === 200) {
-        console.log(
-          "getCounter API Response:",
-          counterRes.data.assignedCounter.id
-        );
-        setCounterId(counterRes.data.assignedCounter.id);
-      }
+  // Filtered lists
+  const filteredItems = useMemo(
+    () =>
+      itemsData.filter((item) =>
+        (item.brandName || "").toLowerCase().includes(searchTerm.toLowerCase())
+      ),
+    [itemsData, searchTerm]
+  );
 
-      const response = await getPOSItems();
-      console.log("getPOSItems API Response:", response.data);
-      if (response?.status === 200 && Array.isArray(response.data)) {
-        const normalized = response.data.map((p) => ({
-          pharmacyProductId: p.pharmacyProductId,
-          medicineId: p.medicineId,
-          itemName: `${p.brandName} (${p.genericName})`,
-          brandName: p.brandName,
-          genericName: p.genericName,
-          barcode: p.barcode,
-          manufacturer: p.manufacturer,
-          packaging: p.packaging,
-          shelf: p.shelf || "-",
-          quantity: p.totalQuantity ?? 0,
-          unitType: p.unitType,
-          unitsPerPack: p.unitsPerPack,
-          sellingPrice: p.sellingPrice ?? 0,
-          costPrice: p.costPrice ?? 0,
-        }));
-        setItemsData(normalized);
-      } else {
-        setItemsData([]);
-      }
-    } catch (error) {
-      console.error("Error fetching POS items or counter:", error);
-    }
-  };
+  const filteredInvoices = useMemo(
+    () =>
+      Array.isArray(invoicesData)
+        ? invoicesData.filter((inv) =>
+            (inv.invoiceNo || "")
+              .toLowerCase()
+              .includes(invoiceSearch.toLowerCase())
+          )
+        : [],
+    [invoicesData, invoiceSearch]
+  );
 
-  // Fetch Sales
-  const fetchSales = async () => {
-    try {
-      const salesRes = await getSales();
-      console.log("getSales API Response:", salesRes);
-      if (salesRes.status === 200 && Array.isArray(salesRes.data.sales)) {
-        setSalesData(salesRes.data.sales);
-      }
-    } catch (error) {
-      console.error("Error fetching sales:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchItems();
-    fetchSales();
-  }, []);
-
-  // Escape key to exit fullscreen
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === "Escape" && document.fullscreenElement) {
-        document.exitFullscreen();
-      }
-    };
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, []);
-
-  // Filter items by search term
-  const filteredItems = useMemo(() => {
-    return itemsData.filter((p) =>
-      (p?.itemName || "").toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [itemsData, searchTerm]);
-
-  // Filter invoices by search
-  const filteredInvoices = useMemo(() => {
-    return salesData.filter((inv) =>
-      (inv?.invoiceNo || "")
-        .toString()
-        .toLowerCase()
-        .includes(invoiceSearch.toLowerCase())
-    );
-  }, [salesData, invoiceSearch]);
-
-  // Add item to cart
-  const handleAddToCart = (product) => {
-    const exists = cart.find(
-      (i) => i.pharmacyProductId === product.pharmacyProductId
-    );
-    if (exists) {
-      setCart(
-        cart.map((i) =>
-          i.pharmacyProductId === product.pharmacyProductId
-            ? { ...i, quantity: i.quantity + 1 }
-            : i
-        )
-      );
-    } else {
-      setCart([...cart, { ...product, quantity: 1, discount: 0 }]);
-    }
-  };
-
-  const handleDiscountChange = (index, value) => {
-    const updatedCart = [...cart];
-    updatedCart[index].discount = Number(value);
-    setCart(updatedCart);
-  };
-
-  const handleRemoveItem = (index) => {
-    const updatedCart = [...cart];
-    updatedCart.splice(index, 1);
-    setCart(updatedCart);
-  };
-
-  const handleSwitchToReturn = () => {
-    setIsCounter(false);
-    setCart([]);
-    setSelectedReturnItems([]);
-    setSelectedInvoice(null);
-    setInvoiceSearch("");
-  };
-
-  const handleSwitchToSale = () => {
-    setIsCounter(true);
-    setCart([]);
-    setSelectedReturnItems([]);
-    setSelectedInvoice(null);
-    setInvoiceSearch("");
-  };
-
-  const handleInvoiceSelect = (inv) => {
-    setSelectedInvoice(inv);
-    const updatedItems = (inv?.items || []).map((i) => ({
-      ...i,
-      itemName: `${i.pharmacyProduct?.medicine?.brandName || "N/A"} (${
-        i.pharmacyProduct?.medicine?.genericName || "N/A"
-      })`,
-      quantity: i.quantity,
-      sellingPrice: i.price || i.sellingPrice || 0,
-      discount: 0,
-    }));
-    setCart(updatedItems);
-    setSelectedReturnItems([]);
-  };
-
-  // Logout
-  const handleLogout = () => {
-    localStorage.clear();
-    const cookies = document.cookie.split(";");
-    cookies.forEach((cookie) => {
-      const eqPos = cookie.indexOf("=");
-      const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;`;
-    });
-    navigate("/signup");
-  };
-
-  // Toggle return selection
-  const toggleReturnSelection = (item) => {
-    setSelectedReturnItems((prev) =>
-      prev.includes(item.id)
-        ? prev.filter((id) => id !== item.id)
-        : [...prev, item.id]
-    );
-
-    setSelectedReturnDetails((prev) => {
-      const exists = prev.find((i) => i.id === item.id);
-      if (exists) {
-        return prev.filter((i) => i.id !== item.id);
-      } else {
-        return [...prev, item];
-      }
-    });
-  };
-
-  // Save Return
-  const handleSaveReturn = async () => {
-    if (!selectedInvoice) {
-      alert("Please select an invoice first.");
-      return;
-    }
-
-    if (selectedReturnDetails.length === 0) {
-      alert("Please select at least one item to return.");
-      return;
-    }
-
-    const totalAmount = selectedReturnDetails.reduce(
-      (acc, item) => acc + item.price * item.quantity,
-      0
-    );
-
-    const payload = {
-      saleId: selectedInvoice.id,
-      totalAmount,
-      returnItems: selectedReturnDetails.map((item) => ({
-        saleItemId: item.id,
-        quantity: item.quantity,
-        price: item.price,
-        discount: item.discount || 0,
-      })),
-    };
-
-    console.log("returnSale API Payload:", payload);
-
-    try {
-      const res = await returnSale(payload);
-      console.log("returnSale API Response:", res);
-      if (res?.status === "success") {
-        alert("Return successful!");
-        fetchSales();
-        fetchItems();
-        handleSwitchToSale();
-      } else {
-        alert("Failed to process return.");
-      }
-    } catch (error) {
-      console.error("Error in returnSale API:", error);
-    }
-  };
-
-  const totalAmount = cart.reduce((acc, item) => {
-    return (
-      acc +
-      (item.sellingPrice ?? item.price ?? 0) * item.quantity -
-      (item.discount || 0)
-    );
-  }, 0);
-
-  const discountedTotal =
+  // Cart calculations
+  const subtotal = cart.reduce(
+    (acc, item) =>
+      acc + (item.sellingPrice || 0) * item.quantity - (item.discount || 0),
+    0
+  );
+  const discountAmount =
     discountType === "percentage"
-      ? totalAmount - (totalAmount * discountValue) / 100
-      : totalAmount - discountValue;
+      ? (subtotal * discountValue) / 100
+      : discountValue;
+  const total = subtotal - discountAmount;
 
-  // Save Sale
-  const handleSave = async (print = false) => {
+  // Handlers
+  const handleAddToCart = (product) => {
+    setCart((prev) => {
+      // Use pharmacyProductId as the unique identifier
+      const index = prev.findIndex(
+        (item) => item.pharmacyProductId === product.pharmacyProductId
+      );
+
+      if (index !== -1) {
+        const updated = [...prev];
+        updated[index].quantity += 1;
+        return updated;
+      } else {
+        return [...prev, { ...product, quantity: 1, discount: 0 }];
+      }
+    });
+  };
+
+  const handleRemoveItem = (id) =>
+    setCart((prev) => prev.filter((item) => item.id !== id));
+
+  const handleQuantityChange = (id, quantity) => {
+    if (quantity < 1) return;
+    setCart((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, quantity } : item))
+    );
+  };
+
+  const handleDiscountChange = (id, value) => {
+    setCart((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, discount: Number(value) } : item
+      )
+    );
+  };
+
+  const handleSwitchMode = (counterMode) => {
+    setIsCounter(counterMode);
+    setCart([]);
+    setSelectedReturnItems(new Set());
+    setSelectedInvoice(null);
+    setDiscountValue(0);
+  };
+
+  const toggleReturnSelection = (id) => {
+    setSelectedReturnItems((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) newSet.delete(id);
+      else newSet.add(id);
+      return newSet;
+    });
+  };
+
+  const handleInvoiceSelect = (invoice) => {
+    setSelectedInvoice(invoice);
+    setCart(
+      invoice.items.map((item) => ({
+        ...item,
+        id: item.pharmacyProductId, // ensure id matches products
+        sellingPrice: item.unitPrice,
+        brandName: item.pharmacyProduct?.brandName || item.brandName,
+      }))
+    );
+    setSelectedReturnItems(new Set());
+  };
+
+  const handleSave = async (isPrint = false) => {
+    if (!cart.length && isCounter) return toast.error("Cart is empty");
+    if (!selectedReturnItems.size && !isCounter)
+      return toast.error("Select items to return");
+
+    setIsLoading(true);
+
     const payload = {
-      counterId,
-      totalAmount: discountedTotal,
-      paymentMode: "cash",
-      totalDiscount:
-        discountType === "percentage"
-          ? (totalAmount * discountValue) / 100
-          : discountValue,
+      type: isCounter ? "sale" : "return",
       items: cart.map((item) => ({
         pharmacyProductId: item.pharmacyProductId,
         quantity: item.quantity,
-        price: item.sellingPrice,
+        sellingPrice: item.sellingPrice || 0,
         discount: item.discount || 0,
       })),
+      discountType: isCounter ? discountType : null,
+      discountValue: isCounter ? discountValue : 0,
+      invoiceId: isCounter ? null : selectedInvoice?.id,
     };
 
-    console.log("addSale API Payload:", payload);
-
     try {
-      const res = await addSale(payload);
-      console.log("addSale API Response:", res);
+      // You can have a single API endpoint like /api/transaction
+      const response = await saveTransaction(payload);
 
-      if (res?.status === "success") {
-        alert("Sale successful!");
-        setCart([]);
-        fetchItems();
+      toast.success(
+        isCounter ? "Sale saved successfully" : "Return processed successfully"
+      );
 
-        // Print the PDF if requested
-        if (print && res.type === "pdf") {
-          const win = window.open(res.data);
-          if (win) {
-            win.addEventListener("load", () => {
-              win.print();
-            });
-          }
-        }
-      } else {
-        alert("Failed to save sale.");
-      }
-    } catch (error) {
-      console.error("Error saving sale:", error);
-      alert("An error occurred while saving the sale.");
+      if (isPrint) toast.info("Printing invoice...");
+
+      // Reset states
+      setCart([]);
+      setDiscountValue(0);
+      setSelectedReturnItems(new Set());
+      setSelectedInvoice(null);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to process transaction");
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
   };
 
   return (
     <div
-      className={`min-h-screen ${
-        theme === "dark" ? "bg-dark-50" : "bg-light-50"
+      className={`min-h-screen transition-colors ${
+        isDark ? "bg-slate-900 text-white" : "bg-gray-50 text-slate-900"
       }`}
     >
-      {/* Top Bar */}
-      <div
-        className={`w-full flex items-center justify-between border-b p-2 gap-4 ${
-          theme === "dark"
-            ? "border-white/90 bg-dark-50"
-            : "border-black/90 bg-light-50"
+      <ToastContainer />
+
+      {/* Header */}
+      <header
+        className={`border-b ${
+          isDark ? "border-slate-700 bg-slate-800" : "border-gray-200 bg-white"
         }`}
       >
-        {/* Theme toggle */}
-        <label className="inline-flex items-center rounded p-2 cursor-pointer">
-          <input
-            type="checkbox"
-            className="sr-only peer"
-            checked={theme === "dark"}
-            onChange={toggleTheme}
-          />
-          <span
-            className={`ml-3 text-sm font-medium ${
-              theme === "dark" ? "text-white/90" : "text-primary-50"
-            }`}
-          >
-            {theme === "dark" ? "Dark" : "Light"} Mode
-          </span>
-          <div className="w-11 ml-3 h-6 bg-gray-900 rounded-full relative transition-colors duration-300 peer-checked:bg-green-400">
-            <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-300 peer-checked:translate-x-5" />
-          </div>
-        </label>
-
-        {/* Current time */}
-        <div
-          className={`text-sm font-medium ${
-            theme === "dark" ? "text-white/80" : "text-black"
-          }`}
-        >
-          {currentTime.toLocaleTimeString()}
-        </div>
-
-        {/* User & fullscreen */}
-        <div className="flex items-center gap-4 relative">
-          <div className="relative">
-            <button
-              onClick={() => setShowDropdown(!showDropdown)}
-              className="flex items-center gap-2 bg-gray-700 hover:bg-gray-800 text-white px-3 py-1 rounded-full"
+        <div className="flex items-center justify-between px-6 py-4 max-md:flex-wrap gap-4">
+          <div className="flex items-center gap-6 max-md:gap-3 max-md:flex-1">
+            <h1 className="text-2xl max-md:text-xl font-bold">POS System</h1>
+            <div
+              className={`text-sm font-medium ${
+                isDark ? "text-gray-300" : "text-gray-600"
+              }`}
             >
-              <FaUserCircle className="text-lg" />
-              <span className="text-sm font-semibold">{userName}</span>
-            </button>
-            {showDropdown && (
-              <div
-                className="absolute right-0 top-full mt-2 w-40 bg-white shadow-lg rounded-md z-50"
-                onMouseLeave={() => setShowDropdown(false)}
-              >
-                <button
-                  onClick={() => navigate("/profile")}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-                >
-                  Profile
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-                >
-                  Logout
-                </button>
-              </div>
-            )}
+              {currentTime.toLocaleTimeString()}
+            </div>
           </div>
-          <button
-            onClick={() => {
-              const el = document.documentElement;
-              if (!document.fullscreenElement) el.requestFullscreen();
-              else document.exitFullscreen();
-            }}
-            className="text-lg bg-gray-700 hover:bg-gray-800 text-white p-2 rounded-full shadow"
-            title="Toggle Fullscreen"
-          >
-            <FaExpand />
-          </button>
-        </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="flex w-full p-5 max-md:flex-col gap-5">
-        {/* Left Side */}
-        {!isPrinting && (
-          <div className="w-6/6 mt-2 max-md:w-full">
-            {isCounter ? (
-              <>
-                {/* Items Search */}
-                <div className="flex bg-search-50 w-full rounded-full">
-                  <input
-                    type="text"
-                    placeholder="Search by name..."
-                    className="px-4 py-2 w-full outline-none font-semibold text-primary-50 text-sm"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
+          <div className="flex items-center gap-4">
+            {/* Theme Toggle */}
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={isDark}
+                onChange={toggleTheme}
+              />
+              <div
+                className={`w-11 h-6 rounded-full transition-colors ${
+                  isDark ? "bg-blue-600" : "bg-gray-300"
+                }`}
+              />
+              <span className="text-sm font-medium">
+                {isDark ? "Dark" : "Light"}
+              </span>
+            </label>
 
-                {/* Items Table */}
+            {/* User Menu */}
+            <div className="relative">
+              <button
+                onClick={() => setShowDropdown(!showDropdown)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                  isDark
+                    ? "bg-slate-700 hover:bg-slate-600"
+                    : "bg-gray-100 hover:bg-gray-200"
+                }`}
+              >
+                <FaUserCircle size={24} />
+                <span className="text-sm font-semibold max-md:hidden">
+                  {userName}
+                </span>
+              </button>
+              {showDropdown && (
                 <div
-                  className={`table-Main h-110 overflow-y-auto ${
-                    theme === "dark"
-                      ? "border-white/10 bg-white/10"
-                      : "border-black/10 bg-white/60"
+                  className={`absolute right-0 top-full mt-2 w-48 rounded-lg shadow-xl z-50 ${
+                    isDark ? "bg-slate-700" : "bg-white"
                   }`}
+                  onMouseLeave={() => setShowDropdown(false)}
                 >
-                  <table
-                    className={`w-full table-auto ${
-                      theme === "dark" ? "text-light-50" : "text-primary-50"
+                  <button
+                    className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                      isDark ? "hover:bg-slate-600" : "hover:bg-gray-100"
                     }`}
                   >
-                    <thead className="sticky top-0 z-10 text-sm text-left uppercase h-11 bg-bg-50 text-white/80">
+                    Profile
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className={`w-full text-left px-4 py-2 text-sm border-t transition-colors ${
+                      isDark
+                        ? "border-slate-600 hover:bg-slate-600"
+                        : "border-gray-100 hover:bg-gray-100"
+                    }`}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Fullscreen */}
+            <button
+              onClick={() => {
+                if (!document.fullscreenElement)
+                  document.documentElement.requestFullscreen();
+                else document.exitFullscreen();
+              }}
+              className={`p-2 rounded-lg transition-colors ${
+                isDark
+                  ? "bg-slate-700 hover:bg-slate-600"
+                  : "bg-gray-100 hover:bg-gray-200"
+              }`}
+              title="Toggle Fullscreen"
+            >
+              <FaExpand />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="flex gap-6 p-6 max-lg:flex-col">
+        {/* Left Panel */}
+        <div className="flex-1">
+          {isCounter ? (
+            <>
+              {/* Product Search */}
+              <div className="mb-4 relative">
+                <span className="absolute left-3 top-3 text-gray-500">🔍</span>
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  className={`w-full pl-10 pr-4 py-3 rounded-lg outline-none transition-colors ${
+                    isDark
+                      ? "bg-slate-700 text-white placeholder-gray-400"
+                      : "bg-white text-slate-900 placeholder-gray-500 border border-gray-200"
+                  }`}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+
+              {/* Products Table */}
+              <div
+                className={`rounded-lg border overflow-hidden ${
+                  isDark
+                    ? "border-slate-700 bg-slate-800"
+                    : "border-gray-200 bg-white"
+                }`}
+              >
+                <div className="overflow-y-auto max-h-96">
+                  <table className="w-full text-sm">
+                    <thead
+                      className={`sticky top-0 ${
+                        isDark ? "bg-slate-700" : "bg-gray-50"
+                      }`}
+                    >
                       <tr>
-                        <th className="px-4 py-2">Item Name</th>
-                        <th className="px-4 py-2">Quantity</th>
-                        <th className="px-4 py-2">Shelf</th>
-                        <th className="px-4 py-2">Price</th>
+                        <th className="px-4 py-3 text-left font-semibold">
+                          Product
+                        </th>
+                        <th className="px-4 py-3 text-left font-semibold">
+                          Stock
+                        </th>
+                        <th className="px-4 py-3 text-left font-semibold">
+                          Price
+                        </th>
+                        <th className="px-4 py-3 text-center font-semibold">
+                          Action
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredItems.map((p, idx) => (
-                        <tr
-                          key={idx}
-                          onClick={() => handleAddToCart(p)}
-                          className={`cursor-pointer ${
-                            theme === "dark"
-                              ? "hover:bg-white/20"
-                              : "hover:bg-black/20"
-                          } px-4 py-2 text-xs font-medium border-b`}
-                        >
-                          <td className="px-4 py-2">{p?.itemName || "N/A"}</td>
-                          <td className="px-4 py-2">{p?.quantity ?? 0}</td>
-                          <td className="px-4 py-2">{p?.shelf || "-"}</td>
-                          <td className="px-4 py-2">
-                            {(p?.sellingPrice || 0).toFixed(2)}
+                      {filteredItems.length === 0 ? (
+                        <tr>
+                          <td
+                            colSpan="4"
+                            className="px-4 py-8 text-center text-gray-500"
+                          >
+                            No products found
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        filteredItems.map((product) => (
+                          <tr
+                            key={product.id}
+                            className={`border-t transition-colors ${
+                              isDark ? "hover:bg-slate-700" : "hover:bg-gray-50"
+                            }`}
+                          >
+                            <td className="px-4 py-3">{product.brandName}</td>
+                            <td className="px-4 py-3">
+                              {product.totalQuantity}
+                            </td>
+                            <td className="px-4 py-3">
+                              Rs. {(product.sellingPrice || 0).toFixed(2)}
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <button
+                                onClick={() => handleAddToCart(product)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors"
+                              >
+                                Add
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
-              </>
-            ) : (
-              <>
-                {/* Invoice Search */}
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Invoice Return Mode */}
+              <div className="mb-4 relative">
+                <span className="absolute left-3 top-3 text-gray-500">🔍</span>
                 <input
                   type="text"
-                  className="px-4 py-2 w-full rounded-full outline-none font-semibold text-primary-50 text-sm bg-search-50"
-                  placeholder="Search by invoice number..."
+                  placeholder="Search invoices..."
+                  className={`w-full pl-10 pr-4 py-3 rounded-lg outline-none transition-colors ${
+                    isDark
+                      ? "bg-slate-700 text-white placeholder-gray-400"
+                      : "bg-white text-slate-900 border border-gray-200 placeholder-gray-500"
+                  }`}
                   value={invoiceSearch}
                   onChange={(e) => setInvoiceSearch(e.target.value)}
                 />
-
-                {/* Invoices Table */}
-                <div
-                  className={`table-Main h-110 overflow-y-auto ${
-                    theme === "dark"
-                      ? "border-white/10 bg-white/10"
-                      : "border-black/10 bg-white/60"
-                  }`}
-                >
-                  <table
-                    className={`w-full table-auto ${
-                      theme === "dark" ? "text-light-50" : "text-primary-50"
-                    }`}
-                  >
-                    <thead className="sticky top-0 z-10 text-sm text-left uppercase h-11 bg-bg-50 text-white/80">
+              </div>
+              <div
+                className={`rounded-lg border overflow-hidden ${
+                  isDark
+                    ? "border-slate-700 bg-slate-800"
+                    : "border-gray-200 bg-white"
+                }`}
+              >
+                <div className="overflow-y-auto max-h-96">
+                  <table className="w-full text-sm">
+                    <thead
+                      className={`sticky top-0 ${
+                        isDark ? "bg-slate-700" : "bg-gray-50"
+                      }`}
+                    >
                       <tr>
-                        <th className="px-4 py-2">Invoice No</th>
-                        <th className="px-4 py-2">Date</th>
+                        <th className="px-4 py-3 text-left font-semibold">
+                          Invoice No
+                        </th>
+                        <th className="px-4 py-3 text-left font-semibold">
+                          Date
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredInvoices.map((inv, idx) => (
-                        <tr
-                          key={idx}
-                          onClick={() => handleInvoiceSelect(inv)}
-                          className={`cursor-pointer ${
-                            theme === "dark"
-                              ? "hover:bg-white/20"
-                              : "hover:bg-black/20"
-                          } px-4 py-2 text-xs font-medium border-b`}
-                        >
-                          <td className="px-4 py-2">
-                            {inv?.invoiceNo || "N/A"}
-                          </td>
-                          <td className="px-4 py-2">
-                            {inv?.createdAt
-                              ? new Date(inv.createdAt).toLocaleDateString()
-                              : "-"}
+                      {filteredInvoices.length === 0 ? (
+                        <tr>
+                          <td
+                            colSpan="2"
+                            className="px-4 py-8 text-center text-gray-500"
+                          >
+                            No invoices found
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        filteredInvoices.map((inv) => (
+                          <tr
+                            key={inv.id}
+                            onClick={() => handleInvoiceSelect(inv)}
+                            className={`border-t transition-colors cursor-pointer ${
+                              selectedInvoice?.id === inv.id
+                                ? isDark
+                                  ? "bg-blue-900"
+                                  : "bg-blue-50"
+                                : isDark
+                                ? "hover:bg-slate-700"
+                                : "hover:bg-gray-50"
+                            }`}
+                          >
+                            <td className="px-4 py-3">{inv.invoiceNo}</td>
+                            <td className="px-4 py-3">
+                              {new Date(inv.createdAt).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
-              </>
-            )}
-          </div>
-        )}
+              </div>
+            </>
+          )}
+        </div>
 
-        {/* Right Side */}
-        <div className="w-full flex flex-col gap-1">
-          <div className="flex items-center justify-end gap-2">
-            <button
-              onClick={handleSwitchToSale}
-              className="bg-bg-50 hover:bg-selected-50 text-white px-4 py-1 h-10 rounded-full"
-            >
-              New Sale
-            </button>
-            <button
-              onClick={handleSwitchToReturn}
-              className="bg-bg-50 hover:bg-selected-50 text-white px-4 py-1 h-10 rounded-full"
-            >
-              Return
-            </button>
-          </div>
-
-          {/* POS table */}
+        {/* Right Panel - Cart */}
+        <div className="w-96 max-lg:w-full">
           <div
-            className={`overflow-x-auto table-Main rounded-md ${
-              theme === "dark"
-                ? "border-white/10 bg-white/10"
-                : "border-black/10 bg-white/60"
+            className={`rounded-lg border overflow-hidden flex flex-col h-full ${
+              isDark
+                ? "border-slate-700 bg-slate-800"
+                : "border-gray-200 bg-white"
             }`}
           >
-            <table
-              className={`w-full table-auto ${
-                theme === "dark" ? "text-light-50" : "text-primary-50"
+            {/* Cart Header */}
+            <div
+              className={`px-6 py-4 border-b ${
+                isDark ? "border-slate-700" : "border-gray-200"
               }`}
             >
-              <thead className="text-xs text-left h-11 uppercase bg-bg-50 text-white/80">
-                <tr>
-                  <th className="px-4 py-2">Product</th>
-                  <th className="px-4 py-2">Price</th>
-                  <th className="px-4 py-2">Qty</th>
-                  <th className="px-4 py-2">Discount</th>
-                  <th className="px-4 py-2">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cart.map((c, i) => (
-                  <tr key={i} className="text-xs border-b">
-                    <td className="px-4 py-2">{c.itemName}</td>
-                    <td className="px-4 py-2">
-                      {(c.sellingPrice ?? 0).toFixed(2)}
-                    </td>
-                    <td className="px-4 py-2">{c.quantity}</td>
-                    <td className="px-4 py-2">
-                      <input
-                        type="number"
-                        className="w-16 px-1 rounded outline-none text-black"
-                        value={c.discount || 0}
-                        onChange={(e) =>
-                          handleDiscountChange(i, e.target.value)
-                        }
-                      />
-                    </td>
-                    <td className="px-4 py-2">
-                      <button
-                        onClick={() => handleRemoveItem(i)}
-                        className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
+              <div className="flex gap-2 mb-4">
+                <button
+                  onClick={() => handleSwitchMode(true)}
+                  className={`flex-1 py-2 rounded-lg font-semibold transition-colors ${
+                    isCounter
+                      ? "bg-blue-600 text-white"
+                      : isDark
+                      ? "bg-slate-700 text-gray-300 hover:bg-slate-600"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  New Sale
+                </button>
+                <button
+                  onClick={() => handleSwitchMode(false)}
+                  className={`flex-1 py-2 rounded-lg font-semibold transition-colors ${
+                    !isCounter
+                      ? "bg-amber-600 text-white"
+                      : isDark
+                      ? "bg-slate-700 text-gray-300 hover:bg-slate-600"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  Return
+                </button>
+              </div>
+              <h2 className="text-lg font-bold">
+                {isCounter ? "Sales Cart" : "Return Items"}
+              </h2>
+            </div>
+
+            {/* Cart Items */}
+            <div className="flex-1 overflow-y-auto px-6 py-4">
+              {cart.length === 0 ? (
+                <div
+                  className={`text-center py-12 ${
+                    isDark ? "text-gray-400" : "text-gray-500"
+                  }`}
+                >
+                  {isCounter ? "Add items to cart" : "Select an invoice first"}
+                </div>
+              ) : !isCounter ? (
+                <div className="space-y-3">
+                  {cart.map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => toggleReturnSelection(item.id)}
+                      className={`p-3 rounded-lg cursor-pointer transition-colors border-2 ${
+                        selectedReturnItems.has(item.id)
+                          ? isDark
+                            ? "border-blue-500 bg-blue-900/30"
+                            : "border-blue-500 bg-blue-50"
+                          : isDark
+                          ? "border-slate-700 hover:border-slate-600"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <p className="font-medium text-sm">{item.brandName}</p>
+                        <input
+                          type="checkbox"
+                          checked={selectedReturnItems.has(item.id)}
+                          readOnly
+                          className="w-4 h-4 rounded"
+                        />
+                      </div>
+                      <p
+                        className={`text-xs ${
+                          isDark ? "text-gray-400" : "text-gray-600"
+                        }`}
                       >
-                        Remove
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                        Qty: {item.quantity} × Rs.{" "}
+                        {(item.sellingPrice || 0).toFixed(2)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {cart.map((item) => (
+                    <div
+                      key={item.id}
+                      className={`p-3 rounded-lg border-2 flex flex-col gap-2 transition-colors ${
+                        isDark
+                          ? "border-slate-700 hover:border-slate-600"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <p className="font-medium text-sm">{item.brandName}</p>
+                        <button
+                          onClick={() => handleRemoveItem(item.id)}
+                          className="text-red-500 hover:text-red-600"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
+                      <div className="flex gap-2 items-center">
+                        <button
+                          onClick={() =>
+                            handleQuantityChange(item.id, item.quantity - 1)
+                          }
+                          className="p-1 bg-gray-300 rounded"
+                        >
+                          <FaMinus />
+                        </button>
+                        <input
+                          type="number"
+                          className={`w-12 text-center rounded border ${
+                            isDark
+                              ? "bg-slate-700 border-slate-600 text-white"
+                              : "bg-white border-gray-200 text-slate-900"
+                          }`}
+                          value={item.quantity}
+                          onChange={(e) =>
+                            handleQuantityChange(
+                              item.id,
+                              Number(e.target.value)
+                            )
+                          }
+                        />
+                        <button
+                          onClick={() =>
+                            handleQuantityChange(item.id, item.quantity + 1)
+                          }
+                          className="p-1 bg-gray-300 rounded"
+                        >
+                          <FaPlus />
+                        </button>
+                        <input
+                          type="number"
+                          className={`ml-auto w-20 text-center rounded border ${
+                            isDark
+                              ? "bg-slate-700 border-slate-600 text-white"
+                              : "bg-white border-gray-200 text-slate-900"
+                          }`}
+                          value={item.discount}
+                          onChange={(e) =>
+                            handleDiscountChange(item.id, e.target.value)
+                          }
+                          placeholder="Discount"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-          <div className="flex items-center justify-between mt-2">
-            <div className="flex items-center gap-2">
-              <label>Discount Type:</label>
-              <select
-                className="px-2 py-1 rounded"
-                value={discountType}
-                onChange={(e) => setDiscountType(e.target.value)}
+            {/* Cart Footer */}
+            <div
+              className={`px-6 py-4 border-t ${
+                isDark ? "border-slate-700" : "border-gray-200"
+              }`}
+            >
+              <div className="flex justify-between mb-2">
+                <span>Subtotal</span>
+                <span>Rs. {subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between mb-2">
+                <span>Discount</span>
+                <span>Rs. {discountAmount.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between font-bold text-lg mb-2">
+                <span>Total</span>
+                <span>Rs. {total.toFixed(2)}</span>
+              </div>
+              <button
+                onClick={() => handleSave(false)}
+                disabled={isLoading}
+                className="w-full py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors mb-2"
               >
-                <option value="fixed">Fixed</option>
-                <option value="percentage">Percentage</option>
-              </select>
-              <input
-                type="number"
-                className="px-2 py-1 rounded w-20"
-                value={discountValue}
-                onChange={(e) => setDiscountValue(Number(e.target.value))}
-              />
-            </div>
-
-            <div>
-              <strong>Total:</strong> {discountedTotal.toFixed(2)}
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-2 mt-2">
-            {isCounter ? (
+                {isLoading
+                  ? "Processing..."
+                  : isCounter
+                  ? "Save Sale"
+                  : "Process Return"}
+              </button>
               <button
                 onClick={() => handleSave(true)}
-                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                disabled={isLoading}
+                className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
               >
-                Save & Print
+                {isLoading ? "Printing..." : "Save & Print"}
               </button>
-            ) : (
-              <button
-                onClick={handleSaveReturn}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded"
-              >
-                Process Return
-              </button>
-            )}
+            </div>
           </div>
         </div>
       </div>
