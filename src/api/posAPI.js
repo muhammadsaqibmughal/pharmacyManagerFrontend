@@ -3,7 +3,7 @@ import api from "../utils/axiosInstance";
 export const getPOSItems = async () => {
   try {
     const response = await api.get("/inventory/getInventoryByPOS");
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Error fetching pharmacy products:", error);
     throw new Error(
@@ -21,16 +21,22 @@ export const addSale = async (data) => {
     const file = new Blob([response.data], { type: "application/pdf" });
     const fileURL = URL.createObjectURL(file);
 
-    return {
-      status: "success",
-      type: "pdf",
-      data: fileURL, 
-    };
+    const win = window.open(fileURL, "_blank");
+    if (win) {
+      win.focus();
+      setTimeout(() => win.print(), 500);
+    }
+
+    return { status: "success", type: "pdf", data: fileURL };
   } catch (error) {
     console.log(error.message);
     return { status: "error", message: error.message };
   }
 };
+
+
+
+
 
 
 export const addManagerSale = async (data) => {
@@ -66,7 +72,7 @@ export const returnSale = async (data) => {
 export const getSales = async () => {
   try {
     const response = await api.get("/sales/get-sales");
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Error fetching pharmacy sales:", error);
     throw new Error(

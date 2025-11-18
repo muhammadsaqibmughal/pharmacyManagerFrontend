@@ -6,11 +6,10 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { useTheme } from "../theme-support/ThemeContext";
 import { FaSpinner } from "react-icons/fa";
 
-
 const SignUp = () => {
   const { theme } = useTheme();
-
   const navigate = useNavigate();
+
   const [loading, setLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [formErrorLogin, setFormErrorLogin] = useState("");
@@ -18,7 +17,10 @@ const SignUp = () => {
   const [showPasswordLogin, setShowPasswordLogin] = useState(false);
   const [showPasswordRegister, setShowPasswordRegister] = useState(false);
 
+  // Login Formik
   const loginFormik = useLoginFormik(setFormErrorLogin, setLoading);
+
+  // Register Formik
   const registerFormik = useRegisterFormik(
     (email) => navigate(`/verify-email?email=${encodeURIComponent(email)}`),
     setFormErrorRegister
@@ -26,7 +28,11 @@ const SignUp = () => {
 
   if (loading) {
     return (
-      <div className={`flex items-center w-full min-h-screen justify-center py-4 ${theme === "dark" ? "bg-dark-50" : "bg-light-50"} `}> 
+      <div
+        className={`flex items-center w-full min-h-screen justify-center py-4 ${
+          theme === "dark" ? "bg-dark-50" : "bg-light-50"
+        }`}
+      >
         <FaSpinner className="animate-spin text-blue-500 text-8xl" />
       </div>
     );
@@ -46,10 +52,10 @@ const SignUp = () => {
 
   return (
     <div
-      className={`w-full min-h-screen overflow-hidden  flex ${
+      className={`w-full min-h-screen overflow-hidden flex ${
         theme === "dark"
           ? "bg-dark-50 text-white/90"
-          : " bg-light-50 text-primary-50"
+          : "bg-light-50 text-primary-50"
       }`}
     >
       {/* Left Side */}
@@ -59,11 +65,11 @@ const SignUp = () => {
 
       {/* Right Side */}
       <div className="flex w-1/2 max-md:w-full justify-center items-center">
-        <div className="backdrop-blur-xl  bg-white/10 border border-white/20  shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] rounded-2xl flex flex-col justify-center mb-70 items-center w-4/5 max-md:w-11/12 gap-3 p-10 transition-all duration-500">
+        <div className="backdrop-blur-xl bg-white/10 border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] rounded-2xl flex flex-col justify-center mb-70 items-center w-4/5 max-md:w-11/12 gap-3 p-10 transition-all duration-500">
           <h1
-            className={`text-center  text-3xl font-bold ${
-              theme === "dark" ? " text-white/90" : " text-primary-50"
-            } `}
+            className={`text-center text-3xl font-bold ${
+              theme === "dark" ? "text-white/90" : "text-primary-50"
+            }`}
           >
             PharmaConnect +
           </h1>
@@ -88,9 +94,8 @@ const SignUp = () => {
                   <input
                     type="email"
                     name="email"
-                    aria-label="Email"
                     placeholder="Enter your email address"
-                    className={`border-1 text-xs  font-semibold px-3 py-2 rounded-full w-full ${
+                    className={`border-1 text-xs font-semibold px-3 py-2 rounded-full w-full ${
                       theme === "dark"
                         ? "border-gray-300 text-white/90"
                         : "border-black/40 text-primary-50"
@@ -108,9 +113,8 @@ const SignUp = () => {
                     <input
                       type={showPasswordLogin ? "text" : "password"}
                       name="password"
-                      aria-label="Password"
                       placeholder="Enter your password"
-                      className={`border-1 text-xs  font-semibold px-3 py-2 rounded-full w-full ${
+                      className={`border-1 text-xs font-semibold px-3 py-2 rounded-full w-full ${
                         theme === "dark"
                           ? "border-gray-300 text-white/90"
                           : "border-black/40 text-primary-50"
@@ -119,7 +123,7 @@ const SignUp = () => {
                       onChange={loginFormik.handleChange}
                     />
                     <span
-                      className="absolute top-3 right-3  cursor-pointer"
+                      className="absolute top-3 right-3 cursor-pointer"
                       onClick={() => setShowPasswordLogin((prev) => !prev)}
                     >
                       {showPasswordLogin ? (
@@ -162,7 +166,7 @@ const SignUp = () => {
                 </button>
 
                 <div className="text-center mt-4">
-                  <p className="text-sm ">
+                  <p className="text-sm">
                     Don't have an account?
                     <button
                       type="button"
@@ -188,7 +192,6 @@ const SignUp = () => {
                   <input
                     type="text"
                     name="name"
-                    aria-label="Full Name"
                     placeholder="Enter your name"
                     className={`border-1 text-xs backdrop-blur-sm font-semibold px-3 py-2 rounded-full w-full ${
                       theme === "dark"
@@ -208,7 +211,6 @@ const SignUp = () => {
                   <input
                     type="email"
                     name="email"
-                    aria-label="Email"
                     placeholder="Enter your email address"
                     className={`border-1 text-xs backdrop-blur-sm font-semibold px-3 py-2 rounded-full w-full ${
                       theme === "dark"
@@ -229,7 +231,6 @@ const SignUp = () => {
                     <input
                       type={showPasswordRegister ? "text" : "password"}
                       name="password"
-                      aria-label="Password"
                       placeholder="Enter your password"
                       className={`border-1 text-xs backdrop-blur-sm font-semibold px-3 py-2 rounded-full w-full ${
                         theme === "dark"
@@ -241,7 +242,9 @@ const SignUp = () => {
                     />
                     <span
                       className="absolute top-3 right-3 text-gray-300 cursor-pointer"
-                      onClick={() => setShowPasswordRegister((prev) => !prev)}
+                      onClick={() =>
+                        setShowPasswordRegister((prev) => !prev)
+                      }
                     >
                       {showPasswordRegister ? (
                         <AiOutlineEyeInvisible />
@@ -267,13 +270,13 @@ const SignUp = () => {
                 <button
                   type="submit"
                   disabled={registerFormik.isSubmitting}
-                  className="w-full mt-7 py-2 bg-[#4F7942]  font-semibold rounded-xl hover:bg-green-700 transition"
+                  className="w-full mt-7 py-2 bg-[#4F7942] font-semibold rounded-xl hover:bg-green-700 transition"
                 >
                   {registerFormik.isSubmitting ? "Signing Up..." : "Sign Up"}
                 </button>
 
                 <div className="text-center mt-6">
-                  <p className="text-sm ">
+                  <p className="text-sm">
                     Already have an account?
                     <button
                       type="button"

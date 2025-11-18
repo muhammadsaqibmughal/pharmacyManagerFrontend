@@ -7,7 +7,10 @@ export const addProduct = async (data) => {
 };
 
 // get medicines
-export const getProduct = async () => {
-  const response = await api.get("/medicine/getMedicine");
-  return response.data;
+export const getProduct = async ({ page = 1, limit = 50, search = "" }) => {
+  const response = await api.get("/medicine/getMedicine", {
+    params: { page, limit, search },
+  });
+  return response.data; 
 };
+

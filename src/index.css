@@ -1,4 +1,9 @@
+/* 1️⃣ External imports FIRST */
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+@import "https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css";
+@import "https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.1/mapbox-gl-geocoder.css";
+
+
 @import "tailwindcss";
 
 html,
@@ -10,6 +15,8 @@ body {
   height: 100dvh;
   font-family: var(--font-family);
 }
+
+
 
 .section-padding {
   @apply w-full p-10 md:p-20 xl:px-28;

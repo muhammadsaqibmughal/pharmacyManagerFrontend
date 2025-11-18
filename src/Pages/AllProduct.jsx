@@ -9,12 +9,15 @@ const AllProduct = () => {
   const { theme } = useTheme();
 
   const [products, setProducts] = useState([]);
+  const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [showModal, setShowModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isLocked, setIsLocked] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+
+  const [showModal, setShowModal] = useState(false);
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successToast, setSuccessToast] = useState("");
 
   const [newProduct, setNewProduct] = useState({
     brandName: "",
@@ -22,316 +25,292 @@ const AllProduct = () => {
     barcode: "",
   });
 
-  // Fetch products on mount
+  // ----------------------------------------- Fetch Products
+  const fetchProducts = async () => {
+    try {
+      const response = await getProduct({
+        page: currentPage,
+        limit: ITEM_PER_PAGE,
+        search: searchTerm,
+      });
+
+      setProducts(response.data || []);
+      setTotal(response.total || 0);
+    } catch (error) {
+      setErrorMsg("Failed to load products");
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setIsLoading(true);
-        const response = await getProduct();
-        setProducts(Array.isArray(response.data) ? response.data : []);
-      } catch (error) {
-        console.log(error);
-        setErrorMsg("Failed to load products");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchProducts();
-  }, []);
+  }, [currentPage, searchTerm]);
 
-  const filteredProducts = products.filter((product) => {
-    const term = searchTerm.toLowerCase();
-    return (
-      (product.brandName && product.brandName.toLowerCase().includes(term)) ||
-      (product.genericName &&
-        product.genericName.toLowerCase().includes(term)) ||
-      (product.barcode && product.barcode.includes(term))
-    );
-  });
+  const totalPages = Math.ceil(total / ITEM_PER_PAGE);
 
-  // Pagination logic
-  const totalPages = Math.ceil(filteredProducts.length / ITEM_PER_PAGE);
-  const paginatedProducts = filteredProducts.slice(
-    (currentPage - 1) * ITEM_PER_PAGE,
-    currentPage * ITEM_PER_PAGE
-  );
-
+  // ----------------------------------------- Input Handler
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewProduct((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddProduct = async () => {
-    const exists = products.find(
-      (p) => p.brandName.toLowerCase() === newProduct.brandName.toLowerCase()
-    );
-    if (exists) {
-      setErrorMsg("Product already exists!");
-      return;
-    }
+  // ----------------------------------------- Success Toast
+  const showToast = (msg) => {
+    setSuccessToast(msg);
+    setTimeout(() => setSuccessToast(""), 2000);
+  };
 
+  // ----------------------------------------- Add Product
+  const handleAddProduct = async () => {
     try {
       setIsLoading(true);
-      const addedProduct = await addProduct(newProduct);
+      setErrorMsg("");
 
-      console.log("Added product response:", addedProduct);
-      const productToAdd = addedProduct.data || addedProduct;
+      const payload = {
+        brandName: newProduct.brandName.trim(),
+        manufacturer: newProduct.manufacturer.trim(),
+        barcode: newProduct.barcode.trim(),
+      };
 
-      if (!productToAdd || !productToAdd.brandName) {
-        setErrorMsg("Invalid product data returned from server");
+      const response = await addProduct(payload);
+
+      if (!response.status==201 || !response.status==200) {
+        setErrorMsg(response.message || "Failed to add product");
         return;
       }
 
-      setProducts((prev) => [productToAdd, ...prev]);
-      setShowModal(false);
+      // Success
       resetForm();
+      setShowModal(false);
+      fetchProducts();
+      showToast("Medicine added successfully!");
+
     } catch (error) {
+      console.error(error);
       setErrorMsg("Failed to add product");
-      console.error("Add product error:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const resetForm = (keepError = false) => {
+  // ----------------------------------------- Reset Form
+  const resetForm = () => {
     setNewProduct({
       brandName: "",
       manufacturer: "",
       barcode: "",
     });
-    setIsLocked(false);
-    setIsLoading(false);
-
-    if (!keepError) {
-      setErrorMsg("");
-    }
-  };
-
-  const handleBrandBlur = () => {
-    if (!newProduct.brandName.trim()) return;
-
-    setIsLoading(true);
-    setIsLocked(true);
     setErrorMsg("");
-
-    const found = products.find(
-      (p) =>
-        p.brandName.toLowerCase() === newProduct.brandName.trim().toLowerCase()
-    );
-
-    if (found) {
-      setErrorMsg("Product already exists!");
-      resetForm(true);
-    } else {
-      setIsLocked(false);
-    }
-
-    setIsLoading(false);
   };
+
+  // ----------------------------------------- Validation Check
+  const isFormValid =
+    newProduct.brandName.trim() !== "" &&
+    newProduct.manufacturer.trim() !== "" &&
+    newProduct.barcode.trim() !== "";
 
   return (
-    <div
-      className={`mt-8 p-10 ${
-        theme === "dark" ? "bg-dark-50" : " bg-light-50"
-      }`}
-    >
-      {" "}
-      {/* Top Bar */}
+    <div className={`mt-8 p-10 ${theme === "dark" ? "bg-dark-50" : "bg-light-50"}`}>
+
+      {/* TOAST */}
+      {successToast && (
+        <div className="fixed top-5 right-5 bg-green-600 text-white px-4 py-2 rounded shadow-lg animate-slideIn">
+          {successToast}
+        </div>
+      )}
+
+      {/* Header */}
       <div className="flex justify-between items-center mb-4">
-        <h2
-          className={`text-2xl ${
-            theme === "dark" ? "text-white/90" : " text-primary-50"
-          }  font-bold`}
-        >
-          {" "}
+        <h2 className={`text-2xl font-bold ${theme === "dark" ? "text-white/90" : "text-primary-50"}`}>
           All Products
         </h2>
+
         <button
           onClick={() => {
             setShowModal(true);
-            setErrorMsg("");
+            resetForm();
           }}
-          className="bg-bg-50 hover:bg-selected-50 cursor-pointer text-white px-4 py-1 h-10 rounded-full hover:bg-hf-100"
+          className="bg-bg-50 hover:bg-selected-50 cursor-pointer text-white px-4 py-1 h-10 rounded-full"
         >
           Add Product
         </button>
       </div>
-      {/* Search Bar */}
+
+      {/* Search */}
       <div className="mb-4 bg-search-50 rounded-full">
         <input
           type="text"
-          placeholder="Search by Brand or Generic Name or barcode..."
-          className="px-4 py-2 w-full outline-none font-semibold text-primary-50   text-sm"
+          placeholder="Search by brand, generic, manufacturer, or barcode..."
+          className="px-4 py-2 w-full outline-none text-sm font-semibold text-primary-50"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
         />
       </div>
-      {/* Product Table */}
+
+      {/* Table */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-4">
-          <FaSpinner className="animate-spin text-blue-500 text-5xl" />
+        <div className="flex justify-center py-10">
+          <FaSpinner className="animate-spin text-blue-500 text-4xl" />
         </div>
       ) : (
-        <>
-          <div
-            className={`table-Main  ${
-              theme === "dark"
-                ? " border-white/10 bg-white/10"
-                : " border-black/10 bg-white/60"
+        <div
+          className={`table-Main ${
+            theme === "dark"
+              ? "border-white/10 bg-white/10"
+              : "border-black/10 bg-white/60"
+          }`}
+        >
+          <table
+            className={`w-full table-auto ${
+              theme === "dark" ? "text-light-50" : "text-primary-50"
             }`}
           >
-            <table
-              className={`w-full table-auto ${
-                theme === "dark" ? "text-light-50" : " text-primary-50"
-              }`}
-            >
-              <thead className="text-sm text-left uppercase bg-bg-50 text-white/80">
+            <thead className="uppercase text-sm bg-bg-50 text-white/80">
+              <tr>
+                <th className="px-4 py-3">Brand</th>
+                <th className="px-4 py-3">Generic</th>
+                <th className="px-4 py-3">Manufacturer</th>
+                <th className="px-4 py-3">Barcode</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {products.map((product) => (
                 <tr
+                  key={product.id}
                   className={`border-b ${
-                    theme === "dark" ? " border-white/20" : " border-black/20"
+                    theme === "dark" ? "border-white/20" : "border-black/20"
                   }`}
                 >
-                  <th className="px-4 py-3">Brand Name</th>
-                  <th className="px-4 py-3">Generic Name</th>
-                  <th className="px-4 py-3">Manufacturer</th>
-                  <th className="px-4 py-3">Barcode</th>
+                  <td className="px-4 py-2">{product.brandName}</td>
+                  <td className="px-4 py-2">{product.genericName}</td>
+                  <td className="px-4 py-2">{product.manufacturer}</td>
+                  <td className="px-4 py-2">{product.barcode}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {paginatedProducts.map((product) => (
-                  <tr
-                    key={product.id || product.barcode || product.brandName}
-                    className={` px-4 py-2 text-xs font-medium border-b ${
-                      theme === "dark" ? " border-white/40" : " border-black/50"
-                    }`}
-                  >
-                    <td className="px-4 py-2 text-xs font-medium">
-                      {product.brandName}
-                    </td>
-                    <td className="px-4 py-2 text-xs font-medium">
-                      {product.genericName}
-                    </td>
-                    <td className="px-4 py-2 text-xs font-medium">
-                      {product.manufacturer}
-                    </td>
-                    <td className="px-4 py-2 text-xs font-medium">
-                      {product.barcode}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            {/* Pagination */}
-            <div
-              className={`flex justify-between items-center px-4 py-3  border-t ${
-                theme === "dark"
-                  ? "bg-white/20 border-white/20"
-                  : "bg-white/10 border-white/20"
-              }`}
-            >
-              <button
-                className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </button>
-              <span
-                className={`text-sm text-center ${
-                  theme === "dark" ? "text-light-50" : "text-primary-50"
-                } `}
-              >
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                }
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        </>
-      )}
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-10">
-          <div
-            className={`rounded-xl p-5 border ${
-              theme === "dark"
-                ? "border-white/20 bg-white/10"
-                : "border-white/40 bg-white/90"
-            }   backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]`}
-          >
-            <h2
-              className={`text-xl font-semibold mb-4 ${
-                theme === "dark" ? "text-light-50" : "text-primary-50"
-              }`}
-            >
-              Add New Product
-            </h2>
-
-            {/* Error Message */}
-            {errorMsg && (
-              <p className="text-warning-50 text-sm mb-2">{errorMsg}</p>
-            )}
-
-            <div className="grid grid-cols-3 gap-4">
-              {Object.keys(newProduct).map((field) => (
-                <div className="relative" key={field}>
-                  <input
-                    type="text"
-                    name={field}
-                    placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-                    value={newProduct[field]}
-                    onChange={handleChange}
-                    onBlur={field === "brandName" ? handleBrandBlur : undefined}
-                    disabled={field !== "brandName" && (isLocked || isLoading)}
-                    className={`border-1 text-xs  font-semibold px-3 py-2 rounded-full w-full ${
-                      theme === "dark"
-                        ? "border-gray-300 text-white/90"
-                        : "border-black/40 text-primary-50"
-                    }`}
-                  />
-                  {isLocked && field !== "brandName" && (
-                    <span className="absolute right-2 top-1 text-sm text-gray-400">
-                      🔒
-                    </span>
-                  )}
-                  {isLoading && field === "brandName" && (
-                    <span className="absolute right-2 top-1 text-xs text-gray-400 animate-spin">
-                      ⏳
-                    </span>
-                  )}
-                </div>
               ))}
+            </tbody>
+          </table>
+
+          {/* Pagination */}
+          <div className="flex justify-between px-4 py-3 bg-white/10 border-t">
+            <button
+              className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-40"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+
+            <span className="text-sm">
+              Page {currentPage} of {totalPages || 1}
+            </span>
+
+            <button
+              className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-40"
+              onClick={() =>
+                setCurrentPage((p) => Math.min(p + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Add Product Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-10 animate-fadeIn">
+          <div className="rounded-xl p-5 bg-white shadow-xl min-w-[500px] animate-scaleIn">
+            <h2 className="text-xl font-bold mb-4">Add New Product</h2>
+
+            {errorMsg && <p className="text-red-500 mb-2">{errorMsg}</p>}
+
+            <div className="grid grid-cols-2 gap-4">
+              <input
+                name="brandName"
+                placeholder="Brand Name"
+                className={`border p-2 rounded ${
+                  newProduct.brandName.trim() === "" ? "border-red-400" : ""
+                }`}
+                value={newProduct.brandName}
+                onChange={handleChange}
+              />
+
+              <input
+                name="manufacturer"
+                placeholder="Manufacturer"
+                className={`border p-2 rounded ${
+                  newProduct.manufacturer.trim() === "" ? "border-red-400" : ""
+                }`}
+                value={newProduct.manufacturer}
+                onChange={handleChange}
+              />
+
+              <input
+                name="barcode"
+                placeholder="Barcode"
+                className={`border p-2 rounded ${
+                  newProduct.barcode.trim() === "" ? "border-red-400" : ""
+                }`}
+                value={newProduct.barcode}
+                onChange={handleChange}
+              />
             </div>
-            <div className="flex justify-end gap-3 mt-6">
+
+            <div className="flex justify-end gap-3 mt-5">
               <button
                 onClick={() => {
                   setShowModal(false);
                   resetForm();
                 }}
-                className="px-4 py-2 rounded-full bg-gray-400 text-white hover:bg-white/80 hover:text-primary-50 "
+                className="px-4 py-2 bg-gray-400 text-white rounded"
               >
                 Cancel
               </button>
+
               <button
+                className={`px-4 py-2 bg-bg-50 text-white rounded flex items-center gap-2 ${
+                  !isFormValid ? "opacity-40 cursor-not-allowed" : ""
+                }`}
+                disabled={!isFormValid || isLoading}
                 onClick={handleAddProduct}
-                disabled={isLoading}
-                className="px-4 py-2 bg-bg-50 hover:bg-selected-50 text-white rounded-full hover:bg-hf-100"
               >
-                Add Product
+                {isLoading && <FaSpinner className="animate-spin" />}
+                {isLoading ? "Adding..." : "Add Product"}
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Animations */}
+      <style>{`
+        .animate-slideIn {
+          animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+          from { transform: translateX(50px); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.2s ease-out;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .animate-scaleIn {
+          animation: scaleIn 0.25s ease-out;
+        }
+        @keyframes scaleIn {
+          from { transform: scale(0.8); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 };

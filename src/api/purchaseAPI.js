@@ -4,7 +4,7 @@ import api from "../utils/axiosInstance";
 export const addPurchase = async (data) => {
   try {
     const response = await api.post("/purchase/add-purchase", data);
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Error adding purchase:", error);
     throw new Error(
@@ -17,7 +17,7 @@ export const addPurchase = async (data) => {
 export const addPurchaseItem = async (data,id) => {
   try {
     const response = await api.post(`/purchase/add-purchase-item/${id}`, data);
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Error adding purchase item:", error);
     throw new Error(
@@ -30,7 +30,7 @@ export const addPurchaseItem = async (data,id) => {
 export const getPurchase = async () => {
   try {
     const response = await api.get("/purchase/get-purchase");
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Error fetching purchase:", error);
     throw new Error(
@@ -43,7 +43,7 @@ export const getPurchase = async () => {
 export const getPurchaseItems = async (id) => {
   try {
     const response = await api.get(`/purchase/get-purchase-items/${id}`);
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Error fetching purchase items :", error);
     throw new Error(
@@ -52,11 +52,23 @@ export const getPurchaseItems = async (id) => {
   }
 };
 
+export const getPurchaseById = async (id) => {
+  try {
+    const response = await api.get(`/purchase/get-purchase-by-id/${id}`);
+    return response;
+  } catch (error) {
+    console.error("Error fetching purchase:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch purchase details"
+    );
+  }
+};
+
 // return a purchase item
 export const returnPurchaseItem = async (id, payload) => {
   try {
     const response = await api.post(`/purchase/${id}/return`,payload);
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Error adding Purchase Return Item:", error.message);
     throw new Error(
@@ -69,7 +81,7 @@ export const returnPurchaseItem = async (id, payload) => {
 export const getPurchaseReturns= async () => {
   try {
     const response = await api.get(`/purchase/get-purchase-return`);
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Error fetching purchase return :", error);
     throw new Error(
@@ -82,7 +94,7 @@ export const getPurchaseReturns= async () => {
 export const getInventoryByPOS = async () => {
   try {
     const response = await api.get("/inventory/getInventoryByPOS");
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Error fetching POS inventory:", error);
     throw new Error(

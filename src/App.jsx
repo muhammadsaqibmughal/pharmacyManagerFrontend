@@ -88,7 +88,7 @@ const App = () => {
         path="/form"
         element={
           <ProtectedRoute redirectStaff={true}>
-            <FormLayout />
+            <FormPage />
           </ProtectedRoute>
         }
       />

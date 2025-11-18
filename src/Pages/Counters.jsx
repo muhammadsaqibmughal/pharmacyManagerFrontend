@@ -12,15 +12,14 @@ const Counter = () => {
   const [newCounter, setNewCounter] = useState({
     name: "",
     email: "",
-    hasPrinter: false,
   });
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Filtered data
+  // Filtered data (updated)
   const filteredItems = counterData.filter((product) =>
-    (product.counterName || "").toLowerCase().includes(searchTerm.toLowerCase())
+    (product.name || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Pagination
@@ -30,11 +29,11 @@ const Counter = () => {
     currentPage * ITEM_PER_PAGE
   );
 
-  // Fetch counters from API
+  // Fetch counters
   const fetchCounters = async () => {
     try {
       const response = await getCounterList();
-      setCounterData(Array.isArray(response.data) ? response.data : []);
+      setCounterData(Array.isArray(response) ? response : []);
     } catch (err) {
       console.error("Error fetching counters", err.message);
     }
@@ -48,7 +47,8 @@ const Counter = () => {
   const handleAddCounter = async () => {
     try {
       const response = await createCounter(newCounter);
-      if (response.status === "success") {
+
+      if (response.status === 201 || response.status === 200) {
         alert("Counter created successfully!");
         fetchCounters();
         setShowModal(false);
@@ -68,7 +68,6 @@ const Counter = () => {
     setNewCounter({
       name: "",
       email: "",
-      hasPrinter: false,
     });
   };
 
@@ -126,21 +125,13 @@ const Counter = () => {
               <th className="px-4 py-2">Counter Name</th>
               <th className="px-4 py-2">Staff Name</th>
               <th className="px-4 py-2">Email</th>
-              <th className="px-4 py-2">Printer Status</th>
             </tr>
           </thead>
 
           <tbody>
             {paginatedProducts.map((product, idx) => {
-              // Get unique users who created sales for this counter
-              const usersMap = new Map();
-              (product.sales || []).forEach((sale) => {
-                if (sale.createdBy?.id && !usersMap.has(sale.createdBy.id)) {
-                  usersMap.set(sale.createdBy.id, sale.createdBy);
-                }
-              });
-              const uniqueUsers = Array.from(usersMap.values());
-              const mainStaff = uniqueUsers[0] || {};
+              // NEW: Staff comes directly from product.staff
+              const mainStaff = product.staff?.[0] || {};
 
               return (
                 <tr
@@ -156,7 +147,7 @@ const Counter = () => {
                       state={{ counter: product, sales: product.sales }}
                       className="text-blue-600 hover:underline"
                     >
-                      {product.counterName || "N/A"}
+                      {product.name || "N/A"}
                     </Link>
                   </td>
 
@@ -165,17 +156,6 @@ const Counter = () => {
 
                   {/* Email */}
                   <td className="px-4 py-2">{mainStaff.email || "N/A"}</td>
-
-                  {/* Printer Status */}
-                  <td className="px-4 py-2 text-center">
-                    <span
-                      className={`px-3 py-1 rounded-full text-white text-[11px] font-semibold ${
-                        product.hasPrinter ? "bg-green-500" : "bg-red-500"
-                      }`}
-                    >
-                      {product.hasPrinter ? "Yes" : "No"}
-                    </span>
-                  </td>
                 </tr>
               );
             })}
@@ -254,24 +234,6 @@ const Counter = () => {
                     : "border-black/40 text-primary-50"
                 }`}
               />
-              <select
-                name="hasPrinter"
-                value={newCounter.hasPrinter}
-                onChange={(e) =>
-                  setNewCounter({
-                    ...newCounter,
-                    hasPrinter: e.target.value === "true",
-                  })
-                }
-                className={`border-1 text-xs font-semibold px-3 py-2 rounded-full w-full ${
-                  theme === "dark"
-                    ? "border-gray-300 text-white/90"
-                    : "border-black/40 text-primary-50"
-                }`}
-              >
-                <option value="false">No Printer</option>
-                <option value="true">Has Printer</option>
-              </select>
             </div>
             <div className="flex justify-end gap-3 mt-6">
               <button

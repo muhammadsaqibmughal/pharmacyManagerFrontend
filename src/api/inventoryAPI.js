@@ -1,6 +1,6 @@
 import api from "../utils/axiosInstance";
 
-// Add inventory
+// Add new pharmacy product (inventory)
 export const addPharmacyProduct = async (data) => {
   try {
     const response = await api.post("/inventory/addPharmacyProduct", data);
@@ -13,20 +13,20 @@ export const addPharmacyProduct = async (data) => {
   }
 };
 
-// Add stock
-export const addStock = async (data) => {
+// Add stock for a pharmacy product
+export const addPharmacyStock = async (data) => {
   try {
     const response = await api.post("/inventory/addPharmacyStock", data);
     return response.data;
   } catch (error) {
-    console.error("Error adding stock:", error);
+    console.error("Error adding pharmacy stock:", error);
     throw new Error(
       error.response?.data?.message || "Failed to add pharmacy stock"
     );
   }
 };
 
-// Get inventory (all products in pharmacy)
+// Get all pharmacy products (for inventory management)
 export const getPharmacyProduct = async () => {
   try {
     const response = await api.get("/inventory/getPharmacyProduct");
@@ -39,10 +39,8 @@ export const getPharmacyProduct = async () => {
   }
 };
 
-
-
 // Get inventory by pharmacy
-export const getAllPharmacyProduct = async () => {
+export const getInventoryByPharmacy = async () => {
   try {
     const response = await api.get("/inventory/getInventoryByPharmacy");
     return response.data;
@@ -67,15 +65,15 @@ export const getInventoryByPOS = async () => {
   }
 };
 
-// get near to expiry products
+// Get near-to-expiry products
 export const getExpiry = async () => {
   try {
     const response = await api.get("/inventory/getExpiry");
     return response.data;
   } catch (error) {
-    console.error("Error fetching pharmacy expiry products:", error);
+    console.error("Error fetching near-to-expiry products:", error);
     throw new Error(
-      error.response?.data?.message || "Failed to fetch pharmacy expiry products"
+      error.response?.data?.message || "Failed to fetch near-to-expiry products"
     );
   }
 };

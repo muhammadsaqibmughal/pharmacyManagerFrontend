@@ -9,25 +9,49 @@ const useRegisterFormik = (onSuccess, setFormError) => {
       email: "",
       password: "",
     },
+
     validationSchema: Yup.object({
-      name: Yup.string().required("Name is required"),
-      email: Yup.string().email("Invalid email").required("Email is required"),
+      name: Yup.string().trim().required("Name is required"),
+      email: Yup.string()
+        .trim()
+        .email("Invalid email")
+        .required("Email is required"),
       password: Yup.string()
         .min(6, "Minimum 6 characters")
         .required("Password is required"),
     }),
+
     onSubmit: async (values, { setSubmitting, resetForm }) => {
-      setFormError(""); // Clear any previous error
+      setFormError("");
+
       try {
-        const res = await managerRegistration(values);
-        if (res.status === "success") {
+        const payload = {
+          name: values.name.trim(),
+          email: values.email.trim().toLowerCase(),
+          password: values.password,
+        };
+
+        const response = await managerRegistration(payload);
+
+        // const data = response.data;
+        const message = response.message;
+        const status = response.status;
+
+        if (status === 201 || status === 200) {
           resetForm();
-          onSuccess(values.email); // call navigation in the component
-        } else {
-          setFormError(res.message || "Registration failed");
+          onSuccess(payload.email);
+          return;
         }
-      } catch (err) {
-        setFormError(err.response?.data?.message || "Something went wrong.");
+
+        //  ANY OTHER STATUS
+        setFormError(message || "Registration failed");
+      } catch (error) {
+        const serverError =
+          error?.response?.message ||
+          error.message ||
+          "Something went wrong.";
+
+        setFormError(serverError);
       } finally {
         setSubmitting(false);
       }

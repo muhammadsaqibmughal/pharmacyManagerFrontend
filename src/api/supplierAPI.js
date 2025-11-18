@@ -4,7 +4,7 @@ import api from "../utils/axiosInstance";
 export const addSupplier = async (data) => {
   try {
     const response = await api.post("/supplier/add-supplier",data);
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Error Adding Supplier:", error);
     throw new Error(
@@ -16,7 +16,7 @@ export const addSupplier = async (data) => {
 export const getSupplier = async () => {
   try {
     const response = await api.get("/supplier/get-suppliers");
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Error in fetch pharmacy Supplier:", error);
     throw new Error(

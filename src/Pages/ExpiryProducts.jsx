@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "../theme-support/ThemeContext";
 import dayjs from "dayjs";
-import {getExpiry} from "../api/inventoryAPI"
+import { getExpiry } from "../api/inventoryAPI";
+
 const ITEM_PER_PAGE = 8;
 
 const ExpiryProducts = () => {
@@ -17,8 +18,8 @@ const ExpiryProducts = () => {
     const getExp = async () => {
       try {
         setLoading(true);
-        const response = await getExpiry(); 
-        setExpiryData(Array.isArray(response.data) ? response.data : []);
+        const data = await getExpiry(); // getExpiry() returns response.data
+        setExpiryData(Array.isArray(data) ? data : []);
       } catch (e) {
         console.error(e);
         setError("Failed to fetch expiry data.");
@@ -53,8 +54,10 @@ const ExpiryProducts = () => {
   const formatDate = (date) => dayjs(date).format("DD MMM YYYY");
 
   // Calculate days left
-  const getDaysLeft = (expiryDate) =>
-    dayjs(expiryDate).diff(dayjs(), "day");
+  const getDaysLeft = (expiryDate) => {
+    const days = dayjs(expiryDate).diff(dayjs(), "day");
+    return days < 0 ? "Expired" : days;
+  };
 
   return (
     <div
@@ -126,9 +129,7 @@ const ExpiryProducts = () => {
                   <tr
                     key={idx}
                     className={`px-4 py-2 text-xs font-medium border-b ${
-                      theme === "dark"
-                        ? "border-white/40"
-                        : "border-black/50"
+                      theme === "dark" ? "border-white/40" : "border-black/50"
                     }`}
                   >
                     <td className="px-4 py-2">
@@ -137,7 +138,15 @@ const ExpiryProducts = () => {
                     </td>
                     <td className="px-4 py-2">{product.totalQuantity}</td>
                     <td className="px-4 py-2">{formatDate(product.earliestExpiry)}</td>
-                    <td className="px-4 py-2">{getDaysLeft(product.earliestExpiry)}</td>
+                    <td
+                      className={`px-4 py-2 ${
+                        getDaysLeft(product.earliestExpiry) === "Expired"
+                          ? "text-red-500 font-bold"
+                          : ""
+                      }`}
+                    >
+                      {getDaysLeft(product.earliestExpiry)}
+                    </td>
                   </tr>
                 ))
               )}

@@ -34,7 +34,7 @@ const CounterSaleDetail = () => {
   );
 
   const totalPrice = sale.reduce((sum, item) => sum + (item.price || 0), 0);
-  const staffUser = sale[0]?.createdBy || {};
+  // const staffUser = sale[0]?.createdBy || {};
 
   return (
     <div className={`mt-8 p-10 ${theme === "dark" ? "bg-dark-50" : "bg-light-50"}`}>

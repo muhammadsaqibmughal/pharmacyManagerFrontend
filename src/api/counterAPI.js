@@ -4,7 +4,7 @@ import api from "../utils/axiosInstance";
 export const createCounter = async (data) => {
   try {
     const response = await api.post("/counter/create-counter", data);
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Error adding counter:", error);
     throw new Error(
@@ -27,7 +27,7 @@ export const getCounterList = async () => {
 export const getCounter = async () => {
   try {
     const response = await api.get("/counter/get-counter");
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Error getting counter :", error);
     throw new Error(

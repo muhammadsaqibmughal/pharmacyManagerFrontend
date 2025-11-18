@@ -3,12 +3,11 @@ import { useState, useEffect } from "react";
 import {
   addPurchaseItem,
   getPurchaseItems,
-  getPurchase,
+  getPurchaseById,
   returnPurchaseItem,
 } from "../api/purchaseAPI";
 
-import { getPackage } from "../api/packageAPI";
-import { getProduct } from "../api/productsApi";
+import { getPackage,getMedicinesForDropdown } from "../api/packageAPI";
 import { getPharmacyProduct } from "../api/inventoryAPI";
 import { getSupplier } from "../api/supplierAPI";
 import Select from "react-select";
@@ -42,24 +41,30 @@ const SupplierDetail = () => {
       try {
         const [medRes, pkgRes, pharmMedRes, itemRes, suplierRes, purchaseRes] =
           await Promise.all([
-            getProduct(),
+           getMedicinesForDropdown(),
             getPackage(),
             getPharmacyProduct(),
             getPurchaseItems(id),
             getSupplier(),
-            getPurchase(),
+            getPurchaseById(id),
           ]);
 
+        //  console.log(pkgRes.data);
+        //  console.log(medRes);
+         console.log(itemRes.data.items);
+        //  console.log(pharmMedRes.data);
+        //  console.log(purchaseRes.data);
         setAllPackage(Array.isArray(pkgRes.data) ? pkgRes.data : []);
-        setMedicines(Array.isArray(medRes.data) ? medRes.data : []);
-        setPurchaseData(Array.isArray(itemRes.data) ? itemRes.data : []);
+        setMedicines(Array.isArray(medRes) ? medRes : []);
+        setPurchaseData(Array.isArray(itemRes.data.items) ? itemRes.data.items : []);
         setPharmacyMedicine(
           Array.isArray(pharmMedRes.data) ? pharmMedRes.data : []
         );
         setSupplierInfo(Array.isArray(suplierRes.data) ? suplierRes.data : []);
         setPurchaseDetails(
-          Array.isArray(purchaseRes.data) ? purchaseRes.data : []
+          purchaseRes.data
         );
+         console.log(purchaseDetails);
       } catch (err) {
         console.log(err);
       }
@@ -78,7 +83,7 @@ const SupplierDetail = () => {
   const [newPurchase, setNewPurchase] = useState({
     pharmacyProductId: "",
     quantity: "",
-    costPrice: "",
+    unitPrice: "",
     sellingPrice: "",
     batchNumber: "",
     expiryDate: "",
@@ -112,38 +117,52 @@ const SupplierDetail = () => {
 
   // Add Purchase
   const handleAddPurchase = async () => {
-    const payload = {
-      ...newPurchase,
-      pharmacyProductId: newPurchase.pharmacyProductId || null,
-      quantity: newPurchase.quantity ? Number(newPurchase.quantity) : 0,
-      costPrice: newPurchase.costPrice ? Number(newPurchase.costPrice) : 0,
-      sellingPrice: newPurchase.sellingPrice
-        ? Number(newPurchase.sellingPrice)
-        : 0,
-      reorderLevel: newPurchase.reorderLevel
-        ? Number(newPurchase.reorderLevel)
-        : 0,
-      packsPerBox: newPurchase.packsPerBox
-        ? Number(newPurchase.packsPerBox)
-        : 0,
-      expiryDate: newPurchase.expiryDate
-        ? new Date(newPurchase.expiryDate).toISOString()
-        : null,
-    };
+  if (!newPurchase.quantity || Number(newPurchase.quantity) <= 0) {
+    alert("Quantity must be greater than 0");
+    return;
+  }
 
-    try {
-      const response = await addPurchaseItem(payload, id);
-      console.log("Purchase Added, Status:", response.status);
+  let payload = {
+    quantity: Number(newPurchase.quantity),
+    unitPrice: Number(newPurchase.unitPrice),
+    sellingPrice: Number(newPurchase.sellingPrice),
+    batchNumber: newPurchase.batchNumber,
+    expiryDate: newPurchase.expiryDate
+      ? new Date(newPurchase.expiryDate).toISOString()
+      : null,
+  };
+
+  if (isNewProduct) {
+    // Add extra fields for new pharmacy product
+    payload = {
+      ...payload,
+      medicineId: newPurchase.medicineId,
+      packagingId: newPurchase.packagingId,
+      reorderLevel: Number(newPurchase.reorderLevel),
+      shelf: newPurchase.shelf,
+      packsPerBox: Number(newPurchase.packsPerBox),
+      packsBarcode: newPurchase.packsBarcode,
+      pharmacyProductId: null,
+    };
+  } else {
+    // Existing product
+    payload.pharmacyProductId = newPurchase.pharmacyProductId;
+  }
+
+  try {
+    const response = await addPurchaseItem(payload, id);
+    if (response.status === 200 || response.status === 201) {
       const itemRes = await getPurchaseItems(id);
-      if (itemRes.status == "success") {
-        setPurchaseData(Array.isArray(itemRes.data) ? itemRes.data : []);
-      }
+      setPurchaseData(Array.isArray(itemRes.data.items) ? itemRes.data.items : []);
       setShowModal(false);
       resetForm();
-    } catch (error) {
-      console.error("Error adding purchase:", error);
     }
-  };
+  } catch (err) {
+    console.error("Error adding purchase:", err);
+    alert(err.response?.data?.error || "Failed to add purchase item");
+  }
+};
+
 
   // Input Change
   const handleChange = (e) => {
@@ -155,7 +174,7 @@ const SupplierDetail = () => {
     setNewPurchase({
       pharmacyProductId: "",
       quantity: "",
-      costPrice: "",
+      unitPrice: "",
       sellingPrice: "",
       batchNumber: "",
       expiryDate: "",
@@ -202,27 +221,31 @@ const SupplierDetail = () => {
         purchaseItemId: selectedProduct.id,
         pharmacyProductId: selectedProduct.pharmacyProductId,
         quantity: quantityToReturn,
-        costPrice: selectedProduct.costPrice,
+        unitPrice: selectedProduct.unitPrice,
         batchNumber: selectedProduct.batchNumber,
         expiryDate: selectedProduct.expiryDate,
         reason: returnReason,
       };
 
+      console.log(payload);
       const response = await returnPurchaseItem(id, payload);
-
-      if (response.status === "success") {
+      console.log(response);
+      if (response.status === 200 || response.status==201) {
         alert("Return processed successfully!");
 
         // Refresh data
         const [itemRes, purchaseRes] = await Promise.all([
           getPurchaseItems(id),
-          getPurchase(),
+          getPurchaseById(id),
         ]);
 
-        setPurchaseData(Array.isArray(itemRes.data) ? itemRes.data : []);
+        
+        // console.log(purchaseRes.data);
+        setPurchaseData(Array.isArray(itemRes.data.items) ? itemRes.data.items : []);
         setPurchaseDetails(
-          Array.isArray(purchaseRes.data) ? purchaseRes.data : []
+          purchaseRes.data
         );
+        console.log(purchaseDetails);
 
         // Reset modal
         setShowReturnModal(false);
@@ -282,7 +305,7 @@ const SupplierDetail = () => {
         >
           {" "}
           <p>
-            <b>Contact:</b> {supplierInfo[0]?.contact || "N/A"}
+            <b>Contact:</b> {supplierInfo[0]?.phone || "N/A"}
           </p>
           <p>
             <b>Email:</b> {supplierInfo[0]?.email || "N/A"}
@@ -291,7 +314,7 @@ const SupplierDetail = () => {
             <b>Address:</b> {supplierInfo[0]?.address || "N/A"}
           </p>
           <p>
-            <b>Supplier:</b> {supplierInfo[0]?.supplier || "N/A"}
+            <b>Supplier:</b> {supplierInfo[0]?.name || "N/A"}
           </p>
         </div>
 
@@ -303,22 +326,22 @@ const SupplierDetail = () => {
         >
           {" "}
           <p>
-            <b>Invoice No:</b> {purchaseDetails[0]?.invoiceNo || "N/A"}
+            <b>Invoice No:</b> {purchaseDetails?.invoiceNo || "N/A"}
           </p>
           <p>
             <b>Date:</b>{" "}
-            {purchaseDetails[0]?.purchaseDate
-              ? new Date(purchaseDetails[0].purchaseDate).toLocaleDateString()
+            {purchaseDetails?.purchaseDate
+              ? new Date(purchaseDetails.purchaseDate).toLocaleDateString()
               : "N/A"}
           </p>
           <p>
-            <b>Total Amount:</b> {purchaseDetails[0]?.totalAmount || 0}
+            <b>Total Amount:</b> {purchaseDetails?.totalAmount || 0}
           </p>
           <p>
-            <b>Discount:</b> {purchaseDetails[0]?.discount || 0}
+            <b>Discount:</b> {purchaseDetails?.discount || 0}
           </p>
           <p>
-            <b>Tax:</b> {purchaseDetails[0]?.tax || 0}
+            <b>Tax:</b> {purchaseDetails?.tax || 0}
           </p>
         </div>
       </div>
@@ -380,7 +403,7 @@ const SupplierDetail = () => {
                   {product.quantity}
                 </td>
                 <td className="px-4 py-2 text-xs font-medium">
-                  {product.costPrice}
+                  {product.unitPrice}
                 </td>
                 <td className="px-4 py-2 text-xs font-medium">
                   {product.batchNumber}
@@ -484,7 +507,7 @@ const SupplierDetail = () => {
                     "packsPerBox",
                     "packsBarcode",
                     "quantity",
-                    "costPrice",
+                    "unitPrice",
                     "sellingPrice",
                     "batchNumber",
                     "expiryDate",
@@ -492,7 +515,7 @@ const SupplierDetail = () => {
                 : [
                     "pharmacyProductId",
                     "quantity",
-                    "costPrice",
+                    "unitPrice",
                     "sellingPrice",
                     "batchNumber",
                     "expiryDate",
