@@ -15,26 +15,29 @@ const SalesDetail = () => {
   if (!sale) {
     return (
       <div className="flex items-center w-full min-h-screen justify-center py-4">
-        <p className="text-red-500">Sale data not found. Please go back to Sales page.</p>
+        <p className="text-red-500">Sale data not found. Please go back to the Sales page.</p>
       </div>
     );
   }
 
-  const formatDate = (dateStr) => new Date(dateStr).toISOString().split("T")[0];
+  const formatDate = (dateStr) =>
+    dateStr ? new Date(dateStr).toISOString().split("T")[0] : "N/A";
 
   const formatCurrency = (value) =>
     new Intl.NumberFormat("en-PK", {
       style: "currency",
       currency: "PKR",
       minimumFractionDigits: 2,
-    }).format(value);
+    }).format(value || 0);
 
   const getLineTotal = (item) => {
     const quantity = item.quantity || 0;
-    const price = item.price || 0;
+    const price = item.unitPrice || 0;
     const discount = item.discount || 0;
+
     const total = quantity * price;
     const discountAmount = total * (discount / 100);
+
     return total - discountAmount;
   };
 
@@ -52,10 +55,17 @@ const SalesDetail = () => {
     currentPage * ITEM_PER_PAGE
   );
 
-  const totalLineSum = filteredItems.reduce((acc, item) => acc + getLineTotal(item), 0);
+  const totalLineSum = filteredItems.reduce(
+    (acc, item) => acc + getLineTotal(item),
+    0
+  );
 
   return (
-    <div className={`mt-8 p-10 ${theme === "dark" ? "bg-dark-50" : "bg-light-50"}`}>
+    <div
+      className={`mt-8 p-10 ${
+        theme === "dark" ? "bg-dark-50" : "bg-light-50"
+      }`}
+    >
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <Link
@@ -66,10 +76,10 @@ const SalesDetail = () => {
         </Link>
       </div>
 
-      {/* Invoice Header */}
+      {/* Title */}
       <div className="w-full flex justify-center items-center">
         <h1
-          className={`text-2xl font-bold w-50 border-2 border-primary-50 text-center ${
+          className={`text-2xl font-bold w-50 border-2 text-center ${
             theme === "dark"
               ? "border-white/90 text-light-50"
               : "border-primary-50 text-primary-50"
@@ -90,20 +100,22 @@ const SalesDetail = () => {
             <strong>Invoice No:</strong> {sale.invoiceNo}
           </p>
           <p>
-            <strong>Counter Name:</strong> {sale.counter?.counterName || "N/A"}
+            <strong>Counter Name:</strong>{" "}
+            {sale.posCounter?.name || "N/A"}
           </p>
         </div>
+
         <div className="space-y-2">
           <p>
             <strong>Payment Mode:</strong> {sale.paymentMode}
           </p>
           <p>
-            <strong>Date:</strong> {formatDate(sale.saleDate)}
+            <strong>Date:</strong> {formatDate(sale.createdAt)}
           </p>
         </div>
       </div>
 
-      {/* Search Bar */}
+      {/* Search */}
       <div className="mb-4 bg-search-50 rounded-full">
         <input
           type="text"
@@ -139,6 +151,7 @@ const SalesDetail = () => {
               <th className="px-4 py-2">Line Total</th>
             </tr>
           </thead>
+
           <tbody>
             {paginatedItems.length > 0 ? (
               paginatedItems.map((item, idx) => {
@@ -146,17 +159,20 @@ const SalesDetail = () => {
                   item.pharmacyProduct?.medicine?.brandName ||
                   item.pharmacyProduct?.medicine?.genericName ||
                   "Unnamed Product";
+
                 return (
                   <tr
                     key={idx}
                     className={`px-4 py-2 text-xs font-medium border-b ${
-                      theme === "dark" ? "border-white/40" : "border-black/50"
+                      theme === "dark"
+                        ? "border-white/40"
+                        : "border-black/50"
                     }`}
                   >
-                    <td className="px-4 py-2 text-xs font-medium">{name}</td>
-                    <td className="px-4 py-2 text-xs font-medium">{item.quantity}</td>
-                    <td className="px-4 py-2 text-xs font-medium">{item.discount ?? 0}%</td>
-                    <td className="px-4 py-2 text-xs font-medium">
+                    <td className="px-4 py-2">{name}</td>
+                    <td className="px-4 py-2">{item.quantity}</td>
+                    <td className="px-4 py-2">{item.discount ?? 0}%</td>
+                    <td className="px-4 py-2">
                       {formatCurrency(getLineTotal(item))}
                     </td>
                   </tr>
@@ -164,16 +180,23 @@ const SalesDetail = () => {
               })
             ) : (
               <tr>
-                <td colSpan={4} className="px-4 py-4 text-center text-gray-400">
+                <td
+                  colSpan={4}
+                  className="px-4 py-4 text-center text-gray-400"
+                >
                   No products found
                 </td>
               </tr>
             )}
+
+            {/* Total */}
             <tr className="font-bold">
               <td colSpan={3} className="px-4 py-3 text-right">
                 Net Total:
               </td>
-              <td className="px-4 py-3">{formatCurrency(totalLineSum)}</td>
+              <td className="px-4 py-3">
+                {formatCurrency(totalLineSum)}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -193,6 +216,7 @@ const SalesDetail = () => {
           >
             Previous
           </button>
+
           <span
             className={`text-sm ${
               theme === "dark" ? "text-light-50" : "text-primary-50"
@@ -200,9 +224,12 @@ const SalesDetail = () => {
           >
             Page {currentPage} of {totalPages}
           </span>
+
           <button
             className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-50"
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
             disabled={currentPage === totalPages}
           >
             Next
