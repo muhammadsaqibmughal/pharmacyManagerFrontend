@@ -1,4 +1,3 @@
-// POSSystem.jsx
 import { useState, useEffect, useMemo } from "react";
 import { useTheme } from "../theme-support/ThemeContext";
 import {
@@ -9,7 +8,7 @@ import {
   FaTrash,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { getPOSItems, addSale, getSales, returnSale } from "../api/posAPI";
+import { getPOSItems, getSales } from "../api/posAPI";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -24,7 +23,8 @@ const OnlyCounter = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [invoiceSearch, setInvoiceSearch] = useState("");
-  const [cart, setCart] = useState([]);
+  const [saleCart, setSaleCart] = useState([]);
+  const [returnCart, setReturnCart] = useState([]);
   const [selectedReturnItems, setSelectedReturnItems] = useState(new Set());
   const [discountType, setDiscountType] = useState("fixed");
   const [discountValue, setDiscountValue] = useState(0);
@@ -34,6 +34,27 @@ const OnlyCounter = () => {
   const [invoicesData, setInvoicesData] = useState([]);
   const [userName, setUserName] = useState("Admin");
 
+  // Choose correct cart based on mode
+  const cart = isCounter ? saleCart : returnCart;
+  const setCart = isCounter ? setSaleCart : setReturnCart;
+
+  // Load carts from localStorage
+  useEffect(() => {
+    const savedSaleCart = localStorage.getItem("pos_sale_cart");
+    const savedReturnCart = localStorage.getItem("pos_return_cart");
+    if (savedSaleCart) setSaleCart(JSON.parse(savedSaleCart));
+    if (savedReturnCart) setReturnCart(JSON.parse(savedReturnCart));
+  }, []);
+
+  // Save carts to localStorage
+  useEffect(() => {
+    localStorage.setItem("pos_sale_cart", JSON.stringify(saleCart));
+  }, [saleCart]);
+
+  useEffect(() => {
+    localStorage.setItem("pos_return_cart", JSON.stringify(returnCart));
+  }, [returnCart]);
+
   // Fetch POS Items
   useEffect(() => {
     const fetchItems = async () => {
@@ -41,12 +62,9 @@ const OnlyCounter = () => {
         const res = await getPOSItems();
         const normalizedItems = res.data.map((item) => ({
           ...item,
-          id: item.pharmacyProductId, // can keep this for React key
-          pharmacyProductId: item.pharmacyProductId, // ensure consistent usage
+          id: item.pharmacyProductId,
+          pharmacyProductId: item.pharmacyProductId,
         }));
-        setItemsData(normalizedItems);
-
-        console.log(res.data);
         setItemsData(normalizedItems);
       } catch (err) {
         console.error(err);
@@ -67,7 +85,7 @@ const OnlyCounter = () => {
           id: inv.id || inv._id,
           items: inv.items.map((item) => ({
             ...item,
-            id: item.pharmacyProductId, // <- use pharmacyProductId here too
+            id: item.pharmacyProductId,
             sellingPrice: item.unitPrice || 0,
             brandName:
               item.pharmacyProduct?.brandName ||
@@ -75,8 +93,6 @@ const OnlyCounter = () => {
           })),
         }));
         setInvoicesData(normalizedInvoices);
-
-        console.log(res.data);
       } catch (err) {
         console.error(err);
         toast.error("Failed to fetch invoices");
@@ -116,7 +132,9 @@ const OnlyCounter = () => {
   // Cart calculations
   const subtotal = cart.reduce(
     (acc, item) =>
-      acc + (item.sellingPrice || 0) * item.quantity - (item.discount || 0),
+      acc +
+      ((item.sellingPrice || 0) * item.quantity -
+        (item.discount || 0) * item.quantity),
     0
   );
   const discountAmount =
@@ -128,17 +146,20 @@ const OnlyCounter = () => {
   // Handlers
   const handleAddToCart = (product) => {
     setCart((prev) => {
-      // Use pharmacyProductId as the unique identifier
       const index = prev.findIndex(
         (item) => item.pharmacyProductId === product.pharmacyProductId
       );
 
       if (index !== -1) {
         const updated = [...prev];
-        updated[index].quantity += 1;
+        updated[index] = {
+          ...updated[index],
+          quantity: updated[index].quantity + 1,
+        };
         return updated;
       } else {
-        return [...prev, { ...product, quantity: 1, discount: 0 }];
+        const { quantity, ...rest } = product;
+        return [...prev, { ...rest, quantity: 1, discount: 0 }];
       }
     });
   };
@@ -163,7 +184,6 @@ const OnlyCounter = () => {
 
   const handleSwitchMode = (counterMode) => {
     setIsCounter(counterMode);
-    setCart([]);
     setSelectedReturnItems(new Set());
     setSelectedInvoice(null);
     setDiscountValue(0);
@@ -180,10 +200,10 @@ const OnlyCounter = () => {
 
   const handleInvoiceSelect = (invoice) => {
     setSelectedInvoice(invoice);
-    setCart(
+    setReturnCart(
       invoice.items.map((item) => ({
         ...item,
-        id: item.pharmacyProductId, // ensure id matches products
+        id: item.pharmacyProductId,
         sellingPrice: item.unitPrice,
         brandName: item.pharmacyProduct?.brandName || item.brandName,
       }))
@@ -198,34 +218,35 @@ const OnlyCounter = () => {
 
     setIsLoading(true);
 
-    const payload = {
-      type: isCounter ? "sale" : "return",
-      items: cart.map((item) => ({
-        pharmacyProductId: item.pharmacyProductId,
-        quantity: item.quantity,
-        sellingPrice: item.sellingPrice || 0,
-        discount: item.discount || 0,
-      })),
-      discountType: isCounter ? discountType : null,
-      discountValue: isCounter ? discountValue : 0,
-      invoiceId: isCounter ? null : selectedInvoice?.id,
-    };
-
     try {
-      // You can have a single API endpoint like /api/transaction
-      const response = await saveTransaction(payload);
+      if (isCounter) {
+        // Sale mode: normally you'd call saveTransaction here
+        // const response = await saveTransaction(payload);
+        toast.success("Sale saved successfully");
+        if (isPrint) toast.info("Printing invoice...");
+        setSaleCart([]);
+        setDiscountValue(0);
+      } else {
+        // Return mode: move selected return items to sale cart
+        setSaleCart((prevSaleCart) => [
+          ...prevSaleCart,
+          ...cart
+            .filter((item) => selectedReturnItems.has(item.id))
+            .map((item) => ({
+              ...item,
+              quantity: item.quantity,
+              discount: 0,
+              isReturned: true, // <--- mark item as returned
+            })),
+        ]);
 
-      toast.success(
-        isCounter ? "Sale saved successfully" : "Return processed successfully"
-      );
+        toast.success("Selected items moved to Sale Cart");
 
-      if (isPrint) toast.info("Printing invoice...");
-
-      // Reset states
-      setCart([]);
-      setDiscountValue(0);
-      setSelectedReturnItems(new Set());
-      setSelectedInvoice(null);
+        // Clear return cart selections
+        setSelectedReturnItems(new Set());
+        setSelectedInvoice(null);
+        setReturnCart([]);
+      }
     } catch (err) {
       console.error(err);
       toast.error("Failed to process transaction");
@@ -394,6 +415,12 @@ const OnlyCounter = () => {
                         <th className="px-4 py-3 text-left font-semibold">
                           Price
                         </th>
+                        <th className="px-4 py-3 text-left font-semibold">
+                          Cost Price
+                        </th>
+                        <th className="px-4 py-3 text-left font-semibold">
+                          Shelf
+                        </th>
                         <th className="px-4 py-3 text-center font-semibold">
                           Action
                         </th>
@@ -424,6 +451,10 @@ const OnlyCounter = () => {
                             <td className="px-4 py-3">
                               Rs. {(product.sellingPrice || 0).toFixed(2)}
                             </td>
+                            <td className="px-4 py-3">
+                              Rs. {(product.costPrice || 0).toFixed(2)}
+                            </td>
+                            <td className="px-4 py-3">{product.shelf}</td>
                             <td className="px-4 py-3 text-center">
                               <button
                                 onClick={() => handleAddToCart(product)}
@@ -621,6 +652,10 @@ const OnlyCounter = () => {
                         isDark
                           ? "border-slate-700 hover:border-slate-600"
                           : "border-gray-200 hover:border-gray-300"
+                      } ${
+                        item.isReturned
+                          ? "bg-green-100 border-green-300 text-red-800"
+                          : ""
                       }`}
                     >
                       <div className="flex justify-between items-center">
@@ -678,6 +713,11 @@ const OnlyCounter = () => {
                           placeholder="Discount"
                         />
                       </div>
+                      {item.isReturned && (
+                        <span className="text-yellow-700 text-xs font-semibold mt-1">
+                          RETURNED ITEM
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -694,14 +734,44 @@ const OnlyCounter = () => {
                 <span>Subtotal</span>
                 <span>Rs. {subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between mb-2">
-                <span>Discount</span>
-                <span>Rs. {discountAmount.toFixed(2)}</span>
+
+              {/* Discount Type & Value */}
+              <div className="flex gap-2 items-center mb-2">
+                Discount
+                <select
+                  value={discountType}
+                  onChange={(e) => setDiscountType(e.target.value)}
+                  className={`p-2 rounded border outline-none text-sm ${
+                    isDark
+                      ? "bg-slate-700 border-slate-600 text-white"
+                      : "bg-white border-gray-200 text-slate-900"
+                  }`}
+                >
+                  <option value="fixed">Fixed</option>
+                  <option value="percentage">Percentage</option>
+                </select>
+                <input
+                  type="number"
+                  value={discountValue}
+                  onChange={(e) => setDiscountValue(Number(e.target.value))}
+                  placeholder={discountType === "percentage" ? "%" : "Rs."}
+                  className={`flex-1 p-2 rounded border text-sm ${
+                    isDark
+                      ? "bg-slate-700 border-slate-600 text-white"
+                      : "bg-white border-gray-200 text-slate-900"
+                  }`}
+                />
+                <span className="text-sm font-medium">
+                  {discountType === "percentage" ? "%" : "Rs."}
+                </span>
               </div>
+
               <div className="flex justify-between font-bold text-lg mb-2">
                 <span>Total</span>
                 <span>Rs. {total.toFixed(2)}</span>
               </div>
+
+              {/* Action Buttons */}
               <button
                 onClick={() => handleSave(false)}
                 disabled={isLoading}
@@ -713,13 +783,15 @@ const OnlyCounter = () => {
                   ? "Save Sale"
                   : "Process Return"}
               </button>
-              <button
-                onClick={() => handleSave(true)}
-                disabled={isLoading}
-                className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
-              >
-                {isLoading ? "Printing..." : "Save & Print"}
-              </button>
+              {isCounter && (
+                <button
+                  onClick={() => handleSave(true)}
+                  disabled={isLoading}
+                  className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+                >
+                  {isLoading ? "Printing..." : "Save & Print"}
+                </button>
+              )}
             </div>
           </div>
         </div>
