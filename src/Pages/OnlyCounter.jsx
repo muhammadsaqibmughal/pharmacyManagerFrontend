@@ -1,14 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTheme } from "../theme-support/ThemeContext";
-import {
-  FaExpand,
-  FaUserCircle,
-  FaPlus,
-  FaMinus,
-  FaTrash,
-} from "react-icons/fa";
+import { FaExpand, FaUserCircle, FaPlus, FaMinus, FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { getPOSItems, getSales } from "../api/posAPI";
+import { getPOSItems, getSales, addSale, returnSale } from "../api/posAPI";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -17,7 +11,6 @@ const OnlyCounter = () => {
   const isDark = theme === "dark";
   const navigate = useNavigate();
 
-  // States
   const [isCounter, setIsCounter] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showDropdown, setShowDropdown] = useState(false);
@@ -33,10 +26,8 @@ const OnlyCounter = () => {
   const [itemsData, setItemsData] = useState([]);
   const [invoicesData, setInvoicesData] = useState([]);
   const [userName, setUserName] = useState("Admin");
-
-  // Choose correct cart based on mode
-  const cart = isCounter ? saleCart : returnCart;
-  const setCart = isCounter ? setSaleCart : setReturnCart;
+  const [selectedCounterId, setSelectedCounterId] = useState(null);
+  const [selectedPaymentMode, setSelectedPaymentMode] = useState("cash");
 
   // Load carts from localStorage
   useEffect(() => {
@@ -46,7 +37,6 @@ const OnlyCounter = () => {
     if (savedReturnCart) setReturnCart(JSON.parse(savedReturnCart));
   }, []);
 
-  // Save carts to localStorage
   useEffect(() => {
     localStorage.setItem("pos_sale_cart", JSON.stringify(saleCart));
   }, [saleCart]);
@@ -55,131 +45,100 @@ const OnlyCounter = () => {
     localStorage.setItem("pos_return_cart", JSON.stringify(returnCart));
   }, [returnCart]);
 
-  // Fetch POS Items
+  // Fetch items
   useEffect(() => {
     const fetchItems = async () => {
       try {
         const res = await getPOSItems();
-        const normalizedItems = res.data.map((item) => ({
+        const items = Array.isArray(res) ? res : res.data || [];
+        const normalizedItems = items.map((item) => ({
           ...item,
           id: item.pharmacyProductId,
           pharmacyProductId: item.pharmacyProductId,
         }));
         setItemsData(normalizedItems);
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching items:", err);
         toast.error("Failed to fetch items");
       }
     };
     fetchItems();
   }, []);
 
-  // Fetch Sales/Invoices
+  // Fetch invoices
   useEffect(() => {
     const fetchInvoices = async () => {
       try {
         const res = await getSales();
-        const invoices = Array.isArray(res.data.sales) ? res.data.sales : [];
+        const invoices = Array.isArray(res) ? res : res.sales || res.data?.sales || [];
         const normalizedInvoices = invoices.map((inv) => ({
           ...inv,
           id: inv.id || inv._id,
-          items: inv.items.map((item) => ({
+          items: inv.items?.map((item) => ({
             ...item,
             id: item.pharmacyProductId,
+            saleItemId: item.id,
             sellingPrice: item.unitPrice || 0,
-            brandName:
-              item.pharmacyProduct?.brandName ||
-              item.pharmacyProduct?.medicine?.brandName,
-          })),
+            brandName: item.pharmacyProduct?.medicine?.brandName || item.brandName,
+          })) || [],
         }));
         setInvoicesData(normalizedInvoices);
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching invoices:", err);
         toast.error("Failed to fetch invoices");
-        setInvoicesData([]);
       }
     };
     fetchInvoices();
   }, []);
 
-  // Update time every second
+  // Time updater
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // Filtered lists
   const filteredItems = useMemo(
-    () =>
-      itemsData.filter((item) =>
-        (item.brandName || "").toLowerCase().includes(searchTerm.toLowerCase())
-      ),
+    () => itemsData.filter((item) => (item.brandName || "").toLowerCase().includes(searchTerm.toLowerCase())),
     [itemsData, searchTerm]
   );
 
   const filteredInvoices = useMemo(
-    () =>
-      Array.isArray(invoicesData)
-        ? invoicesData.filter((inv) =>
-            (inv.invoiceNo || "")
-              .toLowerCase()
-              .includes(invoiceSearch.toLowerCase())
-          )
-        : [],
+    () => invoicesData.filter((inv) => (inv.invoiceNo || "").toLowerCase().includes(invoiceSearch.toLowerCase())),
     [invoicesData, invoiceSearch]
   );
 
-  // Cart calculations
-  const subtotal = cart.reduce(
-    (acc, item) =>
-      acc +
-      ((item.sellingPrice || 0) * item.quantity -
-        (item.discount || 0) * item.quantity),
-    0
-  );
-  const discountAmount =
-    discountType === "percentage"
-      ? (subtotal * discountValue) / 100
-      : discountValue;
-  const total = subtotal - discountAmount;
+  const saleTotal = saleCart.reduce((acc, item) => acc + item.sellingPrice * item.quantity - (item.discount || 0), 0);
+  const discountAmount = discountType === "percentage" ? (saleTotal * discountValue) / 100 : discountValue;
+  const total = Math.max(0, saleTotal - discountAmount);
 
-  // Handlers
+  // Cart handlers
   const handleAddToCart = (product) => {
-    setCart((prev) => {
-      const index = prev.findIndex(
-        (item) => item.pharmacyProductId === product.pharmacyProductId
-      );
-
+    setSaleCart((prev) => {
+      const index = prev.findIndex((item) => item.pharmacyProductId === product.pharmacyProductId);
       if (index !== -1) {
         const updated = [...prev];
-        updated[index] = {
-          ...updated[index],
-          quantity: updated[index].quantity + 1,
-        };
+        updated[index].quantity += 1;
         return updated;
-      } else {
-        const { quantity, ...rest } = product;
-        return [...prev, { ...rest, quantity: 1, discount: 0 }];
       }
+      return [...prev, { ...product, quantity: 1, discount: 0 }];
     });
   };
 
-  const handleRemoveItem = (id) =>
-    setCart((prev) => prev.filter((item) => item.id !== id));
-
-  const handleQuantityChange = (id, quantity) => {
-    if (quantity < 1) return;
-    setCart((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity } : item))
-    );
+  const handleRemoveItem = (id, isReturnCart = false) => {
+    if (isReturnCart) setReturnCart((prev) => prev.filter((item) => item.id !== id));
+    else setSaleCart((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleDiscountChange = (id, value) => {
-    setCart((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, discount: Number(value) } : item
-      )
-    );
+  const handleQuantityChange = (id, quantity, isReturnCart = false) => {
+    const qty = Number(quantity);
+    if (qty < 1) return;
+    const setCart = isReturnCart ? setReturnCart : setSaleCart;
+    setCart((prev) => prev.map((item) => (item.id === id ? { ...item, quantity: qty } : item)));
+  };
+
+  const handleDiscountChange = (id, value, isReturnCart = false) => {
+    const setCart = isReturnCart ? setReturnCart : setSaleCart;
+    setCart((prev) => prev.map((item) => (item.id === id ? { ...item, discount: Number(value) } : item)));
   };
 
   const handleSwitchMode = (counterMode) => {
@@ -192,64 +151,104 @@ const OnlyCounter = () => {
   const toggleReturnSelection = (id) => {
     setSelectedReturnItems((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(id)) newSet.delete(id);
-      else newSet.add(id);
+      newSet.has(id) ? newSet.delete(id) : newSet.add(id);
       return newSet;
     });
   };
 
   const handleInvoiceSelect = (invoice) => {
     setSelectedInvoice(invoice);
-    setReturnCart(
-      invoice.items.map((item) => ({
-        ...item,
-        id: item.pharmacyProductId,
-        sellingPrice: item.unitPrice,
-        brandName: item.pharmacyProduct?.brandName || item.brandName,
-      }))
-    );
+    setReturnCart(invoice.items.map((item) => ({
+      ...item,
+      id: item.pharmacyProductId,
+      saleItemId: item.saleItemId,
+      sellingPrice: item.unitPrice,
+      brandName: item.pharmacyProduct?.medicine?.brandName || item.brandName,
+    })));
     setSelectedReturnItems(new Set());
   };
 
-  const handleSave = async (isPrint = false) => {
-    if (!cart.length && isCounter) return toast.error("Cart is empty");
-    if (!selectedReturnItems.size && !isCounter)
-      return toast.error("Select items to return");
+// Process return
+const handleProcessReturn = async () => {
+  if (!selectedReturnItems.size) return toast.error("Select items to return");
+  if (!selectedInvoice) return toast.error("No invoice selected");
+
+  setIsLoading(true);
+  try {
+    const itemsToReturn = returnCart
+      .filter((item) => selectedReturnItems.has(item.id))
+      .map((item) => ({ saleItemId: item.saleItemId, quantity: Number(item.quantity) }));
+
+    const totalReturnAmount = itemsToReturn.reduce((sum, item) => {
+      const cartItem = returnCart.find((ci) => ci.saleItemId === item.saleItemId);
+      return sum + (cartItem ? cartItem.sellingPrice * item.quantity : 0);
+    }, 0);
+
+    const payload = {
+      saleId: selectedInvoice.id,
+      totalAmount: Math.max(0, totalReturnAmount),
+      returnItems: itemsToReturn,
+    };
+
+    const result = await returnSale(payload);
+
+    if (result.status === "success") {
+      toast.success("Return processed successfully");
+      setReturnCart([]);
+      setSelectedReturnItems(new Set());
+      setSelectedInvoice(null);
+      setIsCounter(true);
+    } else {
+      toast.error(result.message || "Return failed");
+    }
+  } catch (err) {
+    console.error(err);
+    toast.error(err.message || "Failed to process return");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+  const handleSave = async () => {
+    if (!saleCart.length) return toast.error("❌ Cart is empty");
+    if (!selectedCounterId?.trim()) return toast.error("❌ Select a counter");
+    if (!selectedPaymentMode) return toast.error("❌ Select payment mode");
 
     setIsLoading(true);
-
     try {
-      if (isCounter) {
-        // Sale mode: normally you'd call saveTransaction here
-        // const response = await saveTransaction(payload);
-        toast.success("Sale saved successfully");
-        if (isPrint) toast.info("Printing invoice...");
+      const saleItems = saleCart.map((item) => ({
+        pharmacyProductId: item.pharmacyProductId || item.id,
+        quantity: Number(item.quantity),
+        price: Number(item.sellingPrice),
+        discount: Number(item.discount || 0),
+      }));
+
+      const subtotal = saleItems.reduce((acc, i) => acc + i.quantity * i.price - i.discount, 0);
+      const totalAmount = Math.max(0, subtotal - discountAmount);
+
+      const payload = {
+        counterId: selectedCounterId.trim(),
+        paymentMode: selectedPaymentMode,
+        totalAmount,
+        items: saleItems,
+        totalDiscount: discountAmount || 0,
+        discountType,
+      };
+
+      const result = await addSale(payload);
+
+      if (result.status === "success") {
+        toast.success("✅ Sale processed successfully!");
         setSaleCart([]);
         setDiscountValue(0);
+        setSelectedCounterId(null);
+        setSelectedPaymentMode("cash");
       } else {
-        // Return mode: move selected return items to sale cart
-        setSaleCart((prevSaleCart) => [
-          ...prevSaleCart,
-          ...cart
-            .filter((item) => selectedReturnItems.has(item.id))
-            .map((item) => ({
-              ...item,
-              quantity: item.quantity,
-              discount: 0,
-              isReturned: true, // <--- mark item as returned
-            })),
-        ]);
-
-        toast.success("Selected items moved to Sale Cart");
-
-        // Clear return cart selections
-        setSelectedReturnItems(new Set());
-        setSelectedInvoice(null);
-        setReturnCart([]);
+        toast.error(result.message || "Transaction failed");
       }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to process transaction");
+      toast.error(err.message || "Failed to process transaction");
     } finally {
       setIsLoading(false);
     }
@@ -267,7 +266,6 @@ const OnlyCounter = () => {
       }`}
     >
       <ToastContainer />
-
       {/* Header */}
       <header
         className={`border-b ${
@@ -285,9 +283,7 @@ const OnlyCounter = () => {
               {currentTime.toLocaleTimeString()}
             </div>
           </div>
-
           <div className="flex items-center gap-4">
-            {/* Theme Toggle */}
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -304,8 +300,6 @@ const OnlyCounter = () => {
                 {isDark ? "Dark" : "Light"}
               </span>
             </label>
-
-            {/* User Menu */}
             <div className="relative">
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
@@ -347,8 +341,6 @@ const OnlyCounter = () => {
                 </div>
               )}
             </div>
-
-            {/* Fullscreen */}
             <button
               onClick={() => {
                 if (!document.fullscreenElement)
@@ -389,7 +381,6 @@ const OnlyCounter = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-
               {/* Products Table */}
               <div
                 className={`rounded-lg border overflow-hidden ${
@@ -416,9 +407,6 @@ const OnlyCounter = () => {
                           Price
                         </th>
                         <th className="px-4 py-3 text-left font-semibold">
-                          Cost Price
-                        </th>
-                        <th className="px-4 py-3 text-left font-semibold">
                           Shelf
                         </th>
                         <th className="px-4 py-3 text-center font-semibold">
@@ -430,7 +418,7 @@ const OnlyCounter = () => {
                       {filteredItems.length === 0 ? (
                         <tr>
                           <td
-                            colSpan="4"
+                            colSpan="5"
                             className="px-4 py-8 text-center text-gray-500"
                           >
                             No products found
@@ -449,10 +437,7 @@ const OnlyCounter = () => {
                               {product.totalQuantity}
                             </td>
                             <td className="px-4 py-3">
-                              Rs. {(product.sellingPrice || 0).toFixed(2)}
-                            </td>
-                            <td className="px-4 py-3">
-                              Rs. {(product.costPrice || 0).toFixed(2)}
+                              Rs. {product.sellingPrice?.toFixed(2)}
                             </td>
                             <td className="px-4 py-3">{product.shelf}</td>
                             <td className="px-4 py-3 text-center">
@@ -473,7 +458,7 @@ const OnlyCounter = () => {
             </>
           ) : (
             <>
-              {/* Invoice Return Mode */}
+              {/* Return Mode */}
               <div className="mb-4 relative">
                 <span className="absolute left-3 top-3 text-gray-500">🔍</span>
                 <input
@@ -551,7 +536,7 @@ const OnlyCounter = () => {
           )}
         </div>
 
-        {/* Right Panel - Cart */}
+        {/* Right Panel */}
         <div className="w-96 max-lg:w-full">
           <div
             className={`rounded-lg border overflow-hidden flex flex-col h-full ${
@@ -595,11 +580,40 @@ const OnlyCounter = () => {
               <h2 className="text-lg font-bold">
                 {isCounter ? "Sales Cart" : "Return Items"}
               </h2>
+
+              {isCounter && (
+                <div className="flex gap-2 mt-2">
+                  <input
+                    type="text"
+                    placeholder="Counter ID"
+                    value={selectedCounterId || ""}
+                    onChange={(e) => setSelectedCounterId(e.target.value)}
+                    className={`flex-1 p-2 rounded border outline-none ${
+                      isDark
+                        ? "bg-slate-700 text-white border-slate-600"
+                        : "bg-white text-slate-900 border-gray-300"
+                    }`}
+                  />
+                  <select
+                    value={selectedPaymentMode}
+                    onChange={(e) => setSelectedPaymentMode(e.target.value)}
+                    className={`p-2 rounded border ${
+                      isDark
+                        ? "bg-slate-700 text-white border-slate-600"
+                        : "bg-white text-slate-900 border-gray-300"
+                    }`}
+                  >
+                    <option value="cash">Cash</option>
+                    <option value="card">Card</option>
+                    <option value="upi">UPI</option>
+                  </select>
+                </div>
+              )}
             </div>
 
             {/* Cart Items */}
             <div className="flex-1 overflow-y-auto px-6 py-4">
-              {cart.length === 0 ? (
+              {(isCounter ? saleCart : returnCart).length === 0 ? (
                 <div
                   className={`text-center py-12 ${
                     isDark ? "text-gray-400" : "text-gray-500"
@@ -607,70 +621,48 @@ const OnlyCounter = () => {
                 >
                   {isCounter ? "Add items to cart" : "Select an invoice first"}
                 </div>
-              ) : !isCounter ? (
-                <div className="space-y-3">
-                  {cart.map((item) => (
-                    <div
-                      key={item.id}
-                      onClick={() => toggleReturnSelection(item.id)}
-                      className={`p-3 rounded-lg cursor-pointer transition-colors border-2 ${
-                        selectedReturnItems.has(item.id)
-                          ? isDark
-                            ? "border-blue-500 bg-blue-900/30"
-                            : "border-blue-500 bg-blue-50"
-                          : isDark
-                          ? "border-slate-700 hover:border-slate-600"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <p className="font-medium text-sm">{item.brandName}</p>
-                        <input
-                          type="checkbox"
-                          checked={selectedReturnItems.has(item.id)}
-                          readOnly
-                          className="w-4 h-4 rounded"
-                        />
-                      </div>
-                      <p
-                        className={`text-xs ${
-                          isDark ? "text-gray-400" : "text-gray-600"
-                        }`}
-                      >
-                        Qty: {item.quantity} × Rs.{" "}
-                        {(item.sellingPrice || 0).toFixed(2)}
-                      </p>
-                    </div>
-                  ))}
-                </div>
               ) : (
-                <div className="space-y-3">
-                  {cart.map((item) => (
-                    <div
-                      key={item.id}
-                      className={`p-3 rounded-lg border-2 flex flex-col gap-2 transition-colors ${
-                        isDark
-                          ? "border-slate-700 hover:border-slate-600"
-                          : "border-gray-200 hover:border-gray-300"
-                      } ${
-                        item.isReturned
-                          ? "bg-green-100 border-green-300 text-red-800"
-                          : ""
-                      }`}
-                    >
-                      <div className="flex justify-between items-center">
-                        <p className="font-medium text-sm">{item.brandName}</p>
+                (isCounter ? saleCart : returnCart).map((item) => (
+                  <div
+                    key={item.id}
+                    className={`p-3 rounded-lg border-2 flex flex-col gap-1 transition-colors ${
+                      isDark
+                        ? "border-slate-700 hover:border-slate-600"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                    onClick={() => !isCounter && toggleReturnSelection(item.id)}
+                  >
+                    <div className="flex justify-between items-center">
+                      <p className="font-medium text-sm">{item.brandName}</p>
+                      {isCounter ? (
                         <button
-                          onClick={() => handleRemoveItem(item.id)}
+                          onClick={() => handleRemoveItem(item.id, false)}
                           className="text-red-500 hover:text-red-600"
                         >
                           <FaTrash />
                         </button>
-                      </div>
+                      ) : (
+                        <input
+                          type="checkbox"
+                          checked={selectedReturnItems.has(item.id)}
+                          readOnly
+                          className="w-4 h-4 rounded cursor-pointer"
+                        />
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Rs. {item.sellingPrice.toFixed(2)}
+                    </p>
+
+                    {isCounter && (
                       <div className="flex gap-2 items-center">
                         <button
                           onClick={() =>
-                            handleQuantityChange(item.id, item.quantity - 1)
+                            handleQuantityChange(
+                              item.id,
+                              item.quantity - 1,
+                              false
+                            )
                           }
                           className="p-1 bg-gray-300 rounded"
                         >
@@ -678,49 +670,33 @@ const OnlyCounter = () => {
                         </button>
                         <input
                           type="number"
-                          className={`w-12 text-center rounded border ${
-                            isDark
-                              ? "bg-slate-700 border-slate-600 text-white"
-                              : "bg-white border-gray-200 text-slate-900"
-                          }`}
+                          className={`w-12 text-center rounded border ...`}
                           value={item.quantity}
-                          onChange={(e) =>
-                            handleQuantityChange(
-                              item.id,
-                              Number(e.target.value)
-                            )
+                          onChange={
+                            (e) =>
+                              handleQuantityChange(
+                                item.id,
+                                Number(e.target.value),
+                                false
+                              ) // ✅ false
                           }
                         />
                         <button
                           onClick={() =>
-                            handleQuantityChange(item.id, item.quantity + 1)
-                          }
+                            handleQuantityChange(
+                              item.id,
+                              item.quantity + 1,
+                              false
+                            )
+                          } // ✅ false
                           className="p-1 bg-gray-300 rounded"
                         >
                           <FaPlus />
                         </button>
-                        <input
-                          type="number"
-                          className={`ml-auto w-20 text-center rounded border ${
-                            isDark
-                              ? "bg-slate-700 border-slate-600 text-white"
-                              : "bg-white border-gray-200 text-slate-900"
-                          }`}
-                          value={item.discount}
-                          onChange={(e) =>
-                            handleDiscountChange(item.id, e.target.value)
-                          }
-                          placeholder="Discount"
-                        />
                       </div>
-                      {item.isReturned && (
-                        <span className="text-yellow-700 text-xs font-semibold mt-1">
-                          RETURNED ITEM
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                    )}
+                  </div>
+                ))
               )}
             </div>
 
@@ -730,67 +706,86 @@ const OnlyCounter = () => {
                 isDark ? "border-slate-700" : "border-gray-200"
               }`}
             >
-              <div className="flex justify-between mb-2">
-                <span>Subtotal</span>
-                <span>Rs. {subtotal.toFixed(2)}</span>
-              </div>
+              {isCounter ? (
+                <>
+                  <div className="flex justify-between mb-2">
+                    <span>Subtotal</span>
+                    <span>Rs. {saleTotal.toFixed(2)}</span>
+                  </div>
 
-              {/* Discount Type & Value */}
-              <div className="flex gap-2 items-center mb-2">
-                Discount
-                <select
-                  value={discountType}
-                  onChange={(e) => setDiscountType(e.target.value)}
-                  className={`p-2 rounded border outline-none text-sm ${
-                    isDark
-                      ? "bg-slate-700 border-slate-600 text-white"
-                      : "bg-white border-gray-200 text-slate-900"
-                  }`}
-                >
-                  <option value="fixed">Fixed</option>
-                  <option value="percentage">Percentage</option>
-                </select>
-                <input
-                  type="number"
-                  value={discountValue}
-                  onChange={(e) => setDiscountValue(Number(e.target.value))}
-                  placeholder={discountType === "percentage" ? "%" : "Rs."}
-                  className={`flex-1 p-2 rounded border text-sm ${
-                    isDark
-                      ? "bg-slate-700 border-slate-600 text-white"
-                      : "bg-white border-gray-200 text-slate-900"
-                  }`}
-                />
-                <span className="text-sm font-medium">
-                  {discountType === "percentage" ? "%" : "Rs."}
-                </span>
-              </div>
+                  <div className="flex gap-2 items-center mb-2">
+                    Discount
+                    <select
+                      value={discountType}
+                      onChange={(e) => setDiscountType(e.target.value)}
+                      className={`p-2 rounded border outline-none text-sm ${
+                        isDark
+                          ? "bg-slate-700 text-white border-slate-600"
+                          : "bg-white text-slate-900 border-gray-300"
+                      }`}
+                    >
+                      <option value="fixed">Fixed</option>
+                      <option value="percentage">Percentage</option>
+                    </select>
+                    <input
+                      type="number"
+                      value={discountValue}
+                      onChange={(e) => setDiscountValue(Number(e.target.value))}
+                      placeholder={discountType === "percentage" ? "%" : "Rs."}
+                      className={`flex-1 p-2 rounded border text-sm ${
+                        isDark
+                          ? "bg-slate-700 text-white border-slate-600"
+                          : "bg-white text-slate-900 border-gray-300"
+                      }`}
+                    />
+                    <span className="text-sm font-medium">
+                      {discountType === "percentage" ? "%" : "Rs."}
+                    </span>
+                  </div>
 
-              <div className="flex justify-between font-bold text-lg mb-2">
-                <span>Total</span>
-                <span>Rs. {total.toFixed(2)}</span>
-              </div>
+                  <div className="flex justify-between font-bold text-lg mb-4">
+                    <span>Total</span>
+                    <span>Rs. {total.toFixed(2)}</span>
+                  </div>
 
-              {/* Action Buttons */}
-              <button
-                onClick={() => handleSave(false)}
-                disabled={isLoading}
-                className="w-full py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors mb-2"
-              >
-                {isLoading
-                  ? "Processing..."
-                  : isCounter
-                  ? "Save Sale"
-                  : "Process Return"}
-              </button>
-              {isCounter && (
-                <button
-                  onClick={() => handleSave(true)}
-                  disabled={isLoading}
-                  className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
-                >
-                  {isLoading ? "Printing..." : "Save & Print"}
-                </button>
+                  <button
+                    onClick={handleSave}
+                    disabled={isLoading}
+                    className="w-full py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-800 text-white font-semibold rounded-lg transition-colors"
+                  >
+                    {isLoading ? "Processing..." : "Save Sale"}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="flex justify-between mb-2">
+                    <span>Items Selected</span>
+                    <span>{selectedReturnItems.size}</span>
+                  </div>
+
+                  <div className="flex justify-between mb-4 font-bold text-lg">
+                    <span>Return Amount</span>
+                    <span>
+                      Rs.{" "}
+                      {Array.from(selectedReturnItems)
+                        .reduce((sum, itemId) => {
+                          const item = returnCart.find((i) => i.id === itemId);
+                          return (
+                            sum + (item ? item.sellingPrice * item.quantity : 0)
+                          );
+                        }, 0)
+                        .toFixed(2)}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={handleProcessReturn}
+                    disabled={isLoading || !selectedInvoice}
+                    className="w-full py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-amber-800 text-white font-semibold rounded-lg transition-colors"
+                  >
+                    {isLoading ? "Processing..." : "Process Return"}
+                  </button>
+                </>
               )}
             </div>
           </div>

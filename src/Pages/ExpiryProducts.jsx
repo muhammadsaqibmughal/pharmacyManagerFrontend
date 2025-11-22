@@ -18,8 +18,9 @@ const ExpiryProducts = () => {
     const getExp = async () => {
       try {
         setLoading(true);
-        const data = await getExpiry(); // getExpiry() returns response.data
-        setExpiryData(Array.isArray(data) ? data : []);
+        const data = await getExpiry(); 
+        console.log(data.data);
+        setExpiryData(Array.isArray(data.data) ? data.data : []);
       } catch (e) {
         console.error(e);
         setError("Failed to fetch expiry data.");

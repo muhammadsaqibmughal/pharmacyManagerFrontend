@@ -105,9 +105,9 @@ const Inventry = () => {
   const filteredProducts = products.filter((product) => {
     const term = searchTerm.toLowerCase();
     return (
-      product.medicine?.brandName?.toLowerCase().includes(term) ||
-      product.medicine?.genericName?.toLowerCase().includes(term) ||
-      product.packaging?.packageType?.toLowerCase().includes(term) ||
+      product.brandName?.toLowerCase().includes(term) ||
+      product.genericName?.toLowerCase().includes(term) ||
+      product.packageType?.toLowerCase().includes(term) ||
       product.stockEntries?.some((s) =>
         s.batchNumber?.toLowerCase().includes(term)
       )
@@ -198,10 +198,10 @@ const Inventry = () => {
               product.stockEntries && product.stockEntries.length > 0 ? (
                 product.stockEntries.map((stock) => (
                   <tr key={`${product.id}-${stock.id}`} className={`px-4 py-2 text-xs font-medium border-b ${theme === "dark" ? "border-white/40" : "border-black/50"}`}>
-                    <td>{product.medicine?.brandName || "-"}</td>
-                    <td>{product.medicine?.genericName || "-"}</td>
-                    <td>{product.packaging?.packageType || "-"}</td>
-                    <td>{product.packaging?.unitsPerPack} {product.packaging?.unitType}</td>
+                    <td>{product.brandName || "-"}</td>
+                    <td>{product.genericName || "-"}</td>
+                    <td>{product.packaging || "-"}</td>
+                    <td>{product.unitsPerPack} {product.unitType}</td>
                     <td>{product.shelf || "-"}</td>
                     <td>{product.reorderLevel || "-"}</td>
                     <td>{stock.batchNumber || "-"}</td>
@@ -214,10 +214,10 @@ const Inventry = () => {
                 ))
               ) : (
                 <tr key={`${product.id}-no-stock`} className={`px-4 py-2 text-xs font-medium border-b ${theme === "dark" ? "border-white/40" : "border-black/50"}`}>
-                  <td>{product.medicine?.brandName || "-"}</td>
-                  <td>{product.medicine?.genericName || "-"}</td>
-                  <td>{product.packaging?.packageType || "-"}</td>
-                  <td>{product.packaging?.unitsPerPack} {product.packaging?.unitType}</td>
+                  <td>{product.brandName || "-"}</td>
+                  <td>{product.genericName || "-"}</td>
+                  <td>{product.packaging || "-"}</td>
+                  <td>{product.unitsPerPack} {product.unitType}</td>
                   <td>{product.shelf || "-"}</td>
                   <td>{product.reorderLevel || "-"}</td>
                   <td colSpan="6" className="text-center">No Stock</td>

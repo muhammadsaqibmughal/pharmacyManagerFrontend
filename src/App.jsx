@@ -35,6 +35,8 @@ import OnlyCounter from "./Pages/OnlyCounter";
 import SalesDetail from "./Pages/SalesDetail";
 import ProfilePage from "./Pages/ProfilePage";
 import SalesReturnDetails from "./Pages/SalesReturnDetails";
+import ManagerForgotPassword from "./Pages/ManagerForgotPassword";
+import ManagerResetPassword from "./Pages/ManagerResetPassword";
 
 // Route Guard
 import ProtectedRoute from "./utils/ProtectedRoute";
@@ -64,6 +66,11 @@ const App = () => {
       <Route path="/" element={<HomeLayout />} />
       <Route path="/signup" element={<SignUpLayout />} />
       <Route path="/verify-email" element={<OtpVerification />} />
+      <Route path="/forgot-password" element={<ManagerForgotPassword />} />
+      <Route
+        path="/manager/reset-password/:id/:token"
+        element={<ManagerResetPassword />}
+      />
 
       {/* Staff-only Routes: Staff can ONLY access these */}
       <Route

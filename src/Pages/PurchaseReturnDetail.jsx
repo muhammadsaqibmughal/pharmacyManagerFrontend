@@ -42,19 +42,19 @@ const PurchaseReturnDetail = () => {
           theme === "dark" ? "text-light-50" : "text-primary-50"
         }`}
       >
-        <h2 className="text-2xl font-bold">{purchase?.supplierName || "Unknown Supplier"}</h2>
+        <h2 className="text-2xl font-bold">{purchase?.supplier.name || "Unknown Supplier"}</h2>
         <h1 className="mt-5 border-2 w-50 text-2xl">Return Invoice</h1>
       </div>
 
       {/* Contact & Invoice Info */}
       <div className="flex justify-between mt-5 px-5 text-xs space-y-2">
         <div className={`${theme === "dark" ? "text-light-50" : "text-primary-50"}`}>
-          <p><b>Email:</b> {purchase?.supplierEmail || "N/A"}</p>
-          <p><b>Phone:</b> {purchase?.supplierPhone || "N/A"}</p>
+          <p><b>Email:</b> {purchase?.supplier.name || "N/A"}</p>
+          <p><b>Phone:</b> {purchase?.supplier.phone || "N/A"}</p>
         </div>
         <div className={`${theme === "dark" ? "text-light-50" : "text-primary-50"}`}>
-          <p><b>Invoice No:</b> {purchase?.invoiceNo || "N/A"}</p>
-          <p><b>Date:</b> {purchase?.purchaseDate ? new Date(purchase.purchaseDate).toLocaleDateString() : "N/A"}</p>
+          <p><b>Invoice No:</b> {purchase?.purchaseInfo.invoiceNo|| "N/A"}</p>
+          <p><b>Date:</b> {purchase?.purchaseInfo.purchaseDate ? new Date(purchase.purchaseDate).toLocaleDateString() : "N/A"}</p>
         </div>
       </div>
 

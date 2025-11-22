@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../theme-support/ThemeContext";
-import { getReturns } from "../api/posAPI";
+import { getReturnSales } from "../api/posAPI";  // <-- FIXED IMPORT
 
 const ITEMS_PER_PAGE = 5;
 
@@ -15,13 +15,15 @@ const SalesReturn = () => {
   useEffect(() => {
     const fetchReturns = async () => {
       try {
-        const response = await getReturns();
-        console.log("Fetched Sales Returns:", response.data);
-        setSalesReturnData(Array.isArray(response.data) ? response.data : []);
+        const response = await getReturnSales();   // <-- FIXED FUNCTION CALL
+        console.log("Fetched Sales Returns:", response);
+
+        setSalesReturnData(Array.isArray(response) ? response : []);
       } catch (error) {
         console.error("Error fetching sales returns:", error.message);
       }
     };
+
     fetchReturns();
   }, []);
 
