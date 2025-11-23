@@ -28,17 +28,29 @@ const AllProduct = () => {
   // ----------------------------------------- Fetch Products
   const fetchProducts = async () => {
     try {
+      setIsLoading(true);
       const response = await getProduct({
         page: currentPage,
         limit: ITEM_PER_PAGE,
         search: searchTerm,
       });
 
-      setProducts(response.data || []);
+      const fetchedProducts = response.data || [];
+
+      if (currentPage === 1) {
+        // First page → replace
+        setProducts(fetchedProducts);
+      } else {
+        // Next pages → append
+        setProducts((prev) => [...prev, ...fetchedProducts]);
+      }
+
       setTotal(response.total || 0);
     } catch (error) {
       setErrorMsg("Failed to load products");
       console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -74,7 +86,7 @@ const AllProduct = () => {
 
       const response = await addProduct(payload);
 
-      if (!response.status==201 || !response.status==200) {
+      if (!response.status == 201 || !response.status == 200) {
         setErrorMsg(response.message || "Failed to add product");
         return;
       }
@@ -84,7 +96,6 @@ const AllProduct = () => {
       setShowModal(false);
       fetchProducts();
       showToast("Medicine added successfully!");
-
     } catch (error) {
       console.error(error);
       setErrorMsg("Failed to add product");
@@ -110,8 +121,9 @@ const AllProduct = () => {
     newProduct.barcode.trim() !== "";
 
   return (
-    <div className={`mt-8 p-10 ${theme === "dark" ? "bg-dark-50" : "bg-light-50"}`}>
-
+    <div
+      className={`mt-8 p-10 ${theme === "dark" ? "bg-dark-50" : "bg-light-50"}`}
+    >
       {/* TOAST */}
       {successToast && (
         <div className="fixed top-5 right-5 bg-green-600 text-white px-4 py-2 rounded shadow-lg animate-slideIn">
@@ -121,7 +133,11 @@ const AllProduct = () => {
 
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className={`text-2xl font-bold ${theme === "dark" ? "text-white/90" : "text-primary-50"}`}>
+        <h2
+          className={`text-2xl font-bold ${
+            theme === "dark" ? "text-white/90" : "text-primary-50"
+          }`}
+        >
           All Products
         </h2>
 
@@ -210,9 +226,7 @@ const AllProduct = () => {
 
             <button
               className="px-4 py-1 bg-bg-50 text-white rounded-full disabled:opacity-40"
-              onClick={() =>
-                setCurrentPage((p) => Math.min(p + 1, totalPages))
-              }
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               disabled={currentPage === totalPages}
             >
               Next

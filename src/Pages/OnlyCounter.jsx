@@ -70,6 +70,7 @@ const OnlyCounter = () => {
     const fetchInvoices = async () => {
       try {
         const res = await getSales();
+        console.log(res);
         const invoices = Array.isArray(res) ? res : res.sales || res.data?.sales || [];
         const normalizedInvoices = invoices.map((inv) => ({
           ...inv,
