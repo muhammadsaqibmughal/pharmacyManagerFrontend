@@ -1,6 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTheme } from "../theme-support/ThemeContext";
-import { FaExpand, FaUserCircle, FaPlus, FaMinus, FaTrash } from "react-icons/fa";
+import {
+  FaExpand,
+  FaUserCircle,
+  FaPlus,
+  FaMinus,
+  FaTrash,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { getPOSItems, getSales, addSale, returnSale } from "../api/posAPI";
 import { ToastContainer, toast } from "react-toastify";
@@ -28,6 +34,7 @@ const OnlyCounter = () => {
   const [userName, setUserName] = useState("Admin");
   const [selectedCounterId, setSelectedCounterId] = useState(null);
   const [selectedPaymentMode, setSelectedPaymentMode] = useState("cash");
+
 
   // Load carts from localStorage
   useEffect(() => {
@@ -71,17 +78,21 @@ const OnlyCounter = () => {
       try {
         const res = await getSales();
         console.log(res);
-        const invoices = Array.isArray(res) ? res : res.sales || res.data?.sales || [];
+        const invoices = Array.isArray(res)
+          ? res
+          : res.sales || res.data?.sales || [];
         const normalizedInvoices = invoices.map((inv) => ({
           ...inv,
           id: inv.id || inv._id,
-          items: inv.items?.map((item) => ({
-            ...item,
-            id: item.pharmacyProductId,
-            saleItemId: item.id,
-            sellingPrice: item.unitPrice || 0,
-            brandName: item.pharmacyProduct?.medicine?.brandName || item.brandName,
-          })) || [],
+          items:
+            inv.items?.map((item) => ({
+              ...item,
+              id: item.pharmacyProductId,
+              saleItemId: item.id,
+              sellingPrice: item.unitPrice || 0,
+              brandName:
+                item.pharmacyProduct?.medicine?.brandName || item.brandName,
+            })) || [],
         }));
         setInvoicesData(normalizedInvoices);
       } catch (err) {
@@ -99,23 +110,40 @@ const OnlyCounter = () => {
   }, []);
 
   const filteredItems = useMemo(
-    () => itemsData.filter((item) => (item.brandName || "").toLowerCase().includes(searchTerm.toLowerCase())),
+    () =>
+      itemsData.filter((item) =>
+        (item.brandName || "").toLowerCase().includes(searchTerm.toLowerCase())
+      ),
     [itemsData, searchTerm]
   );
 
   const filteredInvoices = useMemo(
-    () => invoicesData.filter((inv) => (inv.invoiceNo || "").toLowerCase().includes(invoiceSearch.toLowerCase())),
+    () =>
+      invoicesData.filter((inv) =>
+        (inv.invoiceNo || "")
+          .toLowerCase()
+          .includes(invoiceSearch.toLowerCase())
+      ),
     [invoicesData, invoiceSearch]
   );
 
-  const saleTotal = saleCart.reduce((acc, item) => acc + item.sellingPrice * item.quantity - (item.discount || 0), 0);
-  const discountAmount = discountType === "percentage" ? (saleTotal * discountValue) / 100 : discountValue;
+  const saleTotal = saleCart.reduce(
+    (acc, item) =>
+      acc + item.sellingPrice * item.quantity - (item.discount || 0),
+    0
+  );
+  const discountAmount =
+    discountType === "percentage"
+      ? (saleTotal * discountValue) / 100
+      : discountValue;
   const total = Math.max(0, saleTotal - discountAmount);
 
   // Cart handlers
   const handleAddToCart = (product) => {
     setSaleCart((prev) => {
-      const index = prev.findIndex((item) => item.pharmacyProductId === product.pharmacyProductId);
+      const index = prev.findIndex(
+        (item) => item.pharmacyProductId === product.pharmacyProductId
+      );
       if (index !== -1) {
         const updated = [...prev];
         updated[index].quantity += 1;
@@ -126,7 +154,8 @@ const OnlyCounter = () => {
   };
 
   const handleRemoveItem = (id, isReturnCart = false) => {
-    if (isReturnCart) setReturnCart((prev) => prev.filter((item) => item.id !== id));
+    if (isReturnCart)
+      setReturnCart((prev) => prev.filter((item) => item.id !== id));
     else setSaleCart((prev) => prev.filter((item) => item.id !== id));
   };
 
@@ -134,12 +163,18 @@ const OnlyCounter = () => {
     const qty = Number(quantity);
     if (qty < 1) return;
     const setCart = isReturnCart ? setReturnCart : setSaleCart;
-    setCart((prev) => prev.map((item) => (item.id === id ? { ...item, quantity: qty } : item)));
+    setCart((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, quantity: qty } : item))
+    );
   };
 
   const handleDiscountChange = (id, value, isReturnCart = false) => {
     const setCart = isReturnCart ? setReturnCart : setSaleCart;
-    setCart((prev) => prev.map((item) => (item.id === id ? { ...item, discount: Number(value) } : item)));
+    setCart((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, discount: Number(value) } : item
+      )
+    );
   };
 
   const handleSwitchMode = (counterMode) => {
@@ -159,56 +194,63 @@ const OnlyCounter = () => {
 
   const handleInvoiceSelect = (invoice) => {
     setSelectedInvoice(invoice);
-    setReturnCart(invoice.items.map((item) => ({
-      ...item,
-      id: item.pharmacyProductId,
-      saleItemId: item.saleItemId,
-      sellingPrice: item.unitPrice,
-      brandName: item.pharmacyProduct?.medicine?.brandName || item.brandName,
-    })));
+    setReturnCart(
+      invoice.items.map((item) => ({
+        ...item,
+        id: item.pharmacyProductId,
+        saleItemId: item.saleItemId,
+        sellingPrice: item.unitPrice,
+        brandName: item.pharmacyProduct?.medicine?.brandName || item.brandName,
+      }))
+    );
     setSelectedReturnItems(new Set());
   };
 
-// Process return
-const handleProcessReturn = async () => {
-  if (!selectedReturnItems.size) return toast.error("Select items to return");
-  if (!selectedInvoice) return toast.error("No invoice selected");
+  // Process return
+  const handleProcessReturn = async () => {
+    if (!selectedReturnItems.size) return toast.error("Select items to return");
+    if (!selectedInvoice) return toast.error("No invoice selected");
 
-  setIsLoading(true);
-  try {
-    const itemsToReturn = returnCart
-      .filter((item) => selectedReturnItems.has(item.id))
-      .map((item) => ({ saleItemId: item.saleItemId, quantity: Number(item.quantity) }));
+    setIsLoading(true);
+    try {
+      const itemsToReturn = returnCart
+        .filter((item) => selectedReturnItems.has(item.id))
+        .map((item) => ({
+          saleItemId: item.saleItemId,
+          quantity: Number(item.quantity),
+        }));
 
-    const totalReturnAmount = itemsToReturn.reduce((sum, item) => {
-      const cartItem = returnCart.find((ci) => ci.saleItemId === item.saleItemId);
-      return sum + (cartItem ? cartItem.sellingPrice * item.quantity : 0);
-    }, 0);
+      const totalReturnAmount = itemsToReturn.reduce((sum, item) => {
+        const cartItem = returnCart.find(
+          (ci) => ci.saleItemId === item.saleItemId
+        );
+        return sum + (cartItem ? cartItem.sellingPrice * item.quantity : 0);
+      }, 0);
 
-    const payload = {
-      saleId: selectedInvoice.id,
-      totalAmount: Math.max(0, totalReturnAmount),
-      returnItems: itemsToReturn,
-    };
+      const payload = {
+        saleId: selectedInvoice.id,
+        totalAmount: Math.max(0, totalReturnAmount),
+        returnItems: itemsToReturn,
+      };
 
-    const result = await returnSale(payload);
+      const result = await returnSale(payload);
 
-    if (result.status === "success") {
-      toast.success("Return processed successfully");
-      setReturnCart([]);
-      setSelectedReturnItems(new Set());
-      setSelectedInvoice(null);
-      setIsCounter(true);
-    } else {
-      toast.error(result.message || "Return failed");
+      if (result.status === "success") {
+        toast.success("Return processed successfully");
+        setReturnCart([]);
+        setSelectedReturnItems(new Set());
+        setSelectedInvoice(null);
+        setIsCounter(true);
+      } else {
+        toast.error(result.message || "Return failed");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || "Failed to process return");
+    } finally {
+      setIsLoading(false);
     }
-  } catch (err) {
-    console.error(err);
-    toast.error(err.message || "Failed to process return");
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   const handleSave = async () => {
     if (!saleCart.length) return toast.error("❌ Cart is empty");
@@ -224,7 +266,10 @@ const handleProcessReturn = async () => {
         discount: Number(item.discount || 0),
       }));
 
-      const subtotal = saleItems.reduce((acc, i) => acc + i.quantity * i.price - i.discount, 0);
+      const subtotal = saleItems.reduce(
+        (acc, i) => acc + i.quantity * i.price - i.discount,
+        0
+      );
       const totalAmount = Math.max(0, subtotal - discountAmount);
 
       const payload = {
