@@ -269,7 +269,7 @@ export const pos = [
   },
   {
     name: "Forcasting",
-    href: "/pos/customers",
+    href: "/pos/forcasting",
     icon: MdOutlineTrendingUp,
   },
   {
