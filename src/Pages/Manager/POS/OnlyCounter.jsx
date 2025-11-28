@@ -44,6 +44,66 @@ const OnlyCounter = () => {
   const [selectedGeneric, setSelectedGeneric] = useState(null);
   const [alternativeItems, setAlternativeItems] = useState([]);
 
+  // manager add cart using scanner
+  const [scannedCode, setScannedCode] = useState("");
+  const [ws, setWs] = useState(null);
+
+  useEffect(() => {
+    const socket = new WebSocket("ws://localhost:5000"); // use your backend IP in production
+    setWs(socket);
+
+    socket.onopen = () => {
+      console.log("WebSocket connected");
+
+      // Identify this client as POS
+      socket.send(JSON.stringify({ type: "identify", clientType: "pos" }));
+    };
+
+    socket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+
+        if (data.type === "barcode") {
+          console.log("Received barcode via WebSocket:", data.barcode);
+          handleBarcodeScan(data.barcode);
+        }
+      } catch (err) {
+        console.error("Error parsing WebSocket message:", err);
+      }
+    };
+
+    socket.onclose = () => {
+      console.log("WebSocket disconnected");
+    };
+
+    socket.onerror = (err) => {
+      console.error("WebSocket error:", err);
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, [itemsData]);
+
+  const handleBarcodeScan = (code) => {
+    if (!code) return;
+
+    // search in itemsData
+    const product = itemsData.find(
+      (item) => item.barcode?.toString() === code.toString()
+    );
+
+    if (product) {
+      handleAddToCart(product);
+      toast.success(`${product.brandName} added to cart`);
+    } else {
+      toast.error("Product not found");
+    }
+
+    // reset scanned code
+    setScannedCode("");
+  };
+
   // Load carts from localStorage
   useEffect(() => {
     const savedSaleCart = localStorage.getItem("pos_sale_cart");
