@@ -20,6 +20,7 @@
     "dayjs": "^1.11.18",
     "formik": "^2.4.6",
     "js-cookie": "^3.0.5",
+    "lucide-react": "^0.555.0",
     "mapbox-gl": "^3.16.0",
     "motion": "^12.23.15",
     "react": "^19.1.0",

@@ -1,42 +1,67 @@
 import { Routes, Route } from "react-router-dom";
 
-// Components & Pages
-import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
-import Modules from "./components/Modules";
-import Footer from "./components/Footer";
-import FormPage from "./components/FormPage";
-import SignUp from "./components/SignUp";
-import OtpVerification from "./components/OtpVerification";
+// Landing page
+import Navbar from "./Pages/Landing/Navbar";
+import Hero from "./Pages/Landing/Hero";
+import Modules from "./Pages/Landing/Modules";
+import Footer from "./Pages/Landing/Footer";
 
-// Pages
-import Pos from "./components/Pos";
-import PosPage from "./Pages/PosPage";
-import Dashboard from "./Pages/Dashboard";
-import AllProduct from "./Pages/AllProduct";
-import AllPackages from "./Pages/AllPackages";
-import ExpiryProducts from "./Pages/ExpiryProducts";
-import Inventry from "./Pages/Inventry";
-import Supplier from "./Pages/Supplier";
-import SupplierDetail from "./Pages/SupplierDetail";
-import Purchase from "./Pages/Purchase";
-import PurchaseReturen from "./Pages/PurchaseReturen";
-import Customer from "./Pages/Customer";
-import Reports from "./Pages/Reports";
-import Settings from "./Pages/Settings";
-import PendingApproval from "./Pages/PendingApproval";
-import PurchaseReturnDetail from "./Pages/PurchaseReturnDetail";
-import Sales from "./Pages/Sales";
-import SalesReturn from "./Pages/SalesReturn";
-import Counters from "./Pages/Counters";
-import CounterDetail from "./Pages/CounterDetail";
-import CounterSaleDetail from "./Pages/CounterSaleDetail";
-import OnlyCounter from "./Pages/OnlyCounter";
-import SalesDetail from "./Pages/SalesDetail";
-import ProfilePage from "./Pages/ProfilePage";
-import SalesReturnDetails from "./Pages/SalesReturnDetails";
-import ManagerForgotPassword from "./Pages/ManagerForgotPassword";
-import ManagerResetPassword from "./Pages/ManagerResetPassword";
+// Auth pages
+import FormPage from "./Pages/Auth/FormPage";
+import SignUp from "./Pages/Auth/SignUp";
+import OtpVerification from "./Pages/Auth/OtpVerification";
+
+
+// ***************** Manager pages ***********************
+
+//Side Navigation
+import SideNavigation from "./Pages/Manager/Side_Navigation/SideNavigation";
+
+//Dashboard
+import Dashboard from "./Pages/Manager/Dashboard/Dashboard";
+
+//Products
+import AllPackages from "./Pages/Manager/Products/AllPackages";
+import AllProduct from "./Pages/Manager/Products/AllProduct";
+import ExpiryProducts from "./Pages/Manager/Products/ExpiryProducts";
+import Inventry from "./Pages/Manager/Products/Inventry";
+
+//Sales
+import Sales from "./Pages/Manager/Sales/Sales";
+import SalesDetail from "./Pages/Manager/Sales/SalesDetail";
+import SalesReturn from "./Pages/Manager/Sales/SalesReturn";
+import SalesReturnDetails from "./Pages/Manager/Sales/SalesReturnDetails";
+
+//Purchase
+import Purchase from "./Pages/Manager/Purchase/Purchase";
+import PurchaseReturen from "./Pages/Manager/Purchase/PurchaseReturen";
+import PurchaseReturnDetail from "./Pages/Manager/Purchase/PurchaseReturnDetail";
+
+//Supplier
+import Supplier from "./Pages/Manager/Supplier/Supplier";
+import SupplierDetail from "./Pages/Manager/Supplier/SupplierDetail";
+
+//Counter 
+import CounterDetail from "./Pages/Manager/Counter/CounterDetail";
+import Counter from "./Pages/Manager/Counter/Counters";
+import CounterSaleDetail from "./Pages/Manager/Counter/CounterSaleDetail";
+
+//POS
+import OnlyCounter from "./Pages/Manager/POS/OnlyCounter";
+import PosPage from "./Pages/Manager/POS/PosPage";
+
+//Reports
+import Customer from "./Pages/Manager/Reports/Customer";
+import Reports from "./Pages/Manager/Reports/Reports";
+import MedicineForecast from "./Pages/Manager/Reports/Forcasting";
+
+//Users
+import ManagerForgotPassword from "./Pages/Manager/User/ManagerForgotPassword";
+import ManagerResetPassword from "./Pages/Manager/User/ManagerResetPassword";
+import PendingApproval from "./Pages/Manager/User/PendingApproval";
+import ProfilePage from "./Pages/Manager/User/ProfilePage";
+import Settings from "./Pages/Manager/User/Settings";
+
 
 // Route Guard
 import ProtectedRoute from "./utils/ProtectedRoute";
@@ -76,7 +101,7 @@ const App = () => {
       <Route
         path="/onlyCounter"
         element={
-          <ProtectedRoute allowedRoles={["staff"]}>
+          <ProtectedRoute allowedRoles={["staff" ]}>
             <OnlyCounter />
           </ProtectedRoute>
         }
@@ -113,12 +138,12 @@ const App = () => {
         path="/pos"
         element={
           <ProtectedRoute redirectStaff={true}>
-            <Pos />
+            <SideNavigation />
           </ProtectedRoute>
         }
       >
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="pos" element={<PosPage />} />
+        <Route path="pos" element={<OnlyCounter />} />
         <Route path="products/add" element={<AllProduct />} />
         <Route path="products/package" element={<AllPackages />} />
         <Route path="products/expiryProduct" element={<ExpiryProducts />} />
@@ -128,8 +153,9 @@ const App = () => {
         <Route path="purchase/purchaseReturn" element={<PurchaseReturen />} />
         <Route path="sales/sales" element={<Sales />} />
         <Route path="sales/salesReturn" element={<SalesReturn />} />
-        <Route path="customer/counter" element={<Counters />} />
+        <Route path="customer/counter" element={<Counter />} />
         <Route path="reports" element={<Reports />} />
+        <Route path="forcasting" element={<MedicineForecast />} />
         <Route path="settings" element={<Settings />} />
         <Route path="profile" element={<ProfilePage />} />
 
