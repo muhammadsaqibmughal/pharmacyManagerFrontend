@@ -48,7 +48,7 @@ const AllSuppliers = () => {
       setIsLoading(false);
     }
   };
-
+  console.log(suppliers)
   useEffect(() => {
     fetchSuppliers();
   }, []);
@@ -69,7 +69,6 @@ const AllSuppliers = () => {
     try {
       setIsSubmitting(true);
       const response = await addSupplier(newSupplier);
-
       if (response?.status === 200 || response?.status === 201) {
         setSuppliers((prev) => [response.data.data || newSupplier, ...prev]);
         setShowModal(false);
