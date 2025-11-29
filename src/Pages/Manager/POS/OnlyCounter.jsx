@@ -14,7 +14,8 @@ import {
   addSale,
   returnSale,
 } from "../../../api/posAPI";
-import { getCounterList } from "../../../api/counterAPI";
+import { getUser } from "../../../api/counterAPI";
+
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -49,6 +50,8 @@ const OnlyCounter = () => {
   const [userName, setUserName] = useState("");
   const [selectedCounterId, setSelectedCounterId] = useState(null);
   const [selectedPaymentMode, setSelectedPaymentMode] = useState("cash");
+  const [pharmacyId,setpharmacyId]=useState(null);
+  const [counterId,setCounterId]=useState(null);
 
   // Alternative medicine state
   const [selectedGeneric, setSelectedGeneric] = useState(null);
@@ -58,47 +61,87 @@ const OnlyCounter = () => {
   const [scannedCode, setScannedCode] = useState("");
   const [ws, setWs] = useState(null);
 
+
+  // get user
   useEffect(() => {
-    const socket = new WebSocket("ws://localhost:5000"); // backend IP
-    setWs(socket);
-
-    socket.onopen = () => {
-      console.log("WebSocket connected");
-      // Identify this client as POS
-      socket.send(JSON.stringify({ type: "identify", clientType: "pos" }));
-    };
-
-    socket.onmessage = (event) => {
+    const fetchCounter = async () => {
       try {
-        const data = JSON.parse(event.data);
-
-        if (data.type === "barcode") {
-          console.log(`Received barcode (${data.scanType}):`, data.barcode);
-
-          switch (data.scanType) {
-            case "cart":
-              handleAddToCartScan(data.barcode);
-              break;
-
-            case "receipt":
-              console.log(data.barcode);
-              handleReceiptScan(data.barcode);
-              break;
-
-            default:
-              console.warn("Unknown scan type:", data.scanType);
-          }
-        }
-      } catch (err) {
-        console.error("Error parsing WebSocket message:", err);
+        const res = await getUser();
+        console.log("user details", res);
+        setUserName(res.name);
+        setpharmacyId(res.pharmacyId);
+        setCounterId(res.assignedCounterId);
+      } catch (error) {
+        console.error(error.message);
       }
     };
+    fetchCounter();
+  }, []);
 
-    socket.onclose = () => console.log("WebSocket disconnected");
-    socket.onerror = (err) => console.error("WebSocket error:", err);
+  // connect client through websocket
+  useEffect(() => {
+    if (!pharmacyId || !counterId) return; 
+  const socket = new WebSocket("ws://localhost:5000");
+  setWs(socket);
 
-    return () => socket.close();
-  }, [itemsData, invoicesData]);
+  // When WebSocket connects
+  socket.onopen = () => {
+    console.log("WebSocket connected");
+
+    // Identify this client as POS with pharmacyId & counterId
+    // Use the user data from your response
+    const userData = {
+      clientType: "pos",
+      pharmacyId: pharmacyId, // user.pharmacyId
+      counterId: counterId,   // user.assignedCounterId
+    };
+
+    socket.send(JSON.stringify({ type: "identify", ...userData }));
+  };
+
+  // Handle incoming messages
+  socket.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+
+      switch (data.type) {
+        case "barcode":
+          console.log(`Received barcode (${data.scanType}):`, data.barcode);
+
+          if (data.scanType === "cart") handleAddToCartScan(data.barcode);
+          else if (data.scanType === "receipt") handleReceiptScan(data.barcode);
+          else console.warn("Unknown scan type:", data.scanType);
+          break;
+
+        case "identified":
+          console.log(`POS identified successfully as ${data.clientType}`);
+          break;
+
+        case "barcode_sent":
+          console.log(
+            `Barcode ${data.barcode} broadcasted to ${data.broadcast_count} clients`
+          );
+          break;
+
+        case "error":
+          console.error("WebSocket error message:", data.message || data.error);
+          break;
+
+        default:
+          console.warn("Unknown message type:", data.type);
+      }
+    } catch (err) {
+      console.error("Error parsing WebSocket message:", err);
+    }
+  };
+
+  socket.onclose = () => console.log("WebSocket disconnected");
+  socket.onerror = (err) => console.error("WebSocket error:", err);
+
+  // Clean up on unmount
+  return () => socket.close();
+}, [pharmacyId, counterId,itemsData, invoicesData]); // empty dependency array to prevent reconnects
+
 
   // Handle adding item to cart
   const handleAddToCartScan = (code) => {
@@ -125,6 +168,7 @@ const OnlyCounter = () => {
     const invoice = invoicesData.find(
       (inv) => inv.invoiceNo?.toString() === code.toString()
     );
+    console.log(invoicesData);
 
     if (invoice) {
       handleInvoiceSelect(invoice);
@@ -152,19 +196,7 @@ const OnlyCounter = () => {
     localStorage.setItem("pos_return_cart", JSON.stringify(returnCart));
   }, [returnCart]);
 
-  useEffect(() => {
-    const fetchCounter = async () => {
-      try {
-        const res = await getCounterList();
-        console.log("CounterList", res);
-        const name = res[0].name || "N/A";
-        setUserName(name);
-      } catch (error) {
-        console.error(error.message);
-      }
-    };
-    fetchCounter();
-  }, []);
+  
 
   // Fetch items
   useEffect(() => {

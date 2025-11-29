@@ -1,35 +1,24 @@
-import React from "react";
 import { useTheme } from "../../../theme-support/ThemeContext";
-<<<<<<< HEAD
-
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { changePassword } from "../../../api/pharmacyApi";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import { Lock, ArrowLeft, Eye, EyeOff, Shield, CheckCircle } from "lucide-react";
 
 const Settings = () => {
   const { theme } = useTheme();
   const navigate = useNavigate();
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-=======
-import { changePassword } from "../../../api/pharmacyApi";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
-const Settings = () => {
-  const { theme } = useTheme();
->>>>>>> da58c20cb16776c21a5a56724c8ec8efd9092ad0
-
-  // Validation schema using Yup
   const validationSchema = Yup.object().shape({
     currentPassword: Yup.string().required("Current password is required"),
     newPassword: Yup.string()
       .required("New password is required")
       .min(8, "Password must be at least 8 characters")
-      .matches(
-        /[A-Z]/,
-        "Password must contain at least one uppercase letter"
-      )
+      .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
       .matches(/[a-z]/, "Password must contain at least one lowercase letter")
       .matches(/\d/, "Password must contain at least one number")
       .matches(
@@ -41,7 +30,10 @@ const Settings = () => {
       .oneOf([Yup.ref("newPassword"), null], "Passwords must match"),
   });
 
-  const handlePasswordChange = async (values, { setSubmitting, resetForm, setErrors }) => {
+  const handlePasswordChange = async (
+    values,
+    { setSubmitting, resetForm, setErrors }
+  ) => {
     try {
       const payload = {
         currentPassword: values.currentPassword,
@@ -81,140 +73,334 @@ const Settings = () => {
       navigate(-1);
     }
   };
+
+  const passwordRequirements = [
+    { text: "At least 8 characters", regex: /.{8,}/ },
+    { text: "One uppercase letter", regex: /[A-Z]/ },
+    { text: "One lowercase letter", regex: /[a-z]/ },
+    { text: "One number", regex: /\d/ },
+    { text: "One special character (@$!%*?&)", regex: /[@$!%*?&]/ },
+  ];
+
   return (
-    <>
-      <div className="flex justify-start px-10 mt-10 items-center  w-full  text-center">
-        <div className="flex justify-start mb-4">
+    <div
+      className={`min-h-screen ${
+        theme === "dark"
+          ? "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"
+          : "bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50"
+      }`}
+    >
+      <div className="container mx-auto px-4 py-6 sm:py-8 lg:py-12 max-w-7xl">
+        {/* Header Section */}
+        <div className="mb-6 sm:mb-8">
           <button
             onClick={handleClick}
-            className="px-4 py-2 bg-bg-50 hover:bg-selected-50 text-white rounded-full"
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+              theme === "dark"
+                ? "bg-gray-800 hover:bg-gray-700 text-gray-200"
+                : "bg-white hover:bg-gray-50 text-gray-700 shadow-md"
+            }`}
           >
-            Back
+            <ArrowLeft className="w-4 h-4" />
+            <span className="font-medium">Back</span>
           </button>
         </div>
-  return (
-    <>
-      <div className="flex justify-start px-10 mt-10 items-center w-full text-center">
-        <h2
-          className={`text-xl tracking-widest text-left font-bold ${
-            theme === "dark" ? "text-light-50" : "text-primary-50"
-          }`}
-        >
-          Settings
-        </h2>
-      </div>
 
-      <div
-        className={`flex max-md:flex-col gap-5 p-10 ${
-          theme === "dark"
-            ? "bg-dark-50 text-white/90"
-            : "bg-light-50 text-primary-50"
-        }`}
-      >
-        <div className="w-1/2 max-md:w-full">
-          <div
-            className={`rounded-xl p-5 h-135 border ${
-              theme === "dark"
-                ? "border-white/20 bg-white/10"
-                : "border-white/40 bg-white/90"
-            } backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]`}
-          >
-            <h2 className="text-xl text-center mt-5 font-semibold mb-2">
-              Change Password
-            </h2>
-
-            <Formik
-              initialValues={{
-                currentPassword: "",
-                newPassword: "",
-                confirmPassword: "",
-              }}
-              validationSchema={validationSchema}
-              onSubmit={handlePasswordChange}
+        {/* Title Section */}
+        <div className="mb-8 sm:mb-12">
+          <div className="flex items-center gap-3 mb-2">
+            <div
+              className={`p-3 rounded-xl ${
+                theme === "dark"
+                  ? "bg-blue-500/20 text-blue-400"
+                  : "bg-blue-500/10 text-blue-600"
+              }`}
             >
-              {({ isSubmitting }) => (
-                <Form className="mt-15 flex flex-col gap-6">
-                  {/* Current Password */}
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium">
-                      Current Password
-                    </label>
-                    <Field
-                      type="password"
-                      name="currentPassword"
-                      placeholder="Enter current password"
-                      className={`border-1 text-xs font-semibold px-3 py-2 rounded-full w-full ${
-                        theme === "dark"
-                          ? "border-gray-300 text-white/90"
-                          : "border-black/40 text-primary-50"
-                      }`}
-                    />
-                    <ErrorMessage
-                      name="currentPassword"
-                      component="div"
-                      className="text-red-500 text-xs mt-1"
-                    />
-                  </div>
+              <Shield className="w-6 h-6 sm:w-8 sm:h-8" />
+            </div>
+            <h1
+              className={`text-3xl sm:text-4xl lg:text-5xl font-bold ${
+                theme === "dark"
+                  ? "text-white"
+                  : "text-gray-900"
+              }`}
+            >
+              Security Settings
+            </h1>
+          </div>
+          <p
+            className={`text-sm sm:text-base ml-14 sm:ml-16 ${
+              theme === "dark" ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
+            Manage your account security and password
+          </p>
+        </div>
 
-                  {/* New Password */}
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium">New Password</label>
-                    <Field
-                      type="password"
-                      name="newPassword"
-                      placeholder="Enter new password"
-                      className={`border-1 text-xs font-semibold px-3 py-2 rounded-full w-full ${
-                        theme === "dark"
-                          ? "border-gray-300 text-white/90"
-                          : "border-black/40 text-primary-50"
-                      }`}
-                    />
-                    <ErrorMessage
-                      name="newPassword"
-                      component="div"
-                      className="text-red-500 text-xs mt-1"
-                    />
-                  </div>
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          {/* Password Change Form */}
+          <div className="lg:col-span-2">
+            <div
+              className={`rounded-2xl p-6 sm:p-8 ${
+                theme === "dark"
+                  ? "bg-gray-800/50 backdrop-blur-xl border border-gray-700/50"
+                  : "bg-white/80 backdrop-blur-xl border border-gray-200 shadow-xl"
+              }`}
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <Lock
+                  className={`w-5 h-5 ${
+                    theme === "dark" ? "text-blue-400" : "text-blue-600"
+                  }`}
+                />
+                <h2
+                  className={`text-xl sm:text-2xl font-semibold ${
+                    theme === "dark" ? "text-white" : "text-gray-900"
+                  }`}
+                >
+                  Change Password
+                </h2>
+              </div>
 
-                  {/* Confirm Password */}
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium">
-                      Confirm New Password
-                    </label>
-                    <Field
-                      type="password"
-                      name="confirmPassword"
-                      placeholder="Confirm new password"
-                      className={`border-1 text-xs font-semibold px-3 py-2 rounded-full w-full ${
-                        theme === "dark"
-                          ? "border-gray-300 text-white/90"
-                          : "border-black/40 text-primary-50"
-                      }`}
-                    />
-                    <ErrorMessage
-                      name="confirmPassword"
-                      component="div"
-                      className="text-red-500 text-xs mt-1"
-                    />
-                  </div>
+              <Formik
+                initialValues={{
+                  currentPassword: "",
+                  newPassword: "",
+                  confirmPassword: "",
+                }}
+                validationSchema={validationSchema}
+                onSubmit={handlePasswordChange}
+              >
+                {({ isSubmitting, values, errors, touched }) => (
+                  <Form className="space-y-6">
+                    {/* Current Password */}
+                    <div>
+                      <label
+                        className={`block text-sm font-medium mb-2 ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-700"
+                        }`}
+                      >
+                        Current Password
+                      </label>
+                      <div className="relative">
+                        <Field
+                          type={showCurrent ? "text" : "password"}
+                          name="currentPassword"
+                          placeholder="Enter your current password"
+                          className={`w-full px-4 py-3 pr-12 rounded-lg border transition-all duration-200 ${
+                            theme === "dark"
+                              ? "bg-gray-900/50 border-gray-600 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                              : "bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                          } ${
+                            errors.currentPassword && touched.currentPassword
+                              ? "border-red-500"
+                              : ""
+                          }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowCurrent(!showCurrent)}
+                          className={`absolute right-4 top-1/2 -translate-y-1/2 ${
+                            theme === "dark"
+                              ? "text-gray-400 hover:text-gray-300"
+                              : "text-gray-500 hover:text-gray-700"
+                          }`}
+                        >
+                          {showCurrent ? (
+                            <EyeOff className="w-5 h-5" />
+                          ) : (
+                            <Eye className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
+                      <ErrorMessage
+                        name="currentPassword"
+                        component="div"
+                        className="text-red-500 text-sm mt-1 flex items-center gap-1"
+                      />
+                    </div>
 
-                  {/* Submit Button */}
-                  <div className="flex justify-center mt-15 items-center w-full">
+                    {/* New Password */}
+                    <div>
+                      <label
+                        className={`block text-sm font-medium mb-2 ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-700"
+                        }`}
+                      >
+                        New Password
+                      </label>
+                      <div className="relative">
+                        <Field
+                          type={showNew ? "text" : "password"}
+                          name="newPassword"
+                          placeholder="Enter your new password"
+                          className={`w-full px-4 py-3 pr-12 rounded-lg border transition-all duration-200 ${
+                            theme === "dark"
+                              ? "bg-gray-900/50 border-gray-600 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                              : "bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                          } ${
+                            errors.newPassword && touched.newPassword
+                              ? "border-red-500"
+                              : ""
+                          }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNew(!showNew)}
+                          className={`absolute right-4 top-1/2 -translate-y-1/2 ${
+                            theme === "dark"
+                              ? "text-gray-400 hover:text-gray-300"
+                              : "text-gray-500 hover:text-gray-700"
+                          }`}
+                        >
+                          {showNew ? (
+                            <EyeOff className="w-5 h-5" />
+                          ) : (
+                            <Eye className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
+                      <ErrorMessage
+                        name="newPassword"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    </div>
+
+                    {/* Confirm Password */}
+                    <div>
+                      <label
+                        className={`block text-sm font-medium mb-2 ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-700"
+                        }`}
+                      >
+                        Confirm New Password
+                      </label>
+                      <div className="relative">
+                        <Field
+                          type={showConfirm ? "text" : "password"}
+                          name="confirmPassword"
+                          placeholder="Confirm your new password"
+                          className={`w-full px-4 py-3 pr-12 rounded-lg border transition-all duration-200 ${
+                            theme === "dark"
+                              ? "bg-gray-900/50 border-gray-600 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                              : "bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                          } ${
+                            errors.confirmPassword && touched.confirmPassword
+                              ? "border-red-500"
+                              : ""
+                          }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirm(!showConfirm)}
+                          className={`absolute right-4 top-1/2 -translate-y-1/2 ${
+                            theme === "dark"
+                              ? "text-gray-400 hover:text-gray-300"
+                              : "text-gray-500 hover:text-gray-700"
+                          }`}
+                        >
+                          {showConfirm ? (
+                            <EyeOff className="w-5 h-5" />
+                          ) : (
+                            <Eye className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
+                      <ErrorMessage
+                        name="confirmPassword"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    </div>
+
+                    {/* Submit Button */}
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="px-4 py-2 bg-bg-50 hover:bg-selected-50 text-white rounded-full hover:bg-hf-100"
+                      className={`w-full py-3 px-6 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+                        theme === "dark"
+                          ? "bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-700 disabled:text-gray-500"
+                          : "bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-300 disabled:text-gray-500 shadow-lg hover:shadow-xl"
+                      }`}
                     >
-                      {isSubmitting ? "Updating..." : "Update Password"}
+                      {isSubmitting ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Updating Password...
+                        </>
+                      ) : (
+                        <>
+                          <Lock className="w-5 h-5" />
+                          Update Password
+                        </>
+                      )}
                     </button>
+                  </Form>
+                )}
+              </Formik>
+            </div>
+          </div>
+
+          {/* Password Requirements Sidebar */}
+          <div className="lg:col-span-1">
+            <div
+              className={`rounded-2xl p-6 sticky top-6 ${
+                theme === "dark"
+                  ? "bg-gray-800/50 backdrop-blur-xl border border-gray-700/50"
+                  : "bg-white/80 backdrop-blur-xl border border-gray-200 shadow-xl"
+              }`}
+            >
+              <h3
+                className={`text-lg font-semibold mb-4 ${
+                  theme === "dark" ? "text-white" : "text-gray-900"
+                }`}
+              >
+                Password Requirements
+              </h3>
+              <div className="space-y-3">
+                {passwordRequirements.map((req, index) => (
+                  <div key={index} className="flex items-start gap-2">
+                    <CheckCircle
+                      className={`w-5 h-5 mt-0.5 flex-shrink-0 ${
+                        theme === "dark"
+                          ? "text-gray-500"
+                          : "text-gray-400"
+                      }`}
+                    />
+                    <span
+                      className={`text-sm ${
+                        theme === "dark" ? "text-gray-300" : "text-gray-600"
+                      }`}
+                    >
+                      {req.text}
+                    </span>
                   </div>
-                </Form>
-              )}
-            </Formik>
+                ))}
+              </div>
+
+              <div
+                className={`mt-6 p-4 rounded-lg ${
+                  theme === "dark"
+                    ? "bg-blue-500/10 border border-blue-500/20"
+                    : "bg-blue-50 border border-blue-200"
+                }`}
+              >
+                <p
+                  className={`text-sm ${
+                    theme === "dark" ? "text-blue-300" : "text-blue-700"
+                  }`}
+                >
+                  <strong>Security Tip:</strong> Use a unique password that you
+                  don't use on any other websites.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

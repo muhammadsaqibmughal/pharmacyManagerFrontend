@@ -12,7 +12,7 @@ const ScannerSetup = () => {
   const fetchQr = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/scanner/qr"); // backend route
+      const response = await api.get("/scanner/qr");
       console.log(response.data);
       setQrData(response.data);
       setLoading(false);
