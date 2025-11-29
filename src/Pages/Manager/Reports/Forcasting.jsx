@@ -32,35 +32,51 @@ const MedicineForecast = () => {
     );
   };
 
-const handlePredict = async () => {
-  const payload = {
-    medicine: selectedMedicines,
-    days_ahead: Number(forecastDays),
-    prediction_date: startDate,
-  };
+  const handlePredict = async () => {
+    const payload = {
+      medicine: selectedMedicines,
+      days_ahead: Number(forecastDays),
+      prediction_date: startDate,
+    };
 
-  try {
-    setLoading(true);
-    const response = await getForecast(payload);
+    try {
+      setLoading(true);
+      const response = await getForecast(payload);
 
-    if (!response.success) {
-      alert(response.message || "No predictions available");
-      setPredictions(null);
-      return;
+      if (!response.success) {
+        alert(response.message || "No predictions available");
+        setPredictions(null);
+        return;
+      }
+
+      // Transform flat array into grouped object by medicine
+      const grouped = response.predictions.reduce((acc, item) => {
+        const med = item.medicine;
+        if (!acc[med]) acc[med] = [];
+        acc[med].push({
+          date: item.date,
+          day: item.day_name,
+          predicted: item.rounded_demand,
+          predicted_raw: item.predicted_demand,
+        });
+        return acc;
+      }, {});
+
+      setPredictions(grouped);
+    } catch (error) {
+      console.error(
+        "Prediction API error:",
+        error.response?.data || error.message
+      );
+      alert(
+        `Prediction failed: ${JSON.stringify(
+          error.response?.data || error.message
+        )}`
+      );
+    } finally {
+      setLoading(false);
     }
-
-    setPredictions(response.predictions);
-  } catch (error) {
-    console.error("Prediction API error:", error.response?.data || error.message);
-    alert(`Prediction failed: ${JSON.stringify(error.response?.data || error.message)}`);
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-
-
+  };
 
   const getConfidenceColor = (confidence) => {
     if (confidence >= 90) return "text-green-600 bg-green-50";
