@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { FaSpinner } from "react-icons/fa";
 import { getProduct, addProduct } from "../../../api/productsApi";
 import { useTheme } from "../../../theme-support/ThemeContext";
+import { getUser } from "../../../api/counterAPI";
 
 import Loader from "../../../components/common/Loader";
 import MainHeader from "../../../components/common/MainHeader";
@@ -24,30 +25,55 @@ const AllProduct = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pharmacyId, setpharmacyId] = useState(null);
+  const [ws, setWs] = useState(null);cd
 
-  // handle add inventory barcode
-  const [ws, setWs] = useState(null);
   useEffect(() => {
+    const fetchCounter = async () => {
+      try {
+        const res = await getUser();
+        console.log("user details", res);
+        setpharmacyId(res.pharmacyId);
+      } catch (error) {
+        console.error(error.message);
+      }
+    };
+    fetchCounter();
+  }, []);
+  // handle add inventory barcode
+
+  useEffect(() => {
+    if (!pharmacyId) return; // make sure pharmacyId is available
+
     const socket = new WebSocket("ws://localhost:5000"); // backend IP
     setWs(socket);
-    console.log("reach in effect");
+
+    console.log("Connecting WebSocket for inventory page...");
+
     socket.onopen = () => {
-      console.log("WebSocket connected for product scanning");
-      // Identify this client as inventory page
+      console.log("WebSocket connected for inventory scanning");
+
+      // Identify this client as inventory with pharmacyId
       socket.send(
-        JSON.stringify({ type: "identify", clientType: "inventory" })
+        JSON.stringify({
+          type: "identify",
+          clientType: "inventory",
+          pharmacyId: pharmacyId, // required by backend filter
+          counterId: null, // optional
+        })
       );
     };
 
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        console.log(data);
+        console.log("WS message:", data);
+
         if (data.type === "barcode" && data.scanType === "inventory") {
-          console.log("reached here");
-          // auto-fill barcode field in modal
+          console.log("Inventory barcode received:", data.barcode);
+
+          // Update your form/modal state
           setNewProduct((prev) => ({ ...prev, barcode: data.barcode }));
-          console.log("Barcode scanned:", data.barcode);
         }
       } catch (err) {
         console.error("Error parsing WebSocket message:", err);
@@ -55,11 +81,11 @@ const AllProduct = () => {
     };
 
     socket.onclose = () =>
-      console.log("WebSocket disconnected for product scanning");
+      console.log("WebSocket disconnected for inventory scanning");
     socket.onerror = (err) => console.error("WebSocket error:", err);
 
     return () => socket.close();
-  }, []);
+  }, [pharmacyId]);
 
   const [newProduct, setNewProduct] = useState({
     brandName: "",
