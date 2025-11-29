@@ -1,9 +1,11 @@
 import { useTheme } from "../../../theme-support/ThemeContext";
 
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Settings = () => {
   const { theme } = useTheme();
+  const navigate = useNavigate();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -26,9 +28,33 @@ const Settings = () => {
     setNewPassword("");
     setConfirmPassword("");
   };
+
+  let user = null;
+  try {
+    user = JSON.parse(localStorage.getItem("user"));
+  } catch {
+    user = null;
+  }
+
+  const handleClick = () => {
+    if (user.role === "staff") {
+      navigate("/onlyCounter");
+    }
+    if (user.role === "manager") {
+      navigate(-1);
+    }
+  };
   return (
     <>
       <div className="flex justify-start px-10 mt-10 items-center  w-full  text-center">
+        <div className="flex justify-start mb-4">
+          <button
+            onClick={handleClick}
+            className="px-4 py-2 bg-bg-50 hover:bg-selected-50 text-white rounded-full"
+          >
+            Back
+          </button>
+        </div>
         <h2
           className={`text-xl tracking-widest text-left font-bold  ${
             theme === "dark" ? "text-light-50" : "text-primary-50"

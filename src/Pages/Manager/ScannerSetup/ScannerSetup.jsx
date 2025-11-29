@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import ScannerQR from "../../../components/ScannerQR";
 import api from "../../../utils/axiosInstance";
+import { useNavigate } from "react-router-dom";
 
 const ScannerSetup = () => {
+  const navigate = useNavigate();
   const [qrData, setQrData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,8 +34,34 @@ const ScannerSetup = () => {
   if (loading) return <p>Loading scanner setup...</p>;
   if (error) return <p>{error}</p>;
 
+  let user = null;
+  try {
+    user = JSON.parse(localStorage.getItem("user"));
+  } catch {
+    user = null;
+  }
+
+  const handleClick = () => {
+    if (user.role === "staff") {
+      navigate("/onlyCounter");
+    }
+    if (user.role === "manager") {
+      navigate(-1);
+    }
+  };
+
   return (
-    <div style={{ textAlign: "center", marginTop: "50px", marginLeft:"100px"}}>
+    <div
+      style={{ textAlign: "center", marginTop: "50px", marginLeft: "100px" }}
+    >
+      <div className="flex justify-start mb-4">
+        <button
+          onClick={handleClick}
+          className="px-4 py-2 bg-bg-50 hover:bg-selected-50 text-white rounded-full"
+        >
+          Back
+        </button>
+      </div>
       <h1>Scanner Setup</h1>
       <p>
         {qrData.type === "manager"
@@ -46,10 +74,16 @@ const ScannerSetup = () => {
 
       {/* Optional: Show user details */}
       <div style={{ marginTop: "20px" }}>
-        <p><strong>User Type:</strong> {qrData.role}</p>
-        <p><strong>Pharmacy ID:</strong> {qrData.pharmacyId}</p>
+        <p>
+          <strong>User Type:</strong> {qrData.role}
+        </p>
+        <p>
+          <strong>Pharmacy ID:</strong> {qrData.pharmacyId}
+        </p>
         {qrData.type === "staff" && (
-          <p><strong>Counter ID:</strong> {qrData.counterId}</p>
+          <p>
+            <strong>Counter ID:</strong> {qrData.counterId}
+          </p>
         )}
       </div>
     </div>

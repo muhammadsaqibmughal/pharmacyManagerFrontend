@@ -1,4 +1,4 @@
-import { Navigate, useLocation } from "react-router-dom";
+import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { getCookie } from "./getCookie";
 
 const ProtectedRoute = ({ children, allowedRoles = [], redirectStaff = false }) => {
@@ -47,7 +47,8 @@ const ProtectedRoute = ({ children, allowedRoles = [], redirectStaff = false }) 
     return <Navigate to="/pos/dashboard" replace />;
   }
 
-  return children;
+  // ✅ Return children if explicitly passed, otherwise Outlet for nested routes
+  return children ? children : <Outlet />;
 };
 
 export default ProtectedRoute;

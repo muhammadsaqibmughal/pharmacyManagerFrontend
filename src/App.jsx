@@ -100,15 +100,13 @@ const App = () => {
         element={<ManagerResetPassword />}
       />
 
-      {/* Staff-only Routes: Staff can ONLY access these */}
-      <Route
-        path="/onlyCounter"
-        element={
-          <ProtectedRoute allowedRoles={["staff" ]}>
-            <OnlyCounter />
-          </ProtectedRoute>
-        }
-      />
+      {/* Staff-only section */}
+      <Route element={<ProtectedRoute allowedRoles={["staff"]} />}>
+          <Route path="/onlyCounter" element={<OnlyCounter />} />
+          <Route path="/onlyCounter/settings" element={<Settings />} />
+          <Route path="/onlyCounter/scanner" element={<ScannerSetup />} />
+      </Route>
+
       <Route
         path="/profile"
         element={
@@ -118,33 +116,13 @@ const App = () => {
         }
       />
 
-      {/* Authenticated routes — restrict staff from accessing except above */}
-      <Route
-        path="/form"
-        element={
-          <ProtectedRoute redirectStaff={true}>
-            <FormPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/pending-approval"
-        element={
-          <ProtectedRoute redirectStaff={true}>
-            <PendingApproval />
-          </ProtectedRoute>
-        }
-      />
+      {/* Restrict staff */}
+      <Route path="/form" element={<ProtectedRoute redirectStaff={true}><FormPage /></ProtectedRoute>} />
+      <Route path="/pending-approval" element={<ProtectedRoute redirectStaff={true}><PendingApproval /></ProtectedRoute>} />
 
-      {/* Protected POS System & subroutes: Staff redirected away */}
-      <Route
-        path="/pos"
-        element={
-          <ProtectedRoute redirectStaff={true}>
-            <SideNavigation />
-          </ProtectedRoute>
-        }
-      >
+
+      {/* Manager POS Section */}
+      <Route path="/pos" element={<ProtectedRoute redirectStaff={true}><SideNavigation /></ProtectedRoute>} >
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="pos" element={<OnlyCounter />} />
         <Route path="products/add" element={<AllProduct />} />
@@ -160,8 +138,7 @@ const App = () => {
         <Route path="reports" element={<Reports />} />
         <Route path="forcasting" element={<MedicineForecast />} />
         <Route path="settings" element={<Settings />} />
-        <Route path="scanner" element={<ScannerSetup/>}/>
-        <Route path="profile" element={<ProfilePage />} />
+        <Route path="scanner" element={<ScannerSetup />} />
 
         {/* Dynamic Routes */}
         <Route path="purchase/:id" element={<SupplierDetail />} />
@@ -174,5 +151,6 @@ const App = () => {
     </Routes>
   );
 };
+
 
 export default App;

@@ -14,15 +14,23 @@ import {
   addSale,
   returnSale,
 } from "../../../api/posAPI";
-import {  getCounterList } from "../../../api/counterAPI";
+import { getCounterList } from "../../../api/counterAPI";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Outlet } from "react-router-dom";
 
 const OnlyCounter = () => {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
   const navigate = useNavigate();
+
+  let user = null;
+  try {
+    user = JSON.parse(localStorage.getItem("user"));
+  } catch {
+    user = null;
+  }
 
   const [isCounter, setIsCounter] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -103,7 +111,6 @@ const OnlyCounter = () => {
     if (product) {
       handleAddToCart(product);
       toast.success(`${product.brandName} added to cart`);
-
     } else {
       toast.error("Product not found");
     }
@@ -147,33 +154,33 @@ const OnlyCounter = () => {
 
   useEffect(() => {
     const fetchCounter = async () => {
-    try {
-        const res = await getCounterList()
-        console.log("CounterList" , res)
-        const name = res[0].name || "N/A"
-        setUserName(name)
-    } catch (error) {
-      console.log(error)
-    }
-  }
-    fetchCounter()
-  },[])
+      try {
+        const res = await getCounterList();
+        console.log("CounterList", res);
+        const name = res[0].name || "N/A";
+        setUserName(name);
+      } catch (error) {
+        console.error(error.message);
+      }
+    };
+    fetchCounter();
+  }, []);
 
   // Fetch items
   useEffect(() => {
     const fetchItems = async () => {
       try {
         const res = await getPOSItems();
-        
+
         const items = Array.isArray(res) ? res : res.data || [];
+        console.log("items", items);
         const normalizedItems = items.map((item) => ({
           ...item,
           id: item.pharmacyProductId,
           pharmacyProductId: item.pharmacyProductId,
         }));
         setItemsData(normalizedItems);
-          console.log("products" , itemsData)
-
+        console.log("products", itemsData);
       } catch (err) {
         console.error("Error fetching items:", err);
         toast.error("Failed to fetch items");
@@ -226,9 +233,6 @@ const OnlyCounter = () => {
       ),
     [itemsData, searchTerm]
   );
-
-
-
 
   const filteredInvoices = useMemo(
     () =>
@@ -415,7 +419,7 @@ const OnlyCounter = () => {
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate("/login");
+    navigate("/signup");
   };
 
   // ================= ALTERNATIVE MEDICINES FUNCTION =================
@@ -439,10 +443,16 @@ const OnlyCounter = () => {
     setAlternativeItems(alternatives);
   };
 
-  const dropDownButtons = [
-    { name: "Profile", onClick: () => navigate("/pos/profile") },
+  const dropDownButtonsManager = [
+    { name: "Profile", onClick: () => navigate("/pos/settings") },
     { name: "Scanner", onClick: () => navigate("/pos/scanner") },
-    { name: "Setting", onClick: () => navigate("/pos/profile") },
+    { name: "Logout", onClick: handleLogout },
+  ];
+
+  const dropDownButtonsStaff = [
+    { name: "Profile", onClick: () => navigate("/onlyCounter/settings") },
+    { name: "Scanner", onClick: () => navigate("/onlyCounter/scanner") },
+    { name: "Logout", onClick: handleLogout },
   ];
 
   return (
@@ -509,17 +519,37 @@ const OnlyCounter = () => {
                   }`}
                   onMouseLeave={() => setShowDropdown(false)}
                 >
-                  {dropDownButtons.map((button, idx) => (
-                    <button
-                      onClick={button.onClick}
-                      key={idx}
-                      className={`w-full text-left px-4 py-2 text-sm transition-colors ${
-                        isDark ? "hover:bg-slate-600" : "hover:bg-gray-100"
-                      }`}
-                    >
-                      {button.name}
-                    </button>
-                  ))}
+                  {user.role === "staff" && (
+                    <>
+                      {dropDownButtonsStaff.map((button, idx) => (
+                        <button
+                          onClick={button.onClick}
+                          key={idx}
+                          className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                            isDark ? "hover:bg-slate-600" : "hover:bg-gray-100"
+                          }`}
+                        >
+                          {button.name}
+                        </button>
+                      ))}
+                    </>
+                  )}
+
+                  {user.role === "manager" && (
+                    <>
+                      {dropDownButtonsManager.map((button, idx) => (
+                        <button
+                          onClick={button.onClick}
+                          key={idx}
+                          className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                            isDark ? "hover:bg-slate-600" : "hover:bg-gray-100"
+                          }`}
+                        >
+                          {button.name}
+                        </button>
+                      ))}
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -999,6 +1029,7 @@ const OnlyCounter = () => {
           </div>
         </div>
       </div>
+      <Outlet />
     </div>
   );
 };
