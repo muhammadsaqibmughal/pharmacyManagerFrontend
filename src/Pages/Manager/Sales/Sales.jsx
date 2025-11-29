@@ -25,11 +25,11 @@ const Sales = () => {
     try {
       setIsLoading(true);
       const res = await getSales({
-        page: 1, // fetch all items for frontend pagination
-        limit: 1000, // adjust as needed to get all sales
+        page: currentPage, // fetch all items for frontend pagination
+        limit: ITEM_PER_PAGE, // adjust as needed to get all sales
         search: searchTerm,
       });
-
+      console.log("Sales" , res)
       if (res?.sales) {
         setSales(res.sales);
         setTotalPages(Math.ceil(res.sales.length / ITEM_PER_PAGE));

@@ -14,6 +14,8 @@ import {
   addSale,
   returnSale,
 } from "../../../api/posAPI";
+import {  getCounterList } from "../../../api/counterAPI";
+
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -36,7 +38,7 @@ const OnlyCounter = () => {
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [itemsData, setItemsData] = useState([]);
   const [invoicesData, setInvoicesData] = useState([]);
-  const [userName, setUserName] = useState("Admin");
+  const [userName, setUserName] = useState("");
   const [selectedCounterId, setSelectedCounterId] = useState(null);
   const [selectedPaymentMode, setSelectedPaymentMode] = useState("cash");
 
@@ -101,6 +103,7 @@ const OnlyCounter = () => {
     if (product) {
       handleAddToCart(product);
       toast.success(`${product.brandName} added to cart`);
+
     } else {
       toast.error("Product not found");
     }
@@ -142,11 +145,26 @@ const OnlyCounter = () => {
     localStorage.setItem("pos_return_cart", JSON.stringify(returnCart));
   }, [returnCart]);
 
+  useEffect(() => {
+    const fetchCounter = async () => {
+    try {
+        const res = await getCounterList()
+        console.log("CounterList" , res)
+        const name = res[0].name || "N/A"
+        setUserName(name)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+    fetchCounter()
+  },[])
+
   // Fetch items
   useEffect(() => {
     const fetchItems = async () => {
       try {
         const res = await getPOSItems();
+        
         const items = Array.isArray(res) ? res : res.data || [];
         const normalizedItems = items.map((item) => ({
           ...item,
@@ -154,6 +172,8 @@ const OnlyCounter = () => {
           pharmacyProductId: item.pharmacyProductId,
         }));
         setItemsData(normalizedItems);
+          console.log("products" , itemsData)
+
       } catch (err) {
         console.error("Error fetching items:", err);
         toast.error("Failed to fetch items");
@@ -206,6 +226,9 @@ const OnlyCounter = () => {
       ),
     [itemsData, searchTerm]
   );
+
+
+
 
   const filteredInvoices = useMemo(
     () =>
@@ -416,6 +439,12 @@ const OnlyCounter = () => {
     setAlternativeItems(alternatives);
   };
 
+  const dropDownButtons = [
+    { name: "Profile", onClick: () => navigate("/pos/profile") },
+    { name: "Scanner", onClick: () => navigate("/pos/scanner") },
+    { name: "Setting", onClick: () => navigate("/pos/profile") },
+  ];
+
   return (
     <div
       className={`min-h-screen transition-colors ${
@@ -425,21 +454,75 @@ const OnlyCounter = () => {
       <ToastContainer />
 
       {/* ==================== HEADER ==================== */}
+      {/* Header */}
       <header
         className={`border-b ${
           isDark ? "border-slate-700 bg-slate-800" : "border-gray-200 bg-white"
         }`}
       >
         <div className="flex items-center justify-between px-6 py-4 max-md:flex-wrap gap-4">
-          <div className="flex items-center gap-6 max-md:gap-3">
-            <h1 className="text-2xl font-bold">POS System</h1>
-            <span
+          <div className="flex items-center gap-6 max-md:gap-3 max-md:flex-1">
+            <h1 className="text-2xl max-md:text-xl font-bold">POS System</h1>
+            <div
               className={`text-sm font-medium ${
                 isDark ? "text-gray-300" : "text-gray-600"
               }`}
             >
               {currentTime.toLocaleTimeString()}
-            </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={isDark}
+                onChange={toggleTheme}
+              />
+              <div
+                className={`w-11 h-6 rounded-full transition-colors ${
+                  isDark ? "bg-blue-600" : "bg-gray-300"
+                }`}
+              />
+              <span className="text-sm font-medium">
+                {isDark ? "Dark" : "Light"}
+              </span>
+            </label>
+            <div className="relative">
+              <button
+                onClick={() => setShowDropdown(!showDropdown)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                  isDark
+                    ? "bg-slate-700 hover:bg-slate-600"
+                    : "bg-gray-100 hover:bg-gray-200"
+                }`}
+              >
+                <FaUserCircle size={24} />
+                <span className="text-sm font-semibold max-md:hidden">
+                  {userName}
+                </span>
+              </button>
+              {showDropdown && (
+                <div
+                  className={`absolute right-0 top-full mt-2 w-48 rounded-lg shadow-xl z-50 ${
+                    isDark ? "bg-slate-700 text-white" : "bg-white text-black"
+                  }`}
+                  onMouseLeave={() => setShowDropdown(false)}
+                >
+                  {dropDownButtons.map((button, idx) => (
+                    <button
+                      onClick={button.onClick}
+                      key={idx}
+                      className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                        isDark ? "hover:bg-slate-600" : "hover:bg-gray-100"
+                      }`}
+                    >
+                      {button.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>

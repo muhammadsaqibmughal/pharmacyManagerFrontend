@@ -7,7 +7,7 @@ const MedicineForecast = () => {
   const [selectedMedicines, setSelectedMedicines] = useState([]);
   const [startDate, setStartDate] = useState("");
   const [forecastDays, setForecastDays] = useState("");
-  const [pharmacyName, setPharmacyName] = useState("");
+  // const [pharmacyName, setPharmacyName] = useState("");
   const [predictions, setPredictions] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const [medicines, setMedicines] = useState([]);
@@ -33,42 +33,32 @@ const MedicineForecast = () => {
   };
 
 const handlePredict = async () => {
-  if (
-    selectedMedicines.length === 0 ||
-    !startDate ||
-    !forecastDays ||
-    forecastDays < 1 ) 
-    {
-    alert("Please fill all fields correctly");
-    return;
-  }
-
   const payload = {
-    medicine: selectedMedicines,               // must be array
-    days_ahead: Number(forecastDays),         // convert to number
-    prediction_date: startDate,               // string YYYY-MM-DD
-  
+    medicine: selectedMedicines,
+    days_ahead: Number(forecastDays),
+    prediction_date: startDate,
   };
 
   try {
     setLoading(true);
-    console.log("Sending request to backend:", payload);
-
     const response = await getForecast(payload);
-    console.log("Forecast API response:", response);
 
-    setPredictions(response.data || response);
-  }  catch (error) {
-  console.error("Prediction API error:", error.response?.data || error.message);
-  alert(
-    `Prediction failed. Backend returned: ${JSON.stringify(
-      error.response?.data || error.message
-    )}`
-  );
+    if (!response.success) {
+      alert(response.message || "No predictions available");
+      setPredictions(null);
+      return;
+    }
+
+    setPredictions(response.predictions);
+  } catch (error) {
+    console.error("Prediction API error:", error.response?.data || error.message);
+    alert(`Prediction failed: ${JSON.stringify(error.response?.data || error.message)}`);
   } finally {
     setLoading(false);
   }
 };
+
+
 
 
 

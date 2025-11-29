@@ -57,8 +57,8 @@ const InvoiceHeader = ({ data, title, link, className, theme, formatDate }) => {
             </>
           ) : (
             <>
-              <p><strong>Invoice No:</strong> {data.saleInvoiceNo}</p>
-              <p><strong>Counter Name:</strong> {data.staff?.name || "N/A"}</p>
+              <p><strong>Invoice No:</strong> {data.invoiceNo || data.saleInvoiceNo || "N/A"}</p>
+              <p><strong>Counter Name:</strong> {data.posCounter?.name || data.staff?.name || "N/A"}</p>
             </>
           )}
         </div>

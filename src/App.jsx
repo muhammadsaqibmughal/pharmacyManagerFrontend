@@ -146,7 +146,6 @@ const App = () => {
         }
       >
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="scanner" element={<ScannerSetup/>}/>
         <Route path="pos" element={<OnlyCounter />} />
         <Route path="products/add" element={<AllProduct />} />
         <Route path="products/package" element={<AllPackages />} />
@@ -161,6 +160,7 @@ const App = () => {
         <Route path="reports" element={<Reports />} />
         <Route path="forcasting" element={<MedicineForecast />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="scanner" element={<ScannerSetup/>}/>
         <Route path="profile" element={<ProfilePage />} />
 
         {/* Dynamic Routes */}

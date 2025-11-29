@@ -17,8 +17,9 @@ const SalesReturnDetail = () => {
   const navigate = useNavigate();
 
   const [returnData, setReturnData] = useState(
-    location.state?.returnData || null
+    location.state?.ret || null
   );
+  console.log("State return: ", returnData)
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,7 +30,6 @@ const SalesReturnDetail = () => {
       if (!returnData && id) {
         try {
           setIsLoading(true);
-          const res = await getReturnSaleById(id); // fetch by id
           setReturnData(res?.returnSale || null);
         } catch (err) {
           console.error("Failed to fetch return data:", err);
@@ -55,9 +55,9 @@ const SalesReturnDetail = () => {
   const items = returnData.items || [];
 
   const formatDate = (dateStr) =>
-    dateStr ? new Date(dateStr).toISOString().split("T")[0] : "N/A";
+    dateStr ? new Date(dateStr).toLocaleDateString() : "N/A";
 
-  const formatCurrency = (value) =>
+  const formatCurrency = (value) => 
     new Intl.NumberFormat("en-PK", {
       style: "currency",
       currency: "PKR",

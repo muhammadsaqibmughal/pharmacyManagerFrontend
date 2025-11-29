@@ -24,7 +24,7 @@ const SalesReturn = () => {
   const fetchReturns = async () => {
     try {
       setIsLoading(true);
-      const res = await getReturnSales({ page: 1, limit: 1000, search: searchTerm });
+      const res = await getReturnSales({ page: currentPage, limit: ITEM_PER_PAGE, search: searchTerm });
       if (res?.returnSales) {
         setReturns(res.returnSales);
         setTotalPages(Math.ceil(res.returnSales.length / ITEM_PER_PAGE));
@@ -65,7 +65,7 @@ const SalesReturn = () => {
       invoiceNo: (
         <Link
           to={`/pos/sales/salesReturn/${ret.id}`}
-          state={{ returnData: ret }}
+          state={{ ret }}
           className="text-blue-500 hover:underline"
         >
           {ret.saleInvoiceNo || "N/A"}

@@ -17,6 +17,7 @@ const CounterSaleDetail = () => {
   const { sales = [], counterName, date } = location.state || {};
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  console.log("Sales" , sales)
 
   if (!sales || sales.length === 0) {
     return (
@@ -47,7 +48,7 @@ const CounterSaleDetail = () => {
   );
 
   const totalPrice = filteredSales.reduce(
-    (sum, item) => sum + (item.unitPrice || 0),
+    (sum, item) => sum + ((item.unitPrice*item.quantity) || 0),
     0
   );
 
@@ -62,7 +63,7 @@ const columns = [
 const tableData = paginatedItems.map((item) => ({
   item: item?.pharmacyProduct?.medicine?.brandName || "Unknown",
   quantity: item.quantity || 0,
-  price: item.unitPrice || 0,
+  price: item.unitPrice*item.quantity || 0,
 }));
 
 // Add total row

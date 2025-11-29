@@ -14,7 +14,7 @@ const SalesDetail = () => {
   const location = useLocation();
   const sale = location.state?.sale;
   const navigate = useNavigate()
-
+  console.log("sale state " ,sale)
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -132,13 +132,6 @@ const totalRow = {
           }
         />
       )}
-
-      {/* Net Total */}
-      <div
-        className={`text-right mt-4 font-bold `}
-      >
-        Net Total: {formatCurrency(totalLineSum)}
-      </div>
     </div>
   );
 };

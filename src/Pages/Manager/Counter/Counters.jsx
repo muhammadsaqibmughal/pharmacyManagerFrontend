@@ -31,6 +31,7 @@ const Counter = () => {
       setIsLoading(true);
       const response = await getCounterList();
       setCounterData(Array.isArray(response) ? response : []);
+      console.log("Response", response)
     } catch (err) {
       console.error("Error fetching counters", err.message);
     } finally {
@@ -91,9 +92,6 @@ const Counter = () => {
     currentPage * ITEM_PER_PAGE
   );
 
-  console.log(paginatedItems
-
-  )
   // Table columns
   const columns = [
     { key: "name", label: "Counter Name" },

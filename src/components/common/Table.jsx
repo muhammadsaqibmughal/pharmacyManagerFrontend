@@ -61,10 +61,10 @@ const Table = ({
       </div>
       {pagination && (
         <div
-          className={`px-8 py-2   border-t  backdrop-blur-sm ${
+          className={`px-8 py-2     backdrop-blur-sm ${
             theme === "dark"
               ? "border-slate-700/50 bg-slate-800/40"
-              : "border-gray-200/80 bg-gradient-to-r from-gray-50/80 to-slate-50/80"
+              : ""
           }`}
         >
           {pagination}

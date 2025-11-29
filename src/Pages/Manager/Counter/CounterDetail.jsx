@@ -44,6 +44,7 @@ const CounterDetail = () => {
 
   const counterName = counter.name || "Unnamed Counter";
   const sales = counter.sales || [];
+  console.log("sales" ,sales)
 
   // Filter sales by invoiceNo or date
   const filteredSales = sales.filter((sale) => {
@@ -59,7 +60,7 @@ const CounterDetail = () => {
     (currentPage - 1) * ITEM_PER_PAGE,
     currentPage * ITEM_PER_PAGE
   );
-
+  console.log("paginated" , paginatedSales)
   // Table columns
   const columns = [
     { key: "invoiceNo", label: "Invoice No" },
@@ -90,7 +91,7 @@ const CounterDetail = () => {
     <div
       className={`mt-8 p-10`}
     >
-      <MainHeader backButton="← Back" onButtonClick={() => navigate(-1)} title="All Counter" theme={theme} />
+      <MainHeader backButton="← Back" onButtonClick={() => navigate(-1)} title="All Counter Sales" theme={theme} />
       <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
       {isLoading ? (
