@@ -6,6 +6,7 @@ import {
 } from "react-icons/fa";
 import { GiMedicines, GiHealthCapsule } from "react-icons/gi";
 import { MdLocalPharmacy } from "react-icons/md";
+import { BsQrCodeScan } from "react-icons/bs";
 import {
   FaCashRegister,
   FaClipboardList,
@@ -281,6 +282,11 @@ export const pos = [
     name: "Settings",
     href: "/pos/settings",
     icon: TbReportAnalytics,
+  },
+    {
+    name: "Scanner",
+    href: "/pos/scanner",
+    icon: BsQrCodeScan,
   },
  
 ];

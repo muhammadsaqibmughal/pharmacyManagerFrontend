@@ -25,6 +25,42 @@ const AllProduct = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // handle add inventory barcode
+  const [ws, setWs] = useState(null);
+  useEffect(() => {
+    const socket = new WebSocket("ws://localhost:5000"); // backend IP
+    setWs(socket);
+    console.log("reach in effect");
+    socket.onopen = () => {
+      console.log("WebSocket connected for product scanning");
+      // Identify this client as inventory page
+      socket.send(
+        JSON.stringify({ type: "identify", clientType: "inventory" })
+      );
+    };
+
+    socket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log(data);
+        if (data.type === "barcode" && data.scanType === "inventory") {
+          console.log("reached here");
+          // auto-fill barcode field in modal
+          setNewProduct((prev) => ({ ...prev, barcode: data.barcode }));
+          console.log("Barcode scanned:", data.barcode);
+        }
+      } catch (err) {
+        console.error("Error parsing WebSocket message:", err);
+      }
+    };
+
+    socket.onclose = () =>
+      console.log("WebSocket disconnected for product scanning");
+    socket.onerror = (err) => console.error("WebSocket error:", err);
+
+    return () => socket.close();
+  }, []);
+
   const [newProduct, setNewProduct] = useState({
     brandName: "",
     manufacturer: "",
@@ -105,9 +141,7 @@ const AllProduct = () => {
   ];
 
   return (
-    <div
-      className={`mt-8 p-10 `}
-    >
+    <div className={`mt-8 p-10 `}>
       <MainHeader
         title="All Products"
         buttonText="Add Product"
@@ -115,7 +149,11 @@ const AllProduct = () => {
         theme={theme}
       />
 
-      <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} placeholder={"Search by brandName..."} />
+      <Search
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        placeholder={"Search by brandName..."}
+      />
 
       {isLoading ? (
         <Loader />

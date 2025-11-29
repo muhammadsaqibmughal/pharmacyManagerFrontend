@@ -44,17 +44,16 @@ const OnlyCounter = () => {
   const [selectedGeneric, setSelectedGeneric] = useState(null);
   const [alternativeItems, setAlternativeItems] = useState([]);
 
-  // manager add cart using scanner
+  // POS add cart or receipt scan using scanner
   const [scannedCode, setScannedCode] = useState("");
   const [ws, setWs] = useState(null);
 
   useEffect(() => {
-    const socket = new WebSocket("ws://localhost:5000"); // use your backend IP in production
+    const socket = new WebSocket("ws://localhost:5000"); // backend IP
     setWs(socket);
 
     socket.onopen = () => {
       console.log("WebSocket connected");
-
       // Identify this client as POS
       socket.send(JSON.stringify({ type: "identify", clientType: "pos" }));
     };
@@ -64,31 +63,37 @@ const OnlyCounter = () => {
         const data = JSON.parse(event.data);
 
         if (data.type === "barcode") {
-          console.log("Received barcode via WebSocket:", data.barcode);
-          handleBarcodeScan(data.barcode);
+          console.log(`Received barcode (${data.scanType}):`, data.barcode);
+
+          switch (data.scanType) {
+            case "cart":
+              handleAddToCartScan(data.barcode);
+              break;
+
+            case "receipt":
+              console.log(data.barcode);
+              handleReceiptScan(data.barcode);
+              break;
+
+            default:
+              console.warn("Unknown scan type:", data.scanType);
+          }
         }
       } catch (err) {
         console.error("Error parsing WebSocket message:", err);
       }
     };
 
-    socket.onclose = () => {
-      console.log("WebSocket disconnected");
-    };
+    socket.onclose = () => console.log("WebSocket disconnected");
+    socket.onerror = (err) => console.error("WebSocket error:", err);
 
-    socket.onerror = (err) => {
-      console.error("WebSocket error:", err);
-    };
+    return () => socket.close();
+  }, [itemsData, invoicesData]);
 
-    return () => {
-      socket.close();
-    };
-  }, [itemsData]);
-
-  const handleBarcodeScan = (code) => {
+  // Handle adding item to cart
+  const handleAddToCartScan = (code) => {
     if (!code) return;
 
-    // search in itemsData
     const product = itemsData.find(
       (item) => item.barcode?.toString() === code.toString()
     );
@@ -100,7 +105,24 @@ const OnlyCounter = () => {
       toast.error("Product not found");
     }
 
-    // reset scanned code
+    setScannedCode("");
+  };
+
+  // Handle receipt/invoice scan
+  const handleReceiptScan = (code) => {
+    if (!code) return;
+
+    const invoice = invoicesData.find(
+      (inv) => inv.invoiceNo?.toString() === code.toString()
+    );
+
+    if (invoice) {
+      handleInvoiceSelect(invoice);
+      toast.success(`Invoice ${invoice.invoiceNo} loaded for return`);
+    } else {
+      toast.error("Invoice not found");
+    }
+
     setScannedCode("");
   };
 

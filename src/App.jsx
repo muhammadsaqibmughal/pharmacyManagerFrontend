@@ -62,6 +62,9 @@ import PendingApproval from "./Pages/Manager/User/PendingApproval";
 import ProfilePage from "./Pages/Manager/User/ProfilePage";
 import Settings from "./Pages/Manager/User/Settings";
 
+// Scanner Setup
+import  ScannerSetup from "./Pages/Manager/ScannerSetup/ScannerSetup"
+
 
 // Route Guard
 import ProtectedRoute from "./utils/ProtectedRoute";
@@ -143,6 +146,7 @@ const App = () => {
         }
       >
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="scanner" element={<ScannerSetup/>}/>
         <Route path="pos" element={<OnlyCounter />} />
         <Route path="products/add" element={<AllProduct />} />
         <Route path="products/package" element={<AllPackages />} />
