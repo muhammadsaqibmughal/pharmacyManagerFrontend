@@ -26,23 +26,12 @@ import { AiOutlineBarChart } from "react-icons/ai";
 import { TbReportAnalytics } from "react-icons/tb";
 
 export const navLinks = [
-  {
-    name: "Products",
-    url: "/products",
-  },
-  {
-    name: "Services",
-    url: "/services",
-  },
-  {
-    name: "People",
-    url: "/people",
-  },
-  {
-    name: "Features",
-    url: "/feature",
-  },
+  { name: "Products", id: "products" },
+  { name: "Services", id: "services" },
+  { name: "People", id: "people" },
+  { name: "Features", id: "feature" },
 ];
+
 
 export const words = [
   {

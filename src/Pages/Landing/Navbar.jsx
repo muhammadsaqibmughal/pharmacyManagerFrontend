@@ -32,51 +32,52 @@ const Navbar = () => {
         >
           PharmaConnect +
         </h2>
-
         <ul className="hidden relative md:flex gap-5">
           {navLinks.map((item) => (
             <li
-              key={item.name} // Use unique string key
+              key={item.name}
               className="relative group cursor-pointer transform transition duration-300 hover:scale-110 hover:font-semibold ease-in"
+              onClick={() => {
+                const section = document.getElementById(item.id);
+                section?.scrollIntoView({ behavior: "smooth" });
+              }}
             >
-              <span className="text-white text-sm">
-                <a href={item.url}>{item.name}</a>
-              </span>
+              <span className="text-white text-sm">{item.name}</span>
               <span className="absolute bottom-0 bg-white left-0 w-0 h-0.5 transform transition-all duration-300 group-hover:w-full" />
             </li>
           ))}
         </ul>
       </div>
-          <div className="flex justify-end  items-center w-90 space-x-2">
-                 <div className="px-2 mb-2 flex items-center mt-2 justify-center ">
-        <label className="inline-flex items-center cursor-pointer">
-          {/* Hidden Checkbox */}
-          <input
-            type="checkbox"
-            className="sr-only peer"
-            checked={theme === "dark"}
-            onChange={toggleTheme}
-          />
+      <div className="flex justify-end  items-center w-90 space-x-2">
+        <div className="px-2 mb-2 flex items-center mt-2 justify-center ">
+          <label className="inline-flex items-center cursor-pointer">
+            {/* Hidden Checkbox */}
+            <input
+              type="checkbox"
+              className="sr-only peer"
+              checked={theme === "dark"}
+              onChange={toggleTheme}
+            />
 
-          {/* Label Text */}
-          <span className="ml-3 text-sm font-medium text-white">
-            {theme === "dark" ? "Dark" : "Light"} Mode
-          </span>
+            {/* Label Text */}
+            <span className="ml-3 text-sm font-medium text-white">
+              {theme === "dark" ? "Dark" : "Light"} Mode
+            </span>
 
-          {/* Toggle Background */}
-          <div className="w-11 ml-3 h-6 bg-gray-900 peer-focus:outline-none peer-focus:ring-1 peer-focus:ring-white/60 rounded-full peer dark:bg-gray-600 peer-checked:bg-green-400 relative transition-colors duration-300">
-            {/* Toggle Circle */}
-            <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-300 peer-checked:translate-x-5" />
-          </div>
-        </label>
+            {/* Toggle Background */}
+            <div className="w-11 ml-3 h-6 bg-gray-900 peer-focus:outline-none peer-focus:ring-1 peer-focus:ring-white/60 rounded-full peer dark:bg-gray-600 peer-checked:bg-green-400 relative transition-colors duration-300">
+              {/* Toggle Circle */}
+              <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-300 peer-checked:translate-x-5" />
+            </div>
+          </label>
+        </div>
+        <button
+          onClick={handleRegisterClick}
+          className="border-2 border-selected-50 hover:bg-selected-50 text-white rounded-xl p-1.5 transition duration-300"
+        >
+          <span className="">Register</span>
+        </button>
       </div>
-      <button
-        onClick={handleRegisterClick}
-        className="border-2 border-selected-50 hover:bg-selected-50 text-white rounded-xl p-1.5 transition duration-300"
-      >
-        <span className="">Register</span>
-      </button>
-          </div>
     </div>
   );
 };

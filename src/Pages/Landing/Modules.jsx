@@ -89,10 +89,12 @@ const Modules = () => {
 
             <div className="flex xl:w-4/6  max-sm:w-95 w-full overflow-hidden flex-row max-sm:ml-5 max-md:ml-20 max-lg:ml-32 max-xl:ml-40 p-5 gap-8">
               <div className="flex items-start gap-15">
-                <div className="timeline-wrapper " >
-                  <div className={`timeline  ${
-            theme === "dark" ? "bg-dark-50" : " bg-light-50"
-          }`}/>
+                <div className="timeline-wrapper ">
+                  <div
+                    className={`timeline  ${
+                      theme === "dark" ? "bg-dark-50" : " bg-light-50"
+                    }`}
+                  />
                   <div className="gradient-line" />
                 </div>
 

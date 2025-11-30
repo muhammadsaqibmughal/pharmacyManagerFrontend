@@ -35,7 +35,7 @@ const PurchaseReturn = () => {
       setIsLoading(false);
     }
   };
-
+  console.log(purchaseReturns)
   useEffect(() => {
     fetchReturns();
   }, []);

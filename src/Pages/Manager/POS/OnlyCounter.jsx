@@ -226,17 +226,17 @@ const OnlyCounter = () => {
     const fetchInvoices = async () => {
       try {
         const res = await getSales();
-        console.log(res);
         const invoices = Array.isArray(res)
-          ? res
-          : res.sales || res.data?.sales || [];
+        ? res
+        : res.sales || res.data?.sales || [];
+        console.log("invoice" , invoices);
         const normalizedInvoices = invoices.map((inv) => ({
           ...inv,
           id: inv.id || inv._id,
           items:
             inv.items?.map((item) => ({
               ...item,
-              id: item.pharmacyProductId,
+              id: item.pharmacyProduct.id,
               saleItemId: item.id,
               sellingPrice: item.unitPrice || 0,
               brandName:
@@ -244,6 +244,7 @@ const OnlyCounter = () => {
             })) || [],
         }));
         setInvoicesData(normalizedInvoices);
+        console.log("normalized invoice" , invoicesData)
       } catch (err) {
         console.error("Error fetching invoices:", err);
         toast.error("Failed to fetch invoices");
@@ -282,10 +283,8 @@ const OnlyCounter = () => {
     0
   );
   const discountAmount =
-    discountType === "percentage"
-      ? (saleTotal * discountValue) / 100
-      : discountValue;
-  const total = Math.max(0, saleTotal - discountAmount);
+    discountType === "percentage" ? (saleTotal * discountValue) / 100 : discountValue;
+    const total = Math.max(0, saleTotal - discountAmount);
 
   // Cart handlers
   const handleAddToCart = (product) => {
@@ -352,6 +351,7 @@ const OnlyCounter = () => {
         brandName: item.pharmacyProduct?.medicine?.brandName || item.brandName,
       }))
     );
+    console.log(selectedInvoice)
     setSelectedReturnItems(new Set());
   };
 
@@ -614,7 +614,7 @@ const OnlyCounter = () => {
               {/* Product Table */}
               <div
                 className={`rounded-lg border overflow-hidden ${
-                  isDark ? "border-slate-700 bg-slate-800" : "border-gray-200"
+                  isDark ? "border-slate-700 bg-slate-800" : "border-gray-200 "
                 }`}
               >
                 <div className="overflow-y-auto max-h-96">
@@ -875,7 +875,6 @@ const OnlyCounter = () => {
                   >
                     <option value="cash">Cash</option>
                     <option value="card">Card</option>
-                    <option value="upi">UPI</option>
                   </select>
                 </div>
               )}
