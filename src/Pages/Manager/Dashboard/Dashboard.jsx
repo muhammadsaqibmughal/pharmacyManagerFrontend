@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import Card, { CardContent } from "../../Landing/Card.jsx";
 import { useTheme } from "../../../theme-support/ThemeContext.jsx";
@@ -28,27 +28,77 @@ import {
   nearExpiryProducts,
 } from "../../../constants/index.js";
 
+import {
+  getMonthlySales,
+  getMostSaleProducts,
+  getTotalProduct,
+  getTotalReturn,
+  getTotalSales,
+  getWeeklySales,
+} from "../../../api/dashboardAPI.js";
+import { getExpiry } from "../../../api/inventoryAPI.js";
+
 const ITEMS_PER_PAGE = 5;
 const Dashboard = () => {
   const { theme } = useTheme();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [currentPage2, setCurrentPage2] = useState(1);
+  const [totalSales, setTotalSales] = useState(0);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [totalReturns, setTotalReturns] = useState(0);
+  const [topProducts, setTopProducts] = useState([]);
+  const [monthlySales, setMonthlySales] = useState([]);
+  const [weeklySales, setWeeklySales] = useState([]);
+  const [expiryProducts, setExpiryProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        // Fetch all API calls in parallel
+        const [
+          totalSalesRes,
+          totalProductsRes,
+          totalReturnsRes,
+          topProductsRes,
+          monthlySalesRes,
+          weeklySalesRes,
+          expiryProductRes,
+        ] = await Promise.all([
+          getTotalSales(),
+          getTotalProduct(),
+          getTotalReturn(),
+          getMostSaleProducts(),
+          getMonthlySales(),
+          getWeeklySales(),
+          getExpiry(),
+        ]);
+
+        // Update states
+        setTotalSales(totalSalesRes.data.totalSales || 0);
+        setTotalProducts(totalProductsRes.data.totalProducts || 0);
+        setTotalReturns(totalReturnsRes.totalReturn || 0);
+        setTopProducts(topProductsRes.topSellingProducts || []);
+        setMonthlySales(monthlySalesRes || []);
+        setWeeklySales(weeklySalesRes || []);
+        setExpiryProducts(expiryProductRes.data || []);
+      } catch (error) {
+        console.log("Dashboard data load failed", error);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   // Calculate total pages
   const totalPages = Math.ceil(nearExpiryProducts.length / ITEMS_PER_PAGE);
   const totalPages2 = Math.ceil(topProducts.length / ITEMS_PER_PAGE);
 
   // Get items for current page
-  const paginatedProducts = nearExpiryProducts.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
-
-  const paginatedProducts2 = topProducts.slice(
-    (currentPage2 - 1) * ITEMS_PER_PAGE,
-    currentPage2 * ITEMS_PER_PAGE
-  );
+  // const paginatedProducts = nearExpiryProducts.slice(
+  //   (currentPage - 1) * ITEMS_PER_PAGE,
+  //   currentPage * ITEMS_PER_PAGE
+  // );
 
   return (
     <div
@@ -80,7 +130,7 @@ const Dashboard = () => {
             >
               Total Sales
             </h2>
-            <p className="text-2xl font-bold">2,500</p>
+            <p className="text-2xl font-bold">{totalSales}</p>
           </div>
 
           <div
@@ -93,7 +143,7 @@ const Dashboard = () => {
             >
               Total Products
             </h2>
-            <p className="text-2xl font-bold">3,800</p>
+            <p className="text-2xl font-bold">{totalProducts}</p>
           </div>
           <div
             className={`bg-[#e8d9c5] rounded-xl backdrop-blur-lg shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] p-5`}
@@ -103,9 +153,9 @@ const Dashboard = () => {
                 theme === "dark" ? "text-primary-50" : "text-primary-50"
               }`}
             >
-              Customer Visites
+              Total Returns
             </h2>
-            <p className="text-2xl font-bold">1,300</p>
+            <p className="text-2xl font-bold">{totalReturns}</p>
           </div>
         </div>
       </div>
@@ -128,7 +178,7 @@ const Dashboard = () => {
             Weekly Sales
           </h2>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={salesData}>
+            <BarChart data={weeklySales}>
               <XAxis dataKey="day" />
               <YAxis dataKey="sales" />
               <Tooltip />
@@ -234,56 +284,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Demanding Products  */}
-      {/* <div className="flex min-w-72 flex-1 flex-col gap-4 rounded-xl border border-[#3d4d5c] p-6">
-        <p className="text-white text-base font-medium">Top 20 Demanding Products</p>
-        <p className="text-white text-[32px] font-bold leading-tight truncate">
-          Based on Recent Sales
-        </p>
-
-        <div className="flex min-h-[400px] flex-1 flex-col gap-6 py-4">
-          <ResponsiveContainer width="100%" height={350}>
-            <BarChart
-              data={demandingProducts}
-              layout="vertical"
-              margin={{ top: 10, right: 20, left: 20, bottom: 10 }}
-            >
-              <defs>
-                <linearGradient id="barGradient" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#16A34A" stopOpacity={0.8} />
-                  <stop offset="100%" stopColor="#16A34A" stopOpacity={0.2} />
-                </linearGradient>
-              </defs>
-
-              <XAxis type="number" hide />
-              <YAxis
-                dataKey="product"
-                type="category"
-                tick={{ fill: "#9daebe", fontSize: 12 }}
-                width={100}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#1f2937",
-                  border: "none",
-                  borderRadius: "8px",
-                  color: "#fff",
-                }}
-                labelStyle={{ color: "#fff" }}
-                itemStyle={{ color: "#bbf7d0" }}
-              />
-              <Bar
-                dataKey="sales"
-                fill="url(#barGradient)"
-                radius={[0, 10, 10, 0]}
-                barSize={10}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div> */}
-
-      <div
+      {/* <div
         className={`rounded-xl p-5 mt-8 border ${
           theme === "dark"
             ? "border-white/20 bg-white/10"
@@ -356,7 +357,7 @@ const Dashboard = () => {
             ))}
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Near Expiry Products */}
       <div
@@ -392,13 +393,13 @@ const Dashboard = () => {
                 }`}
               >
                 <th className="py-2 px-4">Product Name</th>
-                <th className="py-2 px-4">Category</th>
+                <th className="py-2 px-4">Formula</th>
                 <th className="py-2 px-4">Expiry Date</th>
                 <th className="py-2 px-4">Stock</th>
               </tr>
             </thead>
             <tbody>
-              {paginatedProducts.map((product, idx) => (
+              {expiryProducts.map((product, idx) => (
                 <tr
                   key={idx}
                   className={` px-4 py-2 text-xs font-medium border-b ${
@@ -406,10 +407,20 @@ const Dashboard = () => {
                   }`}
                 >
                   {" "}
-                  <td className="py-2 px-4 font-semibold">{product.name}</td>
-                  <td className="py-2 px-4 font-medium">{product.category}</td>
-                  <td className="py-2 px-4 font-medium">{product.expiry}</td>
-                  <td className="py-2 px-4 font-medium">{product.stock}</td>
+                  <td className="py-2 px-4 font-semibold">
+                    {product.brandName}
+                  </td>
+                  <td className="py-2 px-4 font-medium">
+                    {product.genericName}
+                  </td>
+                  <td className="py-2 px-4 font-medium">
+                    {new Date(product.earliestExpiry).toLocaleDateString(
+                      "en-US"
+                    )}
+                  </td>
+                  <td className="py-2 px-4 font-medium">
+                    {product.totalQuantity}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -481,13 +492,13 @@ const Dashboard = () => {
               >
                 {" "}
                 <th className="py-2 px-4">Product Name</th>
-                <th className="py-2 px-4">Category</th>
+                {/* <th className="py-2 px-4">Category</th> */}
                 <th className="py-2 px-4">Unit Sold</th>
-                <th className="py-2 px-4">Revenue</th>
+                {/* <th className="py-2 px-4">Revenue</th> */}
               </tr>
             </thead>
             <tbody>
-              {paginatedProducts2.map((product, idx) => (
+              {topProducts.map((product, idx) => (
                 <tr
                   key={idx}
                   className={` px-4 py-2 text-xs font-medium border-b ${
@@ -495,10 +506,14 @@ const Dashboard = () => {
                   }`}
                 >
                   {" "}
-                  <td className="py-2 px-4 font-semibold">{product.name}</td>
-                  <td className="py-2 px-4 font-medium">{product.category}</td>
-                  <td className="py-2 px-4 font-medium">{product.units}</td>
-                  <td className="py-2 px-4 font-medium">{product.revenue}</td>
+                  <td className="py-2 px-4 font-semibold">
+                    {product.productName}
+                  </td>
+                  {/* <td className="py-2 px-4 font-medium">{product.category}</td> */}
+                  <td className="py-2 px-4 font-medium">
+                    {product.quantitySold}
+                  </td>
+                  {/* <td className="py-2 px-4 font-medium">{product.revenue}</td> */}
                 </tr>
               ))}
             </tbody>
