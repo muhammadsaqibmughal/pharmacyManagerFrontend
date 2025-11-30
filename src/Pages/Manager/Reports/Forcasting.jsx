@@ -1,19 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Calendar, TrendingUp, Package } from "lucide-react";
 import { getProduct } from "../../../api/productsApi";
-import { getForecast } from "../../../api/forcastingApi";
+import { getForecast, getTrain } from "../../../api/forcastingApi";
 
 const MedicineForecast = () => {
   const [selectedMedicines, setSelectedMedicines] = useState([]);
   const [startDate, setStartDate] = useState("");
   const [forecastDays, setForecastDays] = useState("");
-  // const [pharmacyName, setPharmacyName] = useState("");
   const [predictions, setPredictions] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const [medicines, setMedicines] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [predictLoading, setPredictLoading] = useState(false);
+  const [retrainLoading, setRetrainLoading] = useState(false);
+  const [retrainStatus, setRetrainStatus] = useState(null);
 
-  // Fetch medicines from backend
+  const dropdownRef = useRef(null);
+
+  // Fetch medicines on mount
   useEffect(() => {
     const fetchMedicines = async () => {
       try {
@@ -26,6 +29,17 @@ const MedicineForecast = () => {
     fetchMedicines();
   }, []);
 
+  // Handle outside click to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const toggleMedicine = (med) => {
     setSelectedMedicines((prev) =>
       prev.includes(med) ? prev.filter((m) => m !== med) : [...prev, med]
@@ -33,6 +47,11 @@ const MedicineForecast = () => {
   };
 
   const handlePredict = async () => {
+    if (!selectedMedicines.length || !startDate || !forecastDays) {
+      alert("Please select medicines, start date, and forecast days.");
+      return;
+    }
+
     const payload = {
       medicine: selectedMedicines,
       days_ahead: Number(forecastDays),
@@ -40,7 +59,7 @@ const MedicineForecast = () => {
     };
 
     try {
-      setLoading(true);
+      setPredictLoading(true);
       const response = await getForecast(payload);
 
       if (!response.success) {
@@ -49,7 +68,7 @@ const MedicineForecast = () => {
         return;
       }
 
-      // Transform flat array into grouped object by medicine
+      // Group predictions by medicine
       const grouped = response.predictions.reduce((acc, item) => {
         const med = item.medicine;
         if (!acc[med]) acc[med] = [];
@@ -58,6 +77,7 @@ const MedicineForecast = () => {
           day: item.day_name,
           predicted: item.rounded_demand,
           predicted_raw: item.predicted_demand,
+          confidence: item.confidence ?? 100,
         });
         return acc;
       }, {});
@@ -74,7 +94,57 @@ const MedicineForecast = () => {
         )}`
       );
     } finally {
-      setLoading(false);
+      setPredictLoading(false);
+    }
+  };
+
+  const handleRetrain = async () => {
+    if (!window.confirm("Are you sure you want to retrain the model?")) return;
+
+    try {
+      setRetrainLoading(true);
+      setRetrainStatus(null);
+
+      const response = await getTrain();
+
+      // Handle success response
+      if (response.success) {
+        setRetrainStatus({
+          type: "success",
+          message: response.message || "Model retraining started successfully!",
+          metrics: response.metrics || null,
+          model_path: response.model_path || null,
+        });
+      } else {
+        // Handle failure response
+        let errorMsg = "Failed to retrain model";
+        if (response.error) {
+          if (typeof response.error === "string") {
+            errorMsg = response.error;
+          } else if (response.error.message) {
+            errorMsg = response.error.message;
+            if (response.error.stats) {
+              errorMsg += ` (Data stats: ${JSON.stringify(
+                response.error.stats
+              )})`;
+            }
+          }
+        }
+        setRetrainStatus({ type: "error", message: errorMsg });
+      }
+    } catch (error) {
+      console.error("Retraining error:", error);
+      let msg = "Failed to retrain model";
+      if (error.response?.data) {
+        if (error.response.data.error?.message)
+          msg = error.response.data.error.message;
+        else msg = JSON.stringify(error.response.data);
+      } else if (error.message) {
+        msg = error.message;
+      }
+      setRetrainStatus({ type: "error", message: msg });
+    } finally {
+      setRetrainLoading(false);
     }
   };
 
@@ -103,23 +173,8 @@ const MedicineForecast = () => {
         {/* Input Section */}
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 border border-gray-100">
           <div className="grid md:grid-cols-4 gap-6">
-            {/* Pharmacy Name */}
-            {/* <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                <Package className="w-4 h-4 mr-2 text-blue-600" />
-                Pharmacy Name
-              </label>
-              <input
-                type="text"
-                value={pharmacyName}
-                onChange={(e) => setPharmacyName(e.target.value)}
-                placeholder="Enter pharmacy name..."
-                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg"
-              />
-            </div> */}
-
             {/* Medicine Selection */}
-            <div className="relative">
+            <div className="relative" ref={dropdownRef}>
               <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
                 <Package className="w-4 h-4 mr-2 text-blue-600" />
                 Select Medicines
@@ -188,16 +243,44 @@ const MedicineForecast = () => {
           <div className="mt-6 flex justify-center">
             <button
               onClick={handlePredict}
+              disabled={predictLoading}
               className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl"
             >
-              {loading ? "Generating..." : "Generate Predictions"}
+              {predictLoading ? "Generating..." : "Generate Predictions"}
             </button>
           </div>
         </div>
 
+        {/* Retrain Section */}
+        <div className="mt-4 flex items-center space-x-4">
+          <button
+            onClick={handleRetrain}
+            disabled={retrainLoading}
+            className={`px-6 py-2 font-semibold rounded-lg ${
+              retrainLoading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-red-600 text-white"
+            }`}
+          >
+            {retrainLoading ? "Retraining..." : "Retrain Model"}
+          </button>
+
+          {retrainStatus && (
+            <div
+              className={`px-4 py-2 rounded ${
+                retrainStatus.type === "success"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
+              }`}
+            >
+              {retrainStatus.message}
+            </div>
+          )}
+        </div>
+
         {/* Results Section */}
-        {predictions && (
-          <div className="space-y-6">
+        {predictions ? (
+          <div className="space-y-6 mt-8">
             {Object.entries(predictions).map(([medicine, forecast]) => (
               <div
                 key={medicine}
@@ -256,9 +339,7 @@ const MedicineForecast = () => {
               </div>
             ))}
           </div>
-        )}
-
-        {!predictions && (
+        ) : (
           <div className="text-center py-16">
             <TrendingUp className="w-20 h-20 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 text-lg">
