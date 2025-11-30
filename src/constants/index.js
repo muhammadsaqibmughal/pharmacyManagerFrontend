@@ -238,11 +238,11 @@ export const pos = [
       { name: "Expiry Product", href: "/pos/products/expiryProduct" },
     ],
   },
-  {
-    name: "POS",
-    href: "/pos/pos",
-    icon: MdPointOfSale,
-  },
+  // {
+  //   name: "POS",
+  //   href: "/pos/pos",
+  //   icon: MdPointOfSale,
+  // },
   {
     name: "Sales",
     // href: '/pos/products',

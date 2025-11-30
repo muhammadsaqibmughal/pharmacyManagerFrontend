@@ -88,12 +88,10 @@ const AllPackages = () => {
         getPackage(),
         getMedicinesForDropdown(),
       ]);
+        console.log("medicine" , medRes)
+
       setPackages(pkgRes.data || []);
-      setMedicines(
-        medRes.map((m) => ({
-          id: m.medicine.id,
-          brandName: m.medicine.brandName,
-        })) || []
+      setMedicines(medRes
       );
     } catch (err) {
       setErrorMsg("Failed to fetch data");
@@ -101,8 +99,7 @@ const AllPackages = () => {
       setIsLoading(false);
     }
   };
-  console.log("packages" , packages)
-  console.log("medicine" , medicines)
+
 
   useEffect(() => {
     fetchData();
