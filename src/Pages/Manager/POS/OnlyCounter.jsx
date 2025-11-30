@@ -326,14 +326,14 @@ const OnlyCounter = () => {
     );
   };
 
-  const handleDiscountChange = (id, value, isReturnCart = false) => {
-    const setCart = isReturnCart ? setReturnCart : setSaleCart;
-    setCart((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, discount: Number(value) } : item
-      )
-    );
-  };
+  // const handleDiscountChange = (id, value, isReturnCart = false) => {
+  //   const setCart = isReturnCart ? setReturnCart : setSaleCart;
+  //   setCart((prev) =>
+  //     prev.map((item) =>
+  //       item.id === id ? { ...item, discount: Number(value) } : item
+  //     )
+  //   );
+  // };
 
   const handleSwitchMode = (counterMode) => {
     setIsCounter(counterMode);
