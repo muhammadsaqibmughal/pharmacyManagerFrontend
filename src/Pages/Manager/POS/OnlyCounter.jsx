@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useTheme } from "../../../theme-support/ThemeContext";
 import {
   FaExpand,
@@ -15,7 +15,6 @@ import {
   returnSale,
 } from "../../../api/posAPI";
 import { getUser } from "../../../api/counterAPI";
-
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -50,8 +49,8 @@ const OnlyCounter = () => {
   const [userName, setUserName] = useState("");
   const [selectedCounterId, setSelectedCounterId] = useState(null);
   const [selectedPaymentMode, setSelectedPaymentMode] = useState("cash");
-  const [pharmacyId,setpharmacyId]=useState(null);
-  const [counterId,setCounterId]=useState(null);
+  const [pharmacyId, setpharmacyId] = useState(null);
+  const [counterId, setCounterId] = useState(null);
 
   // Alternative medicine state
   const [selectedGeneric, setSelectedGeneric] = useState(null);
@@ -60,7 +59,8 @@ const OnlyCounter = () => {
   // POS add cart or receipt scan using scanner
   const [scannedCode, setScannedCode] = useState("");
   const [ws, setWs] = useState(null);
-
+  const itemsRef = useRef([]);
+  const invoicesRef = useRef([]);
 
   // get user
   useEffect(() => {
@@ -78,76 +78,86 @@ const OnlyCounter = () => {
     fetchCounter();
   }, []);
 
+  // update data
+  useEffect(() => {
+    itemsRef.current = itemsData;
+  }, [itemsData]);
+
+  useEffect(() => {
+    invoicesRef.current = invoicesData;
+  }, [invoicesData]);
   // connect client through websocket
   useEffect(() => {
-    if (!pharmacyId || !counterId) return; 
-  const socket = new WebSocket("ws://localhost:5000");
-  setWs(socket);
+    if (!pharmacyId || !counterId) return;
 
-  // When WebSocket connects
-  socket.onopen = () => {
-    console.log("WebSocket connected");
+    const socket = new WebSocket("ws://localhost:5000");
+    setWs(socket);
 
-    // Identify this client as POS with pharmacyId & counterId
-    // Use the user data from your response
-    const userData = {
-      clientType: "pos",
-      pharmacyId: pharmacyId, // user.pharmacyId
-      counterId: counterId,   // user.assignedCounterId
+    // When WebSocket connects
+    socket.onopen = () => {
+      console.log("POS WebSocket connected");
+
+      const userData = {
+        clientType: "pos",
+        pharmacyId: pharmacyId,
+        counterId: counterId,
+      };
+
+      socket.send(JSON.stringify({ type: "identify", ...userData }));
     };
 
-    socket.send(JSON.stringify({ type: "identify", ...userData }));
-  };
+    // Handle incoming messages
+    socket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
 
-  // Handle incoming messages
-  socket.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data);
+        switch (data.type) {
+          case "barcode":
+            console.log(`Received barcode (${data.scanType}):`, data.barcode);
 
-      switch (data.type) {
-        case "barcode":
-          console.log(`Received barcode (${data.scanType}):`, data.barcode);
+            if (data.scanType === "cart") handleAddToCartScan(data.barcode);
+            else if (data.scanType === "receipt")
+              handleReceiptScan(data.barcode);
+            else console.warn("Unknown scan type:", data.scanType);
+            break;
 
-          if (data.scanType === "cart") handleAddToCartScan(data.barcode);
-          else if (data.scanType === "receipt") handleReceiptScan(data.barcode);
-          else console.warn("Unknown scan type:", data.scanType);
-          break;
+          case "identified":
+            console.log(`POS identified successfully as ${data.clientType}`);
+            break;
 
-        case "identified":
-          console.log(`POS identified successfully as ${data.clientType}`);
-          break;
+          case "barcode_sent":
+            console.log(
+              `Barcode ${data.barcode} broadcasted to ${data.broadcast_count} clients`
+            );
+            break;
 
-        case "barcode_sent":
-          console.log(
-            `Barcode ${data.barcode} broadcasted to ${data.broadcast_count} clients`
-          );
-          break;
+          case "error":
+            console.error(
+              "WebSocket error message:",
+              data.message || data.error
+            );
+            break;
 
-        case "error":
-          console.error("WebSocket error message:", data.message || data.error);
-          break;
-
-        default:
-          console.warn("Unknown message type:", data.type);
+          default:
+            console.warn("Unknown message type:", data.type);
+        }
+      } catch (err) {
+        console.error("Error parsing WebSocket message:", err);
       }
-    } catch (err) {
-      console.error("Error parsing WebSocket message:", err);
-    }
-  };
+    };
 
-  socket.onclose = () => console.log("WebSocket disconnected");
-  socket.onerror = (err) => console.error("WebSocket error:", err);
+    socket.onclose = () => console.log("POS WebSocket disconnected");
+    socket.onerror = (err) => console.error("POS WebSocket error:", err);
 
-  // Clean up on unmount
-  return () => socket.close();
-}, [pharmacyId, counterId,itemsData, invoicesData]); // empty dependency array to prevent reconnects
-
+    // Clean up on unmount
+    return () => socket.close();
+  }, [pharmacyId, counterId]); // REMOVED itemsData, invoicesData
 
   // Handle adding item to cart
   const handleAddToCartScan = (code) => {
     if (!code) return;
 
-    const product = itemsData.find(
+    const product = itemsRef.current.find(
       (item) => item.barcode?.toString() === code.toString()
     );
 
@@ -165,9 +175,10 @@ const OnlyCounter = () => {
   const handleReceiptScan = (code) => {
     if (!code) return;
 
-    const invoice = invoicesData.find(
+    const invoice = invoicesRef.current.find(
       (inv) => inv.invoiceNo?.toString() === code.toString()
     );
+
     console.log(invoicesData);
 
     if (invoice) {
@@ -195,8 +206,6 @@ const OnlyCounter = () => {
   useEffect(() => {
     localStorage.setItem("pos_return_cart", JSON.stringify(returnCart));
   }, [returnCart]);
-
-  
 
   // Fetch items
   useEffect(() => {

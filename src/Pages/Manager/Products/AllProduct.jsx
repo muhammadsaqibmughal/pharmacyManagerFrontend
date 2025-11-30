@@ -26,7 +26,7 @@ const AllProduct = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pharmacyId, setpharmacyId] = useState(null);
-  const [ws, setWs] = useState(null);cd
+  const [ws, setWs] = useState(null);
 
   useEffect(() => {
     const fetchCounter = async () => {
