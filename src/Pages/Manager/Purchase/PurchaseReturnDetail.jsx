@@ -21,23 +21,23 @@ const PurchaseReturnDetail = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Fetch data if state is not present (optional: API call can be implemented)
-  useEffect(() => {
-    const fetchReturn = async () => {
-      if (!returnData && id) {
-        try {
-          setIsLoading(true);
-          // Example: call your API to fetch purchase return by id
-          // const res = await getPurchaseReturnById(id);
-          // setReturnData(res?.purchaseReturn || null);
-        } catch (err) {
-          console.error("Failed to fetch purchase return:", err);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-    fetchReturn();
-  }, [id, returnData]);
+  // useEffect(() => {
+  //   const fetchReturn = async () => {
+  //     if (!returnData && id) {
+  //       try {
+  //         setIsLoading(true);
+  //         Example: call your API to fetch purchase return by id
+  //         const res = await getPurchaseReturnById(id);
+  //         setReturnData(res?.purchaseReturn || null);
+  //       } catch (err) {
+  //         console.error("Failed to fetch purchase return:", err);
+  //       } finally {
+  //         setIsLoading(false);
+  //       }
+  //     }
+  //   };
+  //   fetchReturn();
+  // }, [id, returnData]);
 
   if (!returnData) {
     return (

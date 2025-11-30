@@ -188,9 +188,15 @@ const SupplierDetail = () => {
       lineTotal: totalLineSum
   }
 
-
+  const handleDropdownSelect = (value) => {
+    const selected = pharmacyProducts.find((p) => `${p.medicine.brandName} - ${p.packaging.packageType}` ===value)
+    setNewPurchase((prev) => ({
+      ...prev,
+      pharmacyProductId : selected.id,
+    }));
+  };
   
-
+ 
 
   const pharmacyProductOptions = pharmacyProducts.map(
     (p) => `${p.medicine.brandName} - ${p.packaging.packageType}`
@@ -264,14 +270,7 @@ const SupplierDetail = () => {
             options={pharmacyProductOptions}
             value={selectedPharmacyLabel}
             placeholder="Select Product"
-            onSelect={(selectedLabel) => {
-              const selected = pharmacyProducts.find(
-                (p) =>
-                  `${p.medicine.brandName} - ${p.packaging.packageType}` ===
-                  selectedLabel
-              );
-              setNewPurchase({ ...newPurchase, pharmacyProductId: selected?.id || "" });
-            }}
+            onSelect={handleDropdownSelect}
             theme={theme}
             className={"mt-3"}
           />

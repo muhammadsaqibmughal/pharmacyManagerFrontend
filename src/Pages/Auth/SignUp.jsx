@@ -84,7 +84,7 @@ const SignUp = () => {
               {/* LOGIN FORM */}
               <form
                 onSubmit={loginFormik.handleSubmit}
-                className={`absolute top-15 left-0 w-full transition-all duration-500 ${
+                className={`absolute top-15 left-0 w-full  transition-all duration-500 ${
                   isLogin
                     ? "opacity-100 scale-100 pointer-events-auto"
                     : "opacity-0 scale-90 pointer-events-none"

@@ -5,6 +5,7 @@ const ModalInput = ({ fields, values, onChange, theme }) => {
     <div className="grid grid-cols-1 gap-3 mt-3 ">
       {fields.map((field) => (
         <input
+        type={field.type}
           key={field.name}
           name={field.name}
           placeholder={field.placeholder}
