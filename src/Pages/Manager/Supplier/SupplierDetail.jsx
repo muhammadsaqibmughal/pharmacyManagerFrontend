@@ -45,6 +45,8 @@ const SupplierDetail = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
+
+  console.log("New purchase " , newPurchase)
   // ---------------- Fetch Data ----------------
   const fetchData = async () => {
     try {
@@ -66,6 +68,10 @@ const SupplierDetail = () => {
       setIsLoading(false);
     }
   };
+  console.log("pharmacy_product" , pharmacyProducts)
+  console.log("purchase_items" , purchaseItems)
+  console.log("suppliers" , suppliers)
+  console.log("purchase_detail" , purchaseDetails)
 
   useEffect(() => {
     fetchData();
@@ -166,25 +172,32 @@ const SupplierDetail = () => {
     ),
   }));
 
+  
   const totalLineSum = filteredItems.reduce(
     (acc, item) => acc + (parseFloat(item.lineTotal) || 0),
     0
   );
 
+  const newRow = {
+      medicineName: "Net Total",
+      packageType: "",
+      quantity: "",
+      unitPrice: "",
+      batchNumber: "",
+      expiryDate: "",
+      lineTotal: totalLineSum
+  }
+
+
+  
+
+
   const pharmacyProductOptions = pharmacyProducts.map(
     (p) => `${p.medicine.brandName} - ${p.packaging.packageType}`
   );
 
-  const selectedPharmacyLabel = newPurchase.pharmacyProductId
-    ? pharmacyProducts.find((p) => p.id === newPurchase.pharmacyProductId)
-      ? `${pharmacyProducts.find(
-          (p) => p.id === newPurchase.pharmacyProductId
-        ).medicine.brandName} - ${
-          pharmacyProducts.find(
-            (p) => p.id === newPurchase.pharmacyProductId
-          ).packaging.packageType
-        }`
-      : ""
+  const selectedPharmacyLabel = newPurchase.pharmacyProductId ? pharmacyProducts.find((p) => p.id === newPurchase.pharmacyProductId)
+      ? `${pharmacyProducts.find((p) => p.id === newPurchase.pharmacyProductId).medicine.brandName} - ${pharmacyProducts.find((p) => p.id === newPurchase.pharmacyProductId).packaging.packageType}`: ""
     : "";
 
   // ---------------- Helper for formatting date ----------------
@@ -230,13 +243,8 @@ const SupplierDetail = () => {
       ) : (
         <Table
           columns={columns}
-          data={tableData}
+          data={[...tableData ,newRow ]}
           theme={theme}
-          footer={
-            <div className="font-bold text-center p-2">
-              Total: {totalLineSum.toFixed(2)}
-            </div>
-          }
           pagination={
             <Pagination
               currentPage={currentPage}

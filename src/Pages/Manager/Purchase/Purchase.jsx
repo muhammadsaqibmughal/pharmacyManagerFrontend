@@ -67,6 +67,9 @@ const AllPurchases = () => {
       setIsLoading(false);
     }
   };
+  console.log("Purchase_Data", purchaseData);
+
+  console.log("suplier", suppliers);
 
   useEffect(() => {
     fetchData();
@@ -83,7 +86,7 @@ const AllPurchases = () => {
       supplierName: value,
     }));
   };
-
+  console.log("newPurchase" , newPurchase)
   const resetForm = () => {
     setNewPurchase({
       supplierId: "",
@@ -120,11 +123,14 @@ const AllPurchases = () => {
         invoiceNo: newPurchase.invoiceNo,
         purchaseDate: newPurchase.purchaseDate,
         totalAmount: parseFloat(newPurchase.totalAmount),
-        discount: newPurchase.discount ? parseFloat(newPurchase.discount) : null,
+        discount: newPurchase.discount
+          ? parseFloat(newPurchase.discount)
+          : null,
         tax: newPurchase.tax ? parseFloat(newPurchase.tax) : null,
       });
 
       if (res?.status === 200 || res?.status === 201) {
+        // setPurchaseData((prev) => [res.data.purchases || newPurchase, ...prev])
         fetchData();
         setShowModal(false);
         resetForm();
@@ -191,8 +197,10 @@ const AllPurchases = () => {
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
-              onPrev={() => setCurrentPage((prev) => Math.max(prev - 1, 1)) }
-              onNext={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              onPrev={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              onNext={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
               theme={theme}
             />
           }
@@ -220,18 +228,27 @@ const AllPurchases = () => {
         />
 
         {/* <div className="grid grid-cols-2 gap-4 w-full mt-3"> */}
-          <ModalInput
-            fields={[
-              { name: "invoiceNo", placeholder: "Invoice No", type: "text" },
-              { name: "purchaseDate", placeholder: "Purchase Date", type: "date" },
-              { name: "totalAmount", placeholder: "Total Amount", type: "number", min: 1 },
-              { name: "discount", placeholder: "Discount", type: "number" },
-              { name: "tax", placeholder: "Tax", type: "number" },
-            ]}
-            values={newPurchase}
-            onChange={handleChange}
-            theme={theme}
-          />
+        <ModalInput
+          fields={[
+            { name: "invoiceNo", placeholder: "Invoice No", type: "text" },
+            {
+              name: "purchaseDate",
+              placeholder: "Purchase Date",
+              type: "date",
+            },
+            {
+              name: "totalAmount",
+              placeholder: "Total Amount",
+              type: "number",
+              min: 1,
+            },
+            { name: "discount", placeholder: "Discount", type: "number" },
+            { name: "tax", placeholder: "Tax", type: "number" },
+          ]}
+          values={newPurchase}
+          onChange={handleChange}
+          theme={theme}
+        />
         {/* </div> */}
 
         <ModalButtons
