@@ -103,7 +103,7 @@ const ManagerForgotPassword = () => {
 
         <div className="mt-6 text-center text-sm text-[#757575]">
           Remembered your password?{" "}
-          <Link to="/manager/login" className="text-[#298aaa] hover:underline">
+          <Link to="/signup" className="text-[#298aaa] hover:underline">
             Login
           </Link>
         </div>
