@@ -2,9 +2,10 @@ import axios from "axios";
 
 // Create Axios instance
 const api = axios.create({
-  baseURL: "https://pharmacybackend-ick9.onrender.com/api",
+  baseURL: "https://pharmacy-backend-five.vercel.app/api",
   // no need for withCredentials since we are using Authorization header
 });
+
 
 // Add JWT from localStorage to every request
 api.interceptors.request.use(
