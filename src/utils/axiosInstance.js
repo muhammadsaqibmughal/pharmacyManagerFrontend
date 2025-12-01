@@ -1,33 +1,40 @@
-import axios from 'axios';
+import axios from "axios";
 
-// const api = axios.create({
-//   baseURL: 'http://localhost:5000/api', 
-//   withCredentials: true,
-// });
-
+// Create Axios instance
 const api = axios.create({
-  baseURL: 'https://pharmacy-backend-five.vercel.app/api', 
-  withCredentials: true,
+  baseURL: "https://pharmacybackend-ick9.onrender.com/api",
+  // no need for withCredentials since we are using Authorization header
 });
 
+// Add JWT from localStorage to every request
 api.interceptors.request.use(
-  (config) => config,
+  (config) => {
+    const token = localStorage.getItem("accessToken"); // get token from localStorage
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
   (error) => Promise.reject(error)
 );
 
+// Handle 401 Unauthorized globally
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
       const currentPath = window.location.pathname;
-      if (currentPath !== '/signup') {
-        console.warn('Unauthorized! Clearing storage and redirecting to login...');
-        
-        localStorage.removeItem('user');
+      if (currentPath !== "/signup") {
+        console.warn(
+          "Unauthorized! Clearing storage and redirecting to login..."
+        );
 
-        document.cookie = "userRole=; Max-Age=0; path=/";
-        document.cookie = "is_auth=; Max-Age=0; path=/";
-        window.location.href = '/signup';
+        // Clear user info from localStorage
+        localStorage.removeItem("user");
+        localStorage.removeItem("accessToken");
+
+        // Redirect to signup/login page
+        window.location.href = "/signup";
       }
     }
     return Promise.reject(error);

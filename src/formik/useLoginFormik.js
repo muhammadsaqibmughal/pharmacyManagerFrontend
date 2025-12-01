@@ -27,9 +27,11 @@ const useLoginFormik = (setFormError, setLoading) => {
         const httpStatus = response.status;
         const message = response.data?.message;
         const user = response.data?.data?.user || response.data?.user;
-
         // EMAIL NOT VERIFIED
-        if (httpStatus === 403 && message?.toLowerCase().includes("not verified")) {
+        if (
+          httpStatus === 403 &&
+          message?.toLowerCase().includes("not verified")
+        ) {
           return navigate(`/verify-email?email=${values.email}`);
         }
 
@@ -67,6 +69,13 @@ const useLoginFormik = (setFormError, setLoading) => {
             pharmacyId: user.pharmacyId ?? null,
           })
         );
+
+        localStorage.setItem(
+          "accessToken",
+          response.data?.data.cookie.accessToken
+        );
+        localStorage.setItem("userRole", response.data?.data.cookie.userRole);
+        localStorage.setItem("is_auth", response.data?.data.cookie.is_auth);
 
         // REDIRECTS
         if (!user.isRegistered) return navigate("/form");

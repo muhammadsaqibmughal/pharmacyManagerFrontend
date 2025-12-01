@@ -6,9 +6,6 @@
 //   return null;
 // };
 
-import Cookies from "js-cookie";
-
 export const getCookie = (name) => {
-  console.log("COOKEIES: ", Cookies);
-  return Cookies.get(name) || null;
+  return localStorage.getItem(name) || null;
 };
