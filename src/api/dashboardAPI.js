@@ -1,7 +1,5 @@
 import api from "../utils/axiosInstance";
 
-
-
 // get month wise sales
 export const getMonthlySales = async () => {
   try {
