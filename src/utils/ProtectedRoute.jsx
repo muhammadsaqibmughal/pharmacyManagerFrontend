@@ -4,7 +4,7 @@ import { getCookie } from "./getCookie";
 const ProtectedRoute = ({
   children,
   allowedRoles = [],
-  redirectStaff = false,
+  // redirectStaff = false,
 }) => {
   const location = useLocation();
 
@@ -20,7 +20,6 @@ const ProtectedRoute = ({
   const is_auth = getCookie("is_auth") == "true";
   const role = getCookie("userRole") || user?.role;
 
-  console.log("HERE I COMER: ", getCookie("is_auth"));
   // Not authenticated
   if (!user || !is_auth) {
     return <Navigate to="/signup" state={{ from: location }} replace />;
@@ -44,7 +43,7 @@ const ProtectedRoute = ({
   }
 
   // Staff-only redirect
-  if (redirectStaff && role === "staff") {
+  if (role === "staff") {
     return <Navigate to="/onlyCounter" replace />;
   }
 
