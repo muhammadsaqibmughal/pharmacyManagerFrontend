@@ -2,8 +2,12 @@ import { useState, useEffect, useMemo } from "react";
 import { useTheme } from "../../../theme-support/ThemeContext";
 import { FaExpand, FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { getPOSItems, addManagerSale, getSales, returnSale } from "../../../api/posAPI";
-
+import {
+  getPOSItems,
+  addManagerSale,
+  getSales,
+  returnSale,
+} from "../../../api/posAPI";
 
 const PosPage = () => {
   const { theme, toggleTheme } = useTheme();
@@ -38,7 +42,6 @@ const PosPage = () => {
   };
 
   const fetchItems = async () => {
-  
     const response = await getPOSItems();
     if (response?.status === "success" && Array.isArray(response.data)) {
       const normalized = response.data.map((p) => ({
@@ -110,7 +113,6 @@ const PosPage = () => {
     }
   };
 
-
   const handleDiscountChange = (index, value) => {
     const updatedCart = [...cart];
     updatedCart[index].discount = Number(value);
@@ -153,19 +155,10 @@ const PosPage = () => {
   };
 
   const handleLogout = () => {
-
-  localStorage.clear();
-  const cookies = document.cookie.split(";");
-  cookies.forEach((cookie) => {
-    const eqPos = cookie.indexOf("=");
-    const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;`;
-  });
-
-  // Redirect to signup page
-  navigate("/signup");
-};
-
+    localStorage.clear();
+    // Redirect to signup page
+    navigate("/signup");
+  };
 
   const toggleReturnSelection = (item) => {
     setSelectedReturnItems((prev) =>
@@ -200,8 +193,8 @@ const PosPage = () => {
     }, 0);
 
     const payload = {
-      saleId: selectedInvoice.id, 
-      totalAmount, 
+      saleId: selectedInvoice.id,
+      totalAmount,
       returnItems: selectedReturnDetails.map((item) => ({
         saleItemId: item.id,
         quantity: item.quantity,
@@ -335,7 +328,7 @@ const PosPage = () => {
                   Profile
                 </button>
                 <button
-                  onClick={ handleLogout}
+                  onClick={handleLogout}
                   className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
                 >
                   Logout

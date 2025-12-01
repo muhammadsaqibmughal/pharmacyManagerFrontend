@@ -45,12 +45,6 @@ const Pos = () => {
     localStorage.clear();
     sessionStorage.clear();
 
-    document.cookie.split(";").forEach((cookie) => {
-      const eqPos = cookie.indexOf("=");
-      const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
-    });
-
     navigate("/signup"); // Change this route if needed
   };
 
@@ -182,10 +176,10 @@ const Pos = () => {
       {/* Main Content Area */}
       <div
         className={`flex-1 overflow-hidden min-h-screen ${
-  theme === "dark" 
-    ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 shadow-2xl shadow-black/50 border border-slate-700/30" 
-    : "bg-gradient-to-br from-gray-50 via-white to-blue-50/30 shadow-2xl shadow-gray-300/40 border border-gray-200/50"
-}`}
+          theme === "dark"
+            ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 shadow-2xl shadow-black/50 border border-slate-700/30"
+            : "bg-gradient-to-br from-gray-50 via-white to-blue-50/30 shadow-2xl shadow-gray-300/40 border border-gray-200/50"
+        }`}
       >
         {/* <div className="bg-[#4F7942] mx-2 border-l-1 rounded-md mt-1 h-10"></div> */}
         <Outlet />
