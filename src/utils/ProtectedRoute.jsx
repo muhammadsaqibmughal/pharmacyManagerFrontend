@@ -13,7 +13,7 @@ const ProtectedRoute = ({ children, allowedRoles = [], redirectStaff = false }) 
   }
 
   // Check auth cookie
-  const is_auth = getCookie("is_auth") === "true";
+  const is_auth = getCookie("is_auth") == "true";
   const role = getCookie("userRole") || user?.role;
 
   debugger
