@@ -1,7 +1,11 @@
 import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { getCookie } from "./getCookie";
 
-const ProtectedRoute = ({ children, allowedRoles = [], redirectStaff = false }) => {
+const ProtectedRoute = ({
+  children,
+  allowedRoles = [],
+  redirectStaff = false,
+}) => {
   const location = useLocation();
 
   // Get user from LocalStorage
@@ -16,7 +20,7 @@ const ProtectedRoute = ({ children, allowedRoles = [], redirectStaff = false }) 
   const is_auth = getCookie("is_auth") == "true";
   const role = getCookie("userRole") || user?.role;
 
-  debugger
+  console.log("HERE I COMER: ", getCookie("is_auth"));
   // Not authenticated
   if (!user || !is_auth) {
     return <Navigate to="/signup" state={{ from: location }} replace />;
@@ -31,7 +35,11 @@ const ProtectedRoute = ({ children, allowedRoles = [], redirectStaff = false }) 
   }
 
   // Redirect unapproved managers → only if registered AND not on pending page
-  if (isRegistered && !isApproved && location.pathname !== "/pending-approval") {
+  if (
+    isRegistered &&
+    !isApproved &&
+    location.pathname !== "/pending-approval"
+  ) {
     return <Navigate to="/pending-approval" replace />;
   }
 
