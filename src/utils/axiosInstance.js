@@ -6,7 +6,7 @@ import axios from 'axios';
 // });
 
 const api = axios.create({
-  baseURL: 'https://pharmacybackend-ick9.onrender.com/api', 
+  baseURL: 'https://pharmacy-backend-five.vercel.app/api', 
   withCredentials: true,
 });
 
