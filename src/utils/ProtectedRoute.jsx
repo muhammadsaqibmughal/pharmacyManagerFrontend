@@ -16,7 +16,8 @@ const ProtectedRoute = ({ children, allowedRoles = [], redirectStaff = false }) 
   const is_auth = getCookie("is_auth") === "true";
   const role = getCookie("userRole") || user?.role;
 
-  // Not authenticated → redirect to signup
+  debugger
+  // Not authenticated
   if (!user || !is_auth) {
     return <Navigate to="/signup" state={{ from: location }} replace />;
   }
