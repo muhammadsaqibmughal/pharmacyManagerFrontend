@@ -1,13 +1,13 @@
 import axios from "axios";
 
 // Create Axios instance
-// const api = axios.create({
-//   baseURL: "https://pharmacy-backend-five.vercel.app/api",
-// });
-
 const api = axios.create({
-  baseURL: "https://pharmacybackend-ick9.onrender.com",
+  baseURL: "https://pharmacy-backend-five.vercel.app/api",
 });
+
+// const api = axios.create({
+//   baseURL: "https://pharmacybackend-ick9.onrender.com",
+// });
 
 // Add JWT from localStorage to every request
 api.interceptors.request.use(
